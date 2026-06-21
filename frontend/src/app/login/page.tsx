@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
-import { ArrowLeft, Mail, Lock, AlertCircle, Loader2, Music, Zap } from "lucide-react";
+import { Mail, Lock, AlertCircle, Loader2, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -158,7 +158,7 @@ export default function LoginPage() {
           </form>
 
           <p className="text-center mt-8" style={{ color: "#777", fontSize: 14, fontWeight: 600 }}>
-            Don't have an account? <Link href="/signup" className="text-[#1A1A1A] hover:underline" style={{ fontWeight: 800 }}>Sign up</Link>
+            Don&apos;t have an account? <Link href="/signup" className="text-[#1A1A1A] hover:underline" style={{ fontWeight: 800 }}>Sign up</Link>
           </p>
         </motion.div>
           </div>

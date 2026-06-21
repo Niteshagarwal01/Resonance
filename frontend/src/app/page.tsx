@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
-import { motion, useScroll, useTransform, useMotionValue, useSpring, animate, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -64,23 +64,6 @@ function BentoCard({ children, className = "", style = {}, delay = 0 }: {
 }
 
 /* ─── Animated Counter ──────────────────────────────────── */
-function AnimatedCounter({ to, suffix = "" }: { to: number; suffix?: string }) {
-  const [val, setVal] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        const ctrl = animate(0, to, { duration: 1.8, ease: "easeOut", onUpdate: (v) => setVal(Math.round(v)) });
-        observer.disconnect();
-        return () => ctrl.stop();
-      }
-    }, { threshold: 0.5 });
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [to]);
-  return <span ref={ref}>{val.toLocaleString()}{suffix}</span>;
-}
-
 /* ─── Crazy Timeline Section ──────────────────────────────────── */
 const TimelineSection = () => {
   const bgColors = ["#f87171", "#3b82f6", "#ef4444", "#22c55e", "#d946ef", "#FFB703"];
@@ -196,12 +179,12 @@ export default function Home() {
         bgAudio.loop = true;
         bgAudio.volume = 0.4;
         bgAudio.play().catch(() => { isPlaying = false; });
-      } catch (e) {}
+      } catch { }
     };
 
     const playHoverSound = () => {
       try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        if (!audioCtx) audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
         const hoverOsc = audioCtx.createOscillator();
         const hoverGain = audioCtx.createGain();
         hoverOsc.type = "sine";
@@ -213,7 +196,7 @@ export default function Home() {
         hoverGain.connect(audioCtx.destination);
         hoverOsc.start();
         hoverOsc.stop(audioCtx.currentTime + 0.05);
-      } catch (e) {}
+      } catch { }
     };
 
     const over = (e: MouseEvent) => {
