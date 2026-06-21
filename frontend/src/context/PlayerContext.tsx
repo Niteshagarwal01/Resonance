@@ -3,6 +3,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import { Track } from "@/lib/api";
+import { createClient } from "@/utils/supabase/client";
 
 interface PlayerContextType {
   currentTrack: Track | null;
@@ -29,6 +30,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [volume, setVolumeState] = useState(50);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+
+  const supabase = createClient();
 
   const ytPlayerRef = useRef<any>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -100,13 +103,29 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const playTrack = (track: Track, newQueue?: Track[]) => {
+  const playTrack = async (track: Track, newQueue?: Track[]) => {
     setCurrentTrack(track);
     if (newQueue) setQueue(newQueue);
     setIsPlaying(true);
     setProgress(0);
     if (ytPlayerRef.current?.loadVideoById) {
       ytPlayerRef.current.loadVideoById(track.id);
+    }
+
+    // Log to listening_history silently
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await supabase.from("listening_history").insert({
+          user_id: session.user.id,
+          track_id: track.id,
+          track_title: track.title,
+          track_artist: track.artist,
+          track_thumbnail: track.thumbnail
+        });
+      }
+    } catch (e) {
+      console.error("Failed to log listening history", e);
     }
   };
 

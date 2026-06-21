@@ -9,7 +9,8 @@ import { createClient } from "@/utils/supabase/client";
 export default function LibraryPage() {
   const { playTrack } = usePlayer();
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<Track[]>([]);
+  const [likedSongs, setLikedSongs] = useState<Track[]>([]);
+  const [history, setHistory] = useState<Track[]>([]);
   const supabase = createClient();
 
   useEffect(() => {
@@ -18,13 +19,39 @@ export default function LibraryPage() {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
 
+        // Fetch Taste DNA Top Songs (Liked Songs)
         const { data: dna } = await supabase.from("taste_dna").select("top_songs").eq("user_id", session.user.id).single();
-        
         if (dna && dna.top_songs && dna.top_songs.length > 0) {
           const results = await Promise.all(
             dna.top_songs.map((s: any) => searchMusic(`${s.title} ${s.artist}`).then(r => r[0]).catch(() => null))
           );
-          setData(results.filter(Boolean));
+          setLikedSongs(results.filter(Boolean));
+        }
+
+        // Fetch Listening History
+        const { data: historyData, error: historyError } = await supabase
+          .from("listening_history")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .order("played_at", { ascending: false })
+          .limit(50);
+        
+        if (!historyError && historyData) {
+          // Deduplicate by track_id
+          const seen = new Set();
+          const uniqueHistory: Track[] = [];
+          for (const row of historyData) {
+            if (!seen.has(row.track_id)) {
+              seen.add(row.track_id);
+              uniqueHistory.push({
+                id: row.track_id,
+                title: row.track_title,
+                artist: row.track_artist,
+                thumbnail: row.track_thumbnail,
+              });
+            }
+          }
+          setHistory(uniqueHistory);
         }
       } catch (error) {
         console.error(error);
@@ -67,11 +94,11 @@ export default function LibraryPage() {
         <div className="relative z-10 h-full flex flex-col justify-between min-h-[200px]">
           <div>
             <h2 className="text-4xl font-black mb-2">Liked Songs</h2>
-            <p className="text-indigo-100 font-medium">{data.length} tracks</p>
+            <p className="text-indigo-100 font-medium">{likedSongs.length} tracks</p>
           </div>
           <button 
             className="bg-white text-indigo-600 w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
-            onClick={() => data.length > 0 && playTrack(data[0], data)}
+            onClick={() => likedSongs.length > 0 && playTrack(likedSongs[0], likedSongs)}
           >
             <Play fill="currentColor" size={24} className="ml-1" />
           </button>
@@ -81,7 +108,7 @@ export default function LibraryPage() {
       {/* Recent Adds (List View) */}
       <div>
         <h2 className="text-2xl font-black text-[#1A1A1A] mb-6 flex items-center gap-2">
-          <Clock size={24} className="text-gray-400"/> Recently Added
+          <Clock size={24} className="text-gray-400"/> Recently Played
         </h2>
 
         {loading ? (
@@ -100,12 +127,12 @@ export default function LibraryPage() {
 
             {/* Track Rows */}
             <div className="flex flex-col">
-              {data.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">No tracks found. Complete the onboarding to add songs!</div>
-              ) : data.map((track, idx) => (
+              {history.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">No recent tracks found. Start listening! (Note: make sure to run the SQL migration)</div>
+              ) : history.map((track, idx) => (
                 <div 
-                  key={track.id} 
-                  onClick={() => playTrack(track, data)}
+                  key={`${track.id}-${idx}`} 
+                  onClick={() => playTrack(track, history)}
                   className="grid grid-cols-[auto_1fr_1fr_auto] gap-4 p-3 items-center hover:bg-gray-50 transition-colors cursor-pointer group"
                 >
                   <div className="w-12 text-center text-gray-400 font-medium group-hover:hidden">{idx + 1}</div>

@@ -74,3 +74,39 @@ export const getArtistProfile = async (artistId: string): Promise<any> => {
     return null;
   }
 };
+
+export const getHomeFeed = async (seedIds: string): Promise<Track[]> => {
+  if (!seedIds) return [];
+  try {
+    const res = await fetchWithTimeout(`${API_BASE}/home?seed_ids=${encodeURIComponent(seedIds)}`);
+    if (!res.ok) throw new Error("Home feed failed");
+    const data = await res.json();
+    return data.tracks || [];
+  } catch (err) {
+    console.error("Home API Error:", err);
+    return [];
+  }
+};
+
+export const getCharts = async (country: string = "ZZ"): Promise<Track[]> => {
+  try {
+    const res = await fetchWithTimeout(`${API_BASE}/charts?country=${country}`);
+    if (!res.ok) throw new Error("Charts failed");
+    const data = await res.json();
+    return data.tracks || [];
+  } catch (err) {
+    console.error("Charts API Error:", err);
+    return [];
+  }
+};
+
+export const getMoods = async (): Promise<any> => {
+  try {
+    const res = await fetchWithTimeout(`${API_BASE}/moods`);
+    if (!res.ok) throw new Error("Moods failed");
+    return await res.json();
+  } catch (err) {
+    console.error("Moods API Error:", err);
+    return null;
+  }
+};

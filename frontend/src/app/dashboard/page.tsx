@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { searchMusic, Track } from "@/lib/api";
+import { getHomeFeed, getCharts, Track } from "@/lib/api";
 import { usePlayer } from "@/context/PlayerContext";
 import Image from "next/image";
 import { Play, Sparkles, TrendingUp, Radio } from "lucide-react";
@@ -30,12 +30,23 @@ export default function DashboardHome() {
           setDna(data);
         }
 
-        const vibeQuery = userDna?.core_vibe ? `${userDna.core_vibe} mix` : "Lofi chill beats";
-        const trendQuery = userDna?.top_artists?.[0] ? `${userDna.top_artists[0]} top tracks` : (userDna?.top_genres?.[0] ? `top global ${userDna.top_genres[0]}` : "Top global pop 2024");
+        let seedIds = "";
+        if (userDna?.top_songs && userDna.top_songs.length > 0) {
+          // Fallback if top_songs are just objects without videoId, we need to extract IDs
+          // Assuming userDna.top_songs is array of track objects, we map to their IDs
+          // For now, if we don't have direct IDs, we will use a fallback seed "the weeknd"
+          const ids = userDna.top_songs.map((s: any) => s.id || s.videoId).filter(Boolean);
+          seedIds = ids.slice(0, 3).join(",");
+        }
+        
+        // If no seed ids, use a popular default (e.g. Blinding Lights, Starboy)
+        if (!seedIds) {
+          seedIds = "4NRXx6U8ABQ,34Na4j8HLjc";
+        }
 
         const [picks, trend] = await Promise.all([
-          searchMusic(vibeQuery),
-          searchMusic(trendQuery)
+          getHomeFeed(seedIds),
+          getCharts("IN")
         ]);
         
         if (picks.length === 0 && trend.length === 0) {

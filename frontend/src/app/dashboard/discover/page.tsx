@@ -1,7 +1,7 @@
 "use client";
 
 import { usePlayer } from "@/context/PlayerContext";
-import { searchMusic } from "@/lib/api";
+import { searchMusic, getCharts } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Play, Sparkles, TrendingUp, Compass, Globe, Zap } from "lucide-react";
@@ -12,6 +12,7 @@ export default function DiscoverPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>({});
   const [dna, setDna] = useState<any>(null);
+  const [expanded, setExpanded] = useState({ gems: false, charts: false });
   const supabase = createClient();
 
   useEffect(() => {
@@ -29,15 +30,15 @@ export default function DiscoverPage() {
         const genre2 = userDna?.top_genres?.[1] || "pop";
 
         const [hiddenGems, globalHits, genreList1, genreList2] = await Promise.all([
-          searchMusic(`underrated ${genre1} hits`),
-          searchMusic(`top 50 global ${genre2}`),
+          searchMusic(`underrated ${genre1} tracks`),
+          getCharts("ZZ"),
           searchMusic(`best ${genre1}`),
           searchMusic(`deep ${genre2}`)
         ]);
 
         setData({
-          hiddenGems: hiddenGems.slice(0, 4),
-          charts: globalHits.slice(0, 4),
+          hiddenGems: hiddenGems,
+          charts: globalHits,
           genres: {
             first: genreList1.slice(0, 4),
             second: genreList2.slice(0, 4)
@@ -82,14 +83,21 @@ export default function DiscoverPage() {
           <h2 className="text-2xl font-black text-[#1A1A1A] flex items-center gap-2">
             <Zap className="text-[#FFB703]" size={24} /> Hidden Gems
           </h2>
-          <button className="text-sm font-bold text-gray-500 hover:text-[#1A1A1A] uppercase tracking-wider">View All</button>
+          {data.hiddenGems?.length > 4 && (
+            <button 
+              onClick={() => setExpanded(p => ({ ...p, gems: !p.gems }))}
+              className="text-sm font-bold text-gray-500 hover:text-[#1A1A1A] uppercase tracking-wider"
+            >
+              {expanded.gems ? "Show Less" : "View All"}
+            </button>
+          )}
         </div>
         
         {(!data.hiddenGems || data.hiddenGems.length === 0) ? (
           <p className="text-gray-500 py-4">No hidden gems found right now. Check back later!</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {data.hiddenGems?.map((track: any) => (
+            {data.hiddenGems?.slice(0, expanded.gems ? 16 : 4).map((track: any) => (
               <div key={track.id} className="group cursor-pointer" onClick={() => playTrack(track, data.hiddenGems)}>
                 <div className="relative aspect-square rounded-2xl overflow-hidden mb-4 shadow-md group-hover:shadow-xl transition-all duration-300">
                   <img src={track.thumbnail} alt={track.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -113,13 +121,20 @@ export default function DiscoverPage() {
           <h2 className="text-2xl font-black text-[#1A1A1A] flex items-center gap-2">
             <Globe className="text-blue-500" size={24} /> Global Charts
           </h2>
-          <button className="text-sm font-bold text-gray-500 hover:text-[#1A1A1A] uppercase tracking-wider">View All</button>
+          {data.charts?.length > 4 && (
+            <button 
+              onClick={() => setExpanded(p => ({ ...p, charts: !p.charts }))}
+              className="text-sm font-bold text-gray-500 hover:text-[#1A1A1A] uppercase tracking-wider"
+            >
+              {expanded.charts ? "Show Less" : "View All"}
+            </button>
+          )}
         </div>
         {(!data.charts || data.charts.length === 0) ? (
           <p className="text-gray-500 py-4">Global charts are currently unavailable.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {data.charts?.map((track: any, idx: number) => (
+            {data.charts?.slice(0, expanded.charts ? 16 : 4).map((track: any, idx: number) => (
               <div key={track.id} className="group cursor-pointer flex items-center gap-4 bg-white p-3 rounded-2xl shadow-sm border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all" onClick={() => playTrack(track, data.charts)}>
                 <div className="text-2xl font-black text-gray-200 w-8 text-center">{idx + 1}</div>
                 <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0">

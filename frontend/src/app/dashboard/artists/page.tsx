@@ -25,6 +25,7 @@ export default function ArtistsPage() {
               const res = await searchArtists(name);
               const artistData = res?.[0];
               return {
+                id: artistData?.id,
                 name: name,
                 image: artistData?.image || "https://i.ytimg.com/vi/4NRXx6U8ABQ/hqdefault.jpg",
                 followers: artistData?.subscribers || "1M+",
@@ -74,14 +75,20 @@ export default function ArtistsPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
             {artists.map((artist) => (
               <div key={artist.name} className="flex flex-col items-center group cursor-pointer">
-                <Link href={`/dashboard/artist/${artist.id}`} className="relative w-full aspect-square rounded-full overflow-hidden mb-4 shadow-md group-hover:shadow-2xl group-hover:scale-105 transition-all duration-300 block">
-                  <img src={artist.image} alt={artist.name} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                    <div className="bg-[#1A1A1A] text-white px-3 py-1 rounded-full text-xs font-bold opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all">
-                      View Profile
+                {artist.id ? (
+                  <Link href={`/dashboard/artist/${artist.id}`} className="relative w-full aspect-square rounded-full overflow-hidden mb-4 shadow-md group-hover:shadow-2xl group-hover:scale-105 transition-all duration-300 block">
+                    <img src={artist.image} alt={artist.name} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                      <div className="bg-[#1A1A1A] text-white px-3 py-1 rounded-full text-xs font-bold opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all">
+                        View Profile
+                      </div>
                     </div>
+                  </Link>
+                ) : (
+                  <div className="relative w-full aspect-square rounded-full overflow-hidden mb-4 shadow-md">
+                    <img src={artist.image} alt={artist.name} className="w-full h-full object-cover opacity-80" />
                   </div>
-                </Link>
+                )}
                 <h3 className="font-bold text-[#1A1A1A] text-center w-full truncate">{artist.name}</h3>
                 <p className="text-sm text-gray-500">{artist.followers} Followers</p>
                 

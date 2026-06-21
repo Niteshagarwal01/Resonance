@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Activity, Disc3, Layers, Zap, Heart, RefreshCw, Sparkles, Compass, Music, Mic2, Loader2 } from "lucide-react";
+import { Activity, Disc3, Layers, Zap, Heart, Sparkles, Compass, Music, Mic2, Loader2, Play } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { usePlayer } from "@/context/PlayerContext";
 import { searchMusic } from "@/lib/api";
@@ -39,7 +39,7 @@ export default function TasteDNAPage() {
         if (data?.top_songs?.length > 0) {
           setSongsLoading(true);
           const results = await Promise.all(
-            data.top_songs.slice(0, 5).map((s: any) =>
+            data.top_songs.map((s: any) =>
               searchMusic(`${s.title} ${s.artist}`).then(r => r[0]).catch(() => null)
             )
           );
@@ -199,9 +199,19 @@ export default function TasteDNAPage() {
 
       {/* Top Songs */}
       <div>
-        <h2 className="text-2xl font-black text-[#1A1A1A] mb-6 flex items-center gap-2">
-          <Heart size={24} className="text-red-500" fill="currentColor" /> Your Favourite Songs
-        </h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-black text-[#1A1A1A] flex items-center gap-2">
+            <Heart size={24} className="text-red-500" fill="currentColor" /> Your Favourite Songs
+          </h2>
+          {topSongTracks.length > 0 && (
+            <button 
+              onClick={() => playTrack(topSongTracks[0], topSongTracks)}
+              className="flex items-center gap-2 bg-[#1A1A1A] text-white px-4 py-2 rounded-full font-bold text-sm hover:scale-105 active:scale-95 transition-transform"
+            >
+              <Play size={16} fill="currentColor" /> Play All
+            </button>
+          )}
+        </div>
 
         {topSongs.length === 0 ? (
           <p className="text-gray-400">No favourite songs saved yet.</p>
