@@ -51,9 +51,6 @@ function ShelfRow({ title, icon, tracks, onPlay }: { title: string, icon?: React
               <p className="text-xs text-gray-500 truncate mt-0.5">{item.artist}</p>
             </div>
           ))}
-        </div>
-        <div className="absolute left-0 top-0 bottom-2 w-8 bg-gradient-to-r from-[#FDFBF7] to-transparent pointer-events-none z-10" />
-        <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-[#FDFBF7] to-transparent pointer-events-none z-10" />
       </div>
     </section>
   );

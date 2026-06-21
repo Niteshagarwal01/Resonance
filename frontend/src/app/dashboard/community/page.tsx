@@ -3,11 +3,13 @@
 import { Users, Globe2, Radio, MessageSquare, Loader2, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { ChatRoom } from "@/components/ChatRoom";
 
 export default function CommunityPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [vibeRooms, setVibeRooms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -51,6 +53,14 @@ export default function CommunityPage() {
     load();
   }, [supabase]);
 
+  if (activeRoom) {
+    return (
+      <div className="p-8 pb-32">
+        <ChatRoom roomName={activeRoom} onLeave={() => setActiveRoom(null)} />
+      </div>
+    );
+  }
+
   return (
     <div className="p-8 pb-32">
       
@@ -77,7 +87,7 @@ export default function CommunityPage() {
         ) : (
           <div className="flex gap-6 overflow-x-auto pb-6 snap-x">
             {vibeRooms.map((room, idx) => (
-              <div key={idx} className="shrink-0 w-72 bg-gradient-to-br from-[#1A1A1A] to-gray-900 rounded-3xl p-6 text-white shadow-xl snap-start cursor-pointer hover:scale-[1.02] transition-transform">
+              <div key={idx} onClick={() => setActiveRoom(room.name)} className="shrink-0 w-72 bg-gradient-to-br from-[#1A1A1A] to-gray-900 rounded-3xl p-6 text-white shadow-xl snap-start cursor-pointer hover:scale-[1.02] transition-transform">
                 <div className="flex justify-between items-start mb-4">
                   <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
                     <Radio size={20} className="text-[#FFB703]" />
@@ -122,7 +132,7 @@ export default function CommunityPage() {
             <p className="text-gray-500">No recent activity found. Be the first to start a listening room!</p>
           ) : (
             users.map((u, idx) => (
-              <div key={u.id || idx} className="flex items-start gap-4 py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors p-2 rounded-xl">
+              <div key={u.id || idx} onClick={() => setActiveRoom(u.dna?.core_vibe?.replace(/[🌙🧠💪☕💔✨📼🎉🌊🚗📚💕]/g, "").trim() || 'General')} className="flex items-start gap-4 py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors p-2 rounded-xl cursor-pointer group">
                 <div className="w-10 h-10 bg-gradient-to-br from-[#FFB703] to-[#8ECAE6] rounded-full flex items-center justify-center shrink-0 overflow-hidden">
                   {u.avatar_url ? <img src={u.avatar_url} alt={`${u.username}'s avatar`} className="w-full h-full object-cover" /> : <Users size={16} className="text-white" />}
                 </div>
@@ -135,7 +145,7 @@ export default function CommunityPage() {
                     {u.dna?.top_songs?.[0] ? `Recently saved "${u.dna.top_songs[0].title}"` : 'Recently active'}
                   </p>
                 </div>
-                <button className="ml-auto text-gray-400 hover:text-[#FFB703] transition-colors">
+                <button className="ml-auto text-gray-400 group-hover:text-[#FFB703] transition-colors">
                   <MessageSquare size={18} />
                 </button>
               </div>
