@@ -55,7 +55,7 @@ export default function LoginPage() {
       </div>
 
       {/* LEFT SECTION - Branding & Cinematic Visuals */}
-      <div className="hidden lg:flex w-1/2 flex-col justify-center p-12 lg:p-16 relative z-20">
+      <div className="hidden lg:flex w-1/2 flex-col justify-center items-end p-12 lg:p-16 lg:pr-12 xl:pr-24 relative z-20">
         <div className="absolute top-12 left-12 lg:top-16 lg:left-16 z-30">
           <Link href="/" className="flex items-center gap-3 w-fit group" style={{ textDecoration: "none" }}>
             <motion.div whileHover={{ rotate: 90 }} transition={{ type: "spring", stiffness: 200 }}
@@ -67,7 +67,7 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <div className="relative z-10">
+        <div className="relative z-10 w-full max-w-[440px]">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="inline-flex items-center gap-2.5 mb-6" style={{ background: "rgba(255,255,255,0.9)", border: "1px solid rgba(0,0,0,0.06)", padding: "8px 16px", borderRadius: 100, fontSize: 11, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", boxShadow: "0 4px 20px rgba(0,0,0,0.04)" }}>
               <Zap size={14} color="#FFB703" fill="#FFB703" />
@@ -92,7 +92,7 @@ export default function LoginPage() {
       </div>
 
       {/* RIGHT SECTION - Auth Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center relative z-20">
+      <div className="w-full lg:w-1/2 flex items-center justify-center lg:justify-start lg:pl-12 xl:pl-24 relative z-20">
         
 
         <Link href="/" className="lg:hidden absolute top-8 left-8 z-20 text-[#1A1A1A] opacity-60 hover:opacity-100 transition-opacity flex items-center gap-2" style={{ fontWeight: 700, textDecoration: "none" }}>
@@ -102,7 +102,7 @@ export default function LoginPage() {
         {/* Floating Glassmorphic Login Card */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.96, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: "spring", stiffness: 80, damping: 20 }}
-          className="w-full max-w-[440px] p-8 sm:p-12 rounded-[2.5rem] relative z-10 mx-6"
+          className="w-full max-w-[440px] p-8 sm:p-12 rounded-[2.5rem] relative z-10 mx-auto lg:mx-0 px-6 lg:px-12"
           style={{ 
             background: "rgba(255,255,255,0.75)", 
             backdropFilter: "blur(30px)", 
