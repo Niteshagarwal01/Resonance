@@ -77,7 +77,15 @@ export default function OnboardingWizard() {
     if (!q.trim()) { setSongResults([]); return; }
     setSongLoading(true);
     const res = await searchMusic(q);
-    setSongResults(res.filter((s: Song) => s.id && s.title));
+    const songs: Song[] = res
+      .filter((s: { id?: string; title?: string }) => s.id && s.title)
+      .map((s: { id: string; title: string; artist?: string; thumbnail?: string }) => ({
+        id: s.id,
+        title: s.title,
+        artist: s.artist ?? "",
+        thumbnail: s.thumbnail ?? null,
+      }));
+    setSongResults(songs);
     setSongLoading(false);
   }, []);
 
