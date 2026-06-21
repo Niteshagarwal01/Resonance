@@ -3,6 +3,9 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 
 import Image from 'next/image';
+import mainLogo from '../../public/logfiels/main-logo.png';
+import favAppIcon from '../../public/logfiels/favappicon.png';
+
 interface LogoProps {
   variant?: 'icon-only' | 'horizontal' | 'app-icon';
   theme?: 'light' | 'dark';
@@ -14,15 +17,15 @@ export function Logo({ variant = 'horizontal', theme = 'light', className = '', 
   const innerContent = (
     <>
       {variant === 'app-icon' ? (
-        <img 
-          src="/logofiles/favappicon.svg" 
+        <Image 
+          src={favAppIcon} 
           alt="Resonance Icon" 
-          style={{ height: size, width: size }}
+          style={{ height: size, width: 'auto' }}
           className="shrink-0 object-contain drop-shadow-xl"
         />
       ) : (
-        <img 
-          src="/logofiles/main%20logo.svg" 
+        <Image 
+          src={mainLogo} 
           alt="Resonance Logo" 
           style={{ height: size, width: 'auto' }}
           className={`shrink-0 object-contain ${theme === 'dark' ? 'invert brightness-0' : ''}`}
