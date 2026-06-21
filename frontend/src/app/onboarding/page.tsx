@@ -157,28 +157,26 @@ export default function OnboardingWizard() {
   const STEPS = ["Profile", "Genres", "Artists", "Songs", "Vibe"];
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-start py-10 px-4"
-      style={{ background: "#FAFAF8" }}>
+    <div className="w-full flex flex-col items-center">
 
-      {/* Header label */}
-      <div className="w-full max-w-5xl flex justify-between items-center mb-8 px-2">
-        <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Resonance</span>
-        <span className="text-xs font-bold uppercase tracking-widest text-[#FFB703]">TASTE DNA SETUP</span>
-      </div>
-
-      {/* Progress bar */}
+      {/* Progress bar + step label */}
       {step < 5 && (
-        <div className="w-full max-w-lg mx-auto mb-10 flex gap-2">
-          {STEPS.map((_, i) => (
-            <div key={i} className="h-1.5 flex-1 rounded-full bg-gray-200 overflow-hidden">
-              <motion.div
-                className="h-full bg-[#FFB703]"
-                initial={{ width: "0%" }}
-                animate={{ width: step > i ? "100%" : step === i ? "50%" : "0%" }}
-                transition={{ duration: 0.4 }}
-              />
-            </div>
-          ))}
+        <div className="w-full max-w-lg mx-auto mb-10 flex flex-col items-center gap-3">
+          <div className="flex gap-2 w-full">
+            {STEPS.map((label, i) => (
+              <div key={i} className="h-1.5 flex-1 rounded-full bg-gray-200 overflow-hidden" title={label}>
+                <motion.div
+                  className="h-full bg-[#FFB703]"
+                  initial={{ width: "0%" }}
+                  animate={{ width: step > i ? "100%" : step === i ? "50%" : "0%" }}
+                  transition={{ duration: 0.4 }}
+                />
+              </div>
+            ))}
+          </div>
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-400">
+            Step {step + 1} of {STEPS.length} &mdash; <span className="text-[#FFB703]">{STEPS[step]}</span>
+          </p>
         </div>
       )}
 
