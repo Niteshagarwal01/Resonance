@@ -1,8 +1,9 @@
 "use client";
 
 import { usePlayer } from "@/context/PlayerContext";
-import { Play, Pause, SkipBack, SkipForward, Volume2, Maximize2, Shuffle, Repeat, Sparkles } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, Maximize2, Shuffle, Repeat, Sparkles, ListMusic } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 export function BottomPlayer() {
   const { currentTrack, isPlaying, pauseTrack, resumeTrack, nextTrack, prevTrack, progress, duration, seekTo, isShuffle, isRepeat, isMagicShuffle, toggleShuffle, toggleRepeat, toggleMagicShuffle } = usePlayer();
@@ -81,7 +82,10 @@ export function BottomPlayer() {
         <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
           <div className="w-1/2 h-full bg-[#1A1A1A]"></div>
         </div>
-        <Maximize2 size={18} className="ml-2 hover:text-[#1A1A1A] cursor-pointer transition-colors" />
+        <Link href="/dashboard/queue" className="hover:text-[#FFB703] transition-colors" title="View Queue">
+          <ListMusic size={18} />
+        </Link>
+        <Maximize2 size={18} className="hover:text-[#1A1A1A] cursor-pointer transition-colors" />
       </div>
 
     </div>

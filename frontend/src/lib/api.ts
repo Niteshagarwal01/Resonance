@@ -19,9 +19,8 @@ export interface Track {
   title: string;
   artist: string;
   album?: string;
-  duration?: string;
+  duration?: string | null;
   thumbnail?: string;
-  length?: string; // radio endpoint sometimes returns length instead of duration
 }
 
 export const searchMusic = async (query: string): Promise<Track[]> => {
@@ -107,6 +106,47 @@ export const getMoods = async (): Promise<any> => {
     return await res.json();
   } catch (err) {
     console.error("Moods API Error:", err);
+    return null;
+  }
+};
+
+export interface HomeShelf {
+  title: string;
+  items: Track[];
+}
+
+export const getHomeShelves = async (): Promise<HomeShelf[]> => {
+  try {
+    const res = await fetchWithTimeout(`${API_BASE}/home/shelves`);
+    if (!res.ok) throw new Error("Home shelves failed");
+    const data = await res.json();
+    return data.shelves || [];
+  } catch (err) {
+    console.error("Home Shelves API Error:", err);
+    return [];
+  }
+};
+
+export const getAlbum = async (albumId: string): Promise<any> => {
+  if (!albumId) return null;
+  try {
+    const res = await fetchWithTimeout(`${API_BASE}/album/${encodeURIComponent(albumId)}`);
+    if (!res.ok) throw new Error("Album fetch failed");
+    return await res.json();
+  } catch (err) {
+    console.error("Album API Error:", err);
+    return null;
+  }
+};
+
+export const getPlaylist = async (playlistId: string): Promise<any> => {
+  if (!playlistId) return null;
+  try {
+    const res = await fetchWithTimeout(`${API_BASE}/playlist/${encodeURIComponent(playlistId)}`);
+    if (!res.ok) throw new Error("Playlist fetch failed");
+    return await res.json();
+  } catch (err) {
+    console.error("Playlist API Error:", err);
     return null;
   }
 };

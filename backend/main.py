@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = FastAPI(title="Resonance API", description="YT Music Powered Backend", version="2.0.0")
+app = FastAPI(title="Resonance API", description="YT Music Powered Backend", version="3.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,7 +21,7 @@ app.add_middleware(
 ytmusic = YTMusic()
 
 
-# ── Image URL Utilities ────────────────────────────────────────────────────────
+# ── Utilities ─────────────────────────────────────────────────────────────────
 
 def upgrade_yt3_image(url: str | None, size: int = 500) -> str | None:
     if not url:
@@ -53,6 +53,21 @@ def best_thumbnail(thumbnails: list, video_id: str | None = None) -> str | None:
     return url
 
 
+def format_duration(raw: str | None) -> str | None:
+    """Ensure durations are in MM:SS format. YTMusic sometimes returns H:MM:SS."""
+    if not raw:
+        return None
+    parts = raw.strip().split(":")
+    if len(parts) == 2:
+        return raw  # already MM:SS
+    if len(parts) == 3:
+        # H:MM:SS → convert to total minutes:SS
+        h, m, s = int(parts[0]), int(parts[1]), int(parts[2])
+        total_min = h * 60 + m
+        return f"{total_min}:{s:02d}"
+    return raw
+
+
 def format_track(item: dict) -> dict | None:
     """Normalize any track-like dict from ytmusicapi into our Track shape."""
     video_id = item.get("videoId")
@@ -63,40 +78,41 @@ def format_track(item: dict) -> dict | None:
     album_name = None
     if item.get("album"):
         album_name = item["album"].get("name")
+    duration_raw = item.get("duration") or item.get("length")
     return {
         "id": video_id,
         "title": item.get("title"),
         "artist": artist_str,
         "album": album_name,
-        "duration": item.get("duration"),
+        "duration": format_duration(duration_raw),
         "thumbnail": upgrade_ytimg_thumbnail(None, video_id),
     }
 
 
-# ── Endpoints ─────────────────────────────────────────────────────────────────
+# ── Root ──────────────────────────────────────────────────────────────────────
 
 @app.get("/")
 def read_root():
-    return {"message": "Resonance Backend is running. YT Engine active."}
+    return {"message": "Resonance Backend v3 — running."}
 
+
+# ── Search ────────────────────────────────────────────────────────────────────
 
 @app.get("/api/search")
 async def search_music(q: str = Query(..., min_length=1)):
-    """
-    Searches YouTube Music for tracks, returning high-res thumbnails.
-    """
     try:
-        raw_results = await asyncio.to_thread(ytmusic.search, query=q, filter="songs", limit=15)
+        raw_results = await asyncio.to_thread(ytmusic.search, query=q, filter="songs", limit=20)
         formatted = []
         for item in raw_results:
             video_id = item.get("videoId")
+            if not video_id:
+                continue
             formatted.append({
                 "id": video_id,
                 "title": item.get("title"),
                 "artist": ", ".join([a["name"] for a in item.get("artists", [])]),
                 "album": item.get("album", {}).get("name") if item.get("album") else None,
-                "duration": item.get("duration"),
-                # Always use the maxresdefault YouTube thumbnail for songs
+                "duration": format_duration(item.get("duration")),
                 "thumbnail": upgrade_ytimg_thumbnail(None, video_id),
             })
         return {"query": q, "results": formatted}
@@ -107,7 +123,6 @@ async def search_music(q: str = Query(..., min_length=1)):
 
 @app.get("/api/search/artists")
 async def search_artists(q: str = Query(..., min_length=1)):
-    """Search YouTube Music for artists, returning browse IDs and high-res images."""
     try:
         raw_results = await asyncio.to_thread(ytmusic.search, query=q, filter="artists", limit=12)
         formatted = []
@@ -128,54 +143,78 @@ async def search_artists(q: str = Query(..., min_length=1)):
         raise HTTPException(status_code=500, detail="Artist search failed")
 
 
-@app.get("/api/moods")
-async def get_moods():
-    """
-    Fetch mood and genre categories from YouTube Music.
-    Returns a dictionary of sections and categories.
-    """
+@app.get("/api/search/albums")
+async def search_albums(q: str = Query(..., min_length=1)):
     try:
-        categories = await asyncio.to_thread(ytmusic.get_mood_categories)
-        return categories
-    except Exception as e:
-        print(f"Moods error: {e}")
-        raise HTTPException(status_code=500, detail="Moods fetch failed")
-
-@app.get("/api/radio")
-async def get_radio(seed_id: str = Query(..., description="The seed video ID from YouTube Music")):
-    """
-    Hits YT Music's Watch Next algorithm to get the perfect auto-play queue.
-    """
-    try:
-        radio_queue = await asyncio.to_thread(ytmusic.get_watch_playlist, videoId=seed_id, limit=50)
-        tracks = []
-        for track in radio_queue.get("tracks", []):
-            video_id = track.get("videoId")
-            tracks.append({
-                "id": video_id,
-                "title": track.get("title"),
-                "artist": ", ".join([a["name"] for a in track.get("artists", [])]),
-                # Use maxresdefault for all radio queue tracks
-                "thumbnail": upgrade_ytimg_thumbnail(None, video_id),
-                "length": track.get("length"),
+        raw_results = await asyncio.to_thread(ytmusic.search, query=q, filter="albums", limit=10)
+        formatted = []
+        for item in raw_results:
+            browse_id = item.get("browseId")
+            if not browse_id:
+                continue
+            artists = item.get("artists") or []
+            formatted.append({
+                "id": browse_id,
+                "title": item.get("title"),
+                "artist": ", ".join(a["name"] for a in artists if a.get("name")),
+                "year": item.get("year"),
+                "image": best_thumbnail(item.get("thumbnails", [])),
             })
-
-        return {
-            "seed_id": seed_id,
-            "playlist_id": radio_queue.get("playlistId"),
-            "queue": tracks,
-        }
+        return {"query": q, "results": formatted}
     except Exception as e:
-        print(f"Radio error: {e}")
-        raise HTTPException(status_code=500, detail="Radio fetch failed")
+        print(f"Album search error: {e}")
+        raise HTTPException(status_code=500, detail="Album search failed")
+
+
+# ── Home Feed ─────────────────────────────────────────────────────────────────
+
+@app.get("/api/home/shelves")
+async def get_home_shelves():
+    """
+    Fetches the real YouTube Music home page shelves.
+    Returns a structured list of shelves just like Spotify's home feed.
+    """
+    try:
+        home_data = await asyncio.to_thread(ytmusic.get_home, limit=8)
+        shelves = []
+        for shelf in home_data:
+            title = shelf.get("title", "")
+            contents = shelf.get("contents", [])
+            items = []
+            for item in contents[:10]:
+                # Could be tracks, albums, or playlists
+                video_id = item.get("videoId")
+                browse_id = item.get("playlistId") or item.get("browseId")
+                thumbnails = item.get("thumbnails", [])
+                artists = item.get("artists") or item.get("subscribers") and [] or []
+                if isinstance(artists, str):
+                    artists = []
+                
+                result = {
+                    "id": video_id or browse_id,
+                    "type": "track" if video_id else "playlist",
+                    "title": item.get("title"),
+                    "artist": ", ".join(a["name"] for a in artists if isinstance(a, dict) and a.get("name")),
+                    "thumbnail": upgrade_ytimg_thumbnail(None, video_id) if video_id else best_thumbnail(thumbnails),
+                    "duration": format_duration(item.get("duration") or item.get("length")),
+                    "playlistId": browse_id,
+                }
+                if result["id"] and result["title"]:
+                    items.append(result)
+            
+            if items:
+                shelves.append({"title": title, "items": items})
+        
+        return {"shelves": shelves}
+    except Exception as e:
+        print(f"Home shelves error: {e}")
+        raise HTTPException(status_code=500, detail="Home shelves failed")
 
 
 @app.get("/api/home")
 async def get_home_feed(seed_ids: str = Query(..., description="Comma-separated videoIds from user top songs")):
     """
-    Spotify-style personalized home feed.
-    Seeds YTM's watch_playlist from each top song, interleaves & deduplicates
-    results to produce a diverse mix across the user's taste clusters.
+    Spotify-style personalized radio - seeds YTM's watch_playlist from top songs.
     """
     try:
         ids = [s.strip() for s in seed_ids.split(",") if s.strip()][:5]
@@ -209,7 +248,7 @@ async def get_home_feed(seed_ids: str = Query(..., description="Comma-separated 
                             "title": item.get("title"),
                             "artist": ", ".join(a["name"] for a in artists if a.get("name")),
                             "thumbnail": upgrade_ytimg_thumbnail(None, vid),
-                            "duration": item.get("duration") or item.get("length"),
+                            "duration": format_duration(item.get("duration") or item.get("length")),
                         })
 
         return {"tracks": all_tracks[:50]}
@@ -220,13 +259,10 @@ async def get_home_feed(seed_ids: str = Query(..., description="Comma-separated 
         raise HTTPException(status_code=500, detail="Home feed failed")
 
 
+# ── Charts ────────────────────────────────────────────────────────────────────
+
 @app.get("/api/charts")
 async def get_charts(country: str = Query(default="IN")):
-    """
-    Real top chart songs from YouTube Music.
-    Equivalent to Spotify's Top 50 charts.
-    country='IN' for India, 'ZZ' for global.
-    """
     try:
         data = await asyncio.to_thread(ytmusic.get_charts, country=country)
         tracks = []
@@ -251,9 +287,50 @@ async def get_charts(country: str = Query(default="IN")):
         raise HTTPException(status_code=500, detail="Charts fetch failed")
 
 
+# ── Moods ─────────────────────────────────────────────────────────────────────
+
+@app.get("/api/moods")
+async def get_moods():
+    try:
+        categories = await asyncio.to_thread(ytmusic.get_mood_categories)
+        return categories
+    except Exception as e:
+        print(f"Moods error: {e}")
+        raise HTTPException(status_code=500, detail="Moods fetch failed")
+
+
+# ── Radio ─────────────────────────────────────────────────────────────────────
+
+@app.get("/api/radio")
+async def get_radio(seed_id: str = Query(...)):
+    try:
+        radio_queue = await asyncio.to_thread(ytmusic.get_watch_playlist, videoId=seed_id, limit=50)
+        tracks = []
+        for track in radio_queue.get("tracks", []):
+            video_id = track.get("videoId")
+            if not video_id:
+                continue
+            tracks.append({
+                "id": video_id,
+                "title": track.get("title"),
+                "artist": ", ".join([a["name"] for a in track.get("artists", [])]),
+                "thumbnail": upgrade_ytimg_thumbnail(None, video_id),
+                "duration": format_duration(track.get("length") or track.get("duration")),
+            })
+        return {
+            "seed_id": seed_id,
+            "playlist_id": radio_queue.get("playlistId"),
+            "queue": tracks,
+        }
+    except Exception as e:
+        print(f"Radio error: {e}")
+        raise HTTPException(status_code=500, detail="Radio fetch failed")
+
+
+# ── Artist ────────────────────────────────────────────────────────────────────
+
 @app.get("/api/artist/{artist_id}")
 async def get_artist_profile(artist_id: str):
-    """Fetch full artist profile: bio, top tracks, subscriber count."""
     try:
         data = await asyncio.to_thread(ytmusic.get_artist, channelId=artist_id)
         top_songs = []
@@ -270,8 +347,36 @@ async def get_artist_profile(artist_id: str):
                     "artist": ", ".join(a["name"] for a in artists if a.get("name")) or data.get("name"),
                     "album": (song.get("album") or {}).get("name"),
                     "thumbnail": upgrade_ytimg_thumbnail(None, video_id),
-                    "duration": song.get("duration"),
+                    "duration": format_duration(song.get("duration")),
                 })
+
+        # Albums
+        albums = []
+        albums_section = data.get("albums", {})
+        if albums_section and albums_section.get("results"):
+            for album in albums_section["results"][:8]:
+                browse_id = album.get("browseId")
+                albums.append({
+                    "id": browse_id,
+                    "title": album.get("title"),
+                    "year": album.get("year"),
+                    "type": album.get("type", "Album"),
+                    "thumbnail": best_thumbnail(album.get("thumbnails", [])),
+                })
+
+        # Singles
+        singles = []
+        singles_section = data.get("singles", {})
+        if singles_section and singles_section.get("results"):
+            for single in singles_section["results"][:8]:
+                browse_id = single.get("browseId")
+                singles.append({
+                    "id": browse_id,
+                    "title": single.get("title"),
+                    "year": single.get("year"),
+                    "thumbnail": best_thumbnail(single.get("thumbnails", [])),
+                })
+
         return {
             "id": data.get("channelId") or artist_id,
             "name": data.get("name"),
@@ -280,7 +385,82 @@ async def get_artist_profile(artist_id: str):
             "subscribers": data.get("subscribers"),
             "image": best_thumbnail(data.get("thumbnails", [])),
             "top_tracks": top_songs,
+            "albums": albums,
+            "singles": singles,
         }
     except Exception as e:
         print(f"Artist profile error: {e}")
         raise HTTPException(status_code=500, detail="Artist profile fetch failed")
+
+
+# ── Album ─────────────────────────────────────────────────────────────────────
+
+@app.get("/api/album/{album_id}")
+async def get_album(album_id: str):
+    try:
+        data = await asyncio.to_thread(ytmusic.get_album, browseId=album_id)
+        tracks = []
+        for i, track in enumerate(data.get("tracks", [])):
+            video_id = track.get("videoId")
+            if not video_id:
+                continue
+            artists = track.get("artists") or []
+            tracks.append({
+                "id": video_id,
+                "title": track.get("title"),
+                "artist": ", ".join(a["name"] for a in artists if a.get("name")) or data.get("artist", [{}])[0].get("name", ""),
+                "duration": format_duration(track.get("duration")),
+                "trackNumber": i + 1,
+                "thumbnail": upgrade_ytimg_thumbnail(None, video_id),
+            })
+        
+        album_artists = data.get("artists") or []
+        return {
+            "id": album_id,
+            "title": data.get("title"),
+            "artist": ", ".join(a["name"] for a in album_artists if a.get("name")),
+            "artistId": album_artists[0].get("id") if album_artists else None,
+            "year": data.get("year"),
+            "trackCount": data.get("trackCount"),
+            "duration": data.get("duration"),
+            "description": data.get("description"),
+            "thumbnail": best_thumbnail(data.get("thumbnails", [])),
+            "tracks": tracks,
+        }
+    except Exception as e:
+        print(f"Album error: {e}")
+        raise HTTPException(status_code=500, detail="Album fetch failed")
+
+
+# ── Playlist ──────────────────────────────────────────────────────────────────
+
+@app.get("/api/playlist/{playlist_id}")
+async def get_playlist(playlist_id: str):
+    try:
+        data = await asyncio.to_thread(ytmusic.get_playlist, playlistId=playlist_id, limit=50)
+        tracks = []
+        for item in data.get("tracks", []):
+            video_id = item.get("videoId")
+            if not video_id:
+                continue
+            artists = item.get("artists") or []
+            tracks.append({
+                "id": video_id,
+                "title": item.get("title"),
+                "artist": ", ".join(a["name"] for a in artists if a.get("name")),
+                "album": (item.get("album") or {}).get("name"),
+                "duration": format_duration(item.get("duration")),
+                "thumbnail": upgrade_ytimg_thumbnail(None, video_id),
+            })
+        return {
+            "id": playlist_id,
+            "title": data.get("title"),
+            "description": data.get("description"),
+            "author": data.get("author", {}).get("name") if data.get("author") else None,
+            "trackCount": data.get("trackCount"),
+            "thumbnail": best_thumbnail(data.get("thumbnails", [])),
+            "tracks": tracks,
+        }
+    except Exception as e:
+        print(f"Playlist error: {e}")
+        raise HTTPException(status_code=500, detail="Playlist fetch failed")

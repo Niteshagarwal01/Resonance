@@ -156,7 +156,7 @@ export default function LibraryPage() {
 
                   <div className="w-24 flex items-center justify-end gap-4 pr-4">
                     <Heart size={16} className="text-red-500 opacity-100 transition-all" fill="currentColor" />
-                    <span className="text-sm text-gray-400">{track.duration || track.length || "3:00"}</span>
+                    <span className="text-sm text-gray-400">{track.duration || "—"}</span>
                   </div>
                 </div>
               ))}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Compass, Dna, Library, Mic2, Users, User, Plus, Search } from "lucide-react";
+import { Home, Compass, Dna, Library, Mic2, Users, User, Plus, Search, ListMusic } from "lucide-react";
 import { Logo } from "./Logo";
 
 const navLinks = [
@@ -10,6 +10,7 @@ const navLinks = [
   { name: "Discover", href: "/dashboard/discover", icon: Compass },
   { name: "Taste DNA", href: "/dashboard/taste-dna", icon: Dna },
   { name: "Library", href: "/dashboard/library", icon: Library },
+  { name: "Queue", href: "/dashboard/queue", icon: ListMusic },
   { name: "Artists", href: "/dashboard/artists", icon: Mic2 },
   { name: "Community", href: "/dashboard/community", icon: Users },
   { name: "Profile", href: "/dashboard/profile", icon: User },
