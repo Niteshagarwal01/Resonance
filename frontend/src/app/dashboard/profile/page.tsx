@@ -9,6 +9,9 @@ export default function ProfilePage() {
   const router = useRouter();
   const supabase = createClient();
   const [profile, setProfile] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState('');
 
   useEffect(() => {
     async function loadProfile() {
@@ -29,6 +32,15 @@ export default function ProfilePage() {
     await supabase.auth.signOut();
     localStorage.clear();
     router.push("/login");
+  };
+
+  const handleSave = () => {
+    setSaving(true);
+    setTimeout(() => {
+      setSaving(false);
+      setToast('Settings saved successfully!');
+      setTimeout(() => setToast(''), 3000);
+    }, 1000);
   };
 
   return (
@@ -65,24 +77,33 @@ export default function ProfilePage() {
       {/* Settings Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm cursor-pointer hover:border-[#FFB703] transition-colors">
-          <div className="w-10 h-10 bg-gray-50 text-gray-600 rounded-full flex items-center justify-center mb-4">
+        <div 
+          onClick={() => setActiveTab('settings')}
+          className={`bg-white p-6 rounded-3xl border shadow-sm cursor-pointer transition-colors ${activeTab === 'settings' ? 'border-[#FFB703] ring-2 ring-[#FFB703]/20' : 'border-gray-100 hover:border-[#FFB703]'}`}
+        >
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-4 ${activeTab === 'settings' ? 'bg-[#FFB703] text-white' : 'bg-gray-50 text-gray-600'}`}>
             <Settings size={20} />
           </div>
           <h3 className="text-lg font-bold text-[#1A1A1A] mb-1">Account Settings</h3>
           <p className="text-sm text-gray-500">Manage your email, password, and active sessions.</p>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm cursor-pointer hover:border-[#FFB703] transition-colors">
-          <div className="w-10 h-10 bg-gray-50 text-gray-600 rounded-full flex items-center justify-center mb-4">
+        <div 
+          onClick={() => setActiveTab('privacy')}
+          className={`bg-white p-6 rounded-3xl border shadow-sm cursor-pointer transition-colors ${activeTab === 'privacy' ? 'border-[#FFB703] ring-2 ring-[#FFB703]/20' : 'border-gray-100 hover:border-[#FFB703]'}`}
+        >
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-4 ${activeTab === 'privacy' ? 'bg-[#FFB703] text-white' : 'bg-gray-50 text-gray-600'}`}>
             <Shield size={20} />
           </div>
           <h3 className="text-lg font-bold text-[#1A1A1A] mb-1">Privacy</h3>
           <p className="text-sm text-gray-500">Control who sees your Taste DNA and listening activity.</p>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm cursor-pointer hover:border-[#FFB703] transition-colors">
-          <div className="w-10 h-10 bg-gray-50 text-gray-600 rounded-full flex items-center justify-center mb-4">
+        <div 
+          onClick={() => setActiveTab('subscription')}
+          className={`bg-white p-6 rounded-3xl border shadow-sm cursor-pointer transition-colors ${activeTab === 'subscription' ? 'border-[#FFB703] ring-2 ring-[#FFB703]/20' : 'border-gray-100 hover:border-[#FFB703]'}`}
+        >
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-4 ${activeTab === 'subscription' ? 'bg-[#FFB703] text-white' : 'bg-gray-50 text-gray-600'}`}>
             <CreditCard size={20} />
           </div>
           <h3 className="text-lg font-bold text-[#1A1A1A] mb-1">Subscription</h3>
@@ -100,8 +121,64 @@ export default function ProfilePage() {
           <h3 className="text-lg font-bold text-red-600 mb-1">Log Out</h3>
           <p className="text-sm text-red-400">Clear your local session and return to login.</p>
         </div>
-
       </div>
+
+      {/* Active Tab Content */}
+      {activeTab && (
+        <div className="mt-8 bg-white p-8 rounded-3xl border border-gray-100 shadow-sm animate-in fade-in slide-in-from-bottom-4">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-black text-[#1A1A1A] capitalize">{activeTab} Details</h2>
+            <button onClick={() => setActiveTab(null)} className="text-gray-400 hover:text-[#1A1A1A]">Close</button>
+          </div>
+          
+          {activeTab === 'settings' && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">Display Name</label>
+                <input type="text" defaultValue={profile?.display_name || ''} className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#FFB703]" />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">Email Address</label>
+                <input type="email" defaultValue={profile?.email || ''} disabled className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-500 cursor-not-allowed" />
+                <p className="text-xs text-gray-400 mt-1">Email cannot be changed directly.</p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'privacy' && (
+            <div className="space-y-4">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" defaultChecked className="w-5 h-5 accent-[#FFB703]" />
+                <span className="font-medium text-[#1A1A1A]">Make my Taste DNA public</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" defaultChecked className="w-5 h-5 accent-[#FFB703]" />
+                <span className="font-medium text-[#1A1A1A]">Show my active listening sessions to followers</span>
+              </label>
+            </div>
+          )}
+
+          {activeTab === 'subscription' && (
+            <div className="bg-[#1A1A1A] text-white p-6 rounded-2xl">
+              <h4 className="text-xl font-bold mb-2 text-[#FFB703]">Resonance Pro</h4>
+              <p className="text-gray-300 mb-4">Your next billing date is Oct 14, 2024.</p>
+              <button className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-bold transition-colors">Manage Billing via Stripe</button>
+            </div>
+          )}
+
+          <div className="mt-8 flex justify-end items-center gap-4">
+            {toast && <span className="text-emerald-500 font-bold text-sm">{toast}</span>}
+            {activeTab !== 'subscription' && (
+              <button 
+                onClick={handleSave} 
+                className="bg-[#1A1A1A] text-white px-6 py-3 rounded-full font-bold hover:bg-[#FFB703] hover:text-[#1A1A1A] transition-colors"
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

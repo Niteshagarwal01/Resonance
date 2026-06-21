@@ -6,22 +6,36 @@ import { usePlayer } from "@/context/PlayerContext";
 import Image from "next/image";
 import { Play, Sparkles, TrendingUp, Radio } from "lucide-react";
 import { motion } from "framer-motion";
+import { createClient } from "@/utils/supabase/client";
 
 export default function DashboardHome() {
   const [dailyPicks, setDailyPicks] = useState<Track[]>([]);
   const [trending, setTrending] = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
   const [backendError, setBackendError] = useState(false);
+  const [dna, setDna] = useState<any>(null);
   const { playTrack } = usePlayer();
+  const supabase = createClient();
 
   useEffect(() => {
     const loadInitialData = async () => {
       setLoading(true);
       setBackendError(false);
       try {
+        const { data: { session } } = await supabase.auth.getSession();
+        let userDna = null;
+        if (session) {
+          const { data } = await supabase.from("taste_dna").select("*").eq("user_id", session.user.id).single();
+          userDna = data;
+          setDna(data);
+        }
+
+        const vibeQuery = userDna?.core_vibe ? `${userDna.core_vibe} mix` : "Lofi chill beats";
+        const trendQuery = userDna?.top_genres?.[0] ? `top global ${userDna.top_genres[0]}` : "Top global pop 2024";
+
         const [picks, trend] = await Promise.all([
-          searchMusic("Lofi chill beats"),
-          searchMusic("Top global pop 2024")
+          searchMusic(vibeQuery),
+          searchMusic(trendQuery)
         ]);
         
         if (picks.length === 0 && trend.length === 0) {
@@ -39,7 +53,7 @@ export default function DashboardHome() {
     };
 
     loadInitialData();
-  }, []);
+  }, [supabase]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -100,11 +114,11 @@ export default function DashboardHome() {
               <DnaIcon className="w-3 h-3" />
               Taste DNA Match
             </div>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4 leading-tight">
-              Lofi Chill &<br />Atmospheric Vibes
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4 leading-tight capitalize">
+              {dna?.core_vibe ? dna.core_vibe.replace(/[🌙🧠💪☕💔✨📼🎉🌊🚗📚💕]/g, "").trim() : "Lofi Chill"}<br />Atmospheric Vibes
             </h2>
             <p className="text-gray-300 text-sm md:text-base max-w-md mb-8 leading-relaxed">
-              Based on your recent deep dives into ambient electronic and acoustic indie, we've compiled a 2-hour seamless journey.
+              Based on your recent deep dives into {dna?.top_genres?.[0] || "ambient electronic"} and {dna?.top_genres?.[1] || "acoustic indie"}, we've compiled a 2-hour seamless journey.
             </p>
             
             <button 

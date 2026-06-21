@@ -1,20 +1,31 @@
 "use client";
 
-import { Library as LibraryIcon, Play, Heart, Clock, Download } from "lucide-react";
+import { Library as LibraryIcon, Play, Heart, Clock, Download, Music } from "lucide-react";
 import { usePlayer } from "@/context/PlayerContext";
-import { searchMusic } from "@/lib/api";
+import { searchMusic, Track } from "@/lib/api";
 import { useEffect, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
 
 export default function LibraryPage() {
   const { playTrack } = usePlayer();
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<Track[]>([]);
+  const supabase = createClient();
 
   useEffect(() => {
     async function load() {
       try {
-        const tracks = await searchMusic("chill acoustic covers");
-        setData(tracks.slice(0, 10)); // mock library
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        const { data: dna } = await supabase.from("taste_dna").select("top_songs").eq("user_id", session.user.id).single();
+        
+        if (dna && dna.top_songs && dna.top_songs.length > 0) {
+          const results = await Promise.all(
+            dna.top_songs.map((s: any) => searchMusic(`${s.title} ${s.artist}`).then(r => r[0]).catch(() => null))
+          );
+          setData(results.filter(Boolean));
+        }
       } catch (error) {
         console.error(error);
       } finally {
@@ -22,7 +33,7 @@ export default function LibraryPage() {
       }
     }
     load();
-  }, []);
+  }, [supabase]);
 
   return (
     <div className="p-8 pb-32 max-w-6xl mx-auto">
@@ -56,9 +67,12 @@ export default function LibraryPage() {
         <div className="relative z-10 h-full flex flex-col justify-between min-h-[200px]">
           <div>
             <h2 className="text-4xl font-black mb-2">Liked Songs</h2>
-            <p className="text-indigo-100 font-medium">128 tracks • 8 hours 12 mins</p>
+            <p className="text-indigo-100 font-medium">{data.length} tracks</p>
           </div>
-          <button className="bg-white text-indigo-600 w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform">
+          <button 
+            className="bg-white text-indigo-600 w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
+            onClick={() => data.length > 0 && playTrack(data[0], data)}
+          >
             <Play fill="currentColor" size={24} className="ml-1" />
           </button>
         </div>
@@ -86,7 +100,9 @@ export default function LibraryPage() {
 
             {/* Track Rows */}
             <div className="flex flex-col">
-              {data.map((track, idx) => (
+              {data.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">No tracks found. Complete the onboarding to add songs!</div>
+              ) : data.map((track, idx) => (
                 <div 
                   key={track.id} 
                   onClick={() => playTrack(track, data)}
@@ -98,17 +114,21 @@ export default function LibraryPage() {
                   </div>
                   
                   <div className="flex items-center gap-4">
-                    <img src={track.thumbnail} alt={track.title} className="w-10 h-10 rounded shadow-sm object-cover" />
+                    {track.thumbnail ? (
+                      <img src={track.thumbnail} alt={track.title} className="w-10 h-10 rounded shadow-sm object-cover" />
+                    ) : (
+                      <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center"><Music size={16} className="text-gray-400"/></div>
+                    )}
                     <div className="truncate">
                       <div className="font-bold text-[#1A1A1A] truncate group-hover:text-[#FFB703] transition-colors">{track.title}</div>
                       <div className="text-sm text-gray-500 truncate">{track.artist}</div>
                     </div>
                   </div>
 
-                  <div className="text-sm text-gray-500 truncate">Unknown Album</div>
+                  <div className="text-sm text-gray-500 truncate">{track.album || "Unknown Album"}</div>
 
                   <div className="w-24 flex items-center justify-end gap-4 pr-4">
-                    <Heart size={16} className="text-gray-300 hover:text-pink-500 opacity-0 group-hover:opacity-100 transition-all" />
+                    <Heart size={16} className="text-red-500 opacity-100 transition-all" fill="currentColor" />
                     <span className="text-sm text-gray-400">{track.length || "3:00"}</span>
                   </div>
                 </div>

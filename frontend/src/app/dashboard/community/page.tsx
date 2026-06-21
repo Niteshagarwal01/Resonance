@@ -1,8 +1,30 @@
 "use client";
 
-import { Users, Globe2, Radio, MessageSquare } from "lucide-react";
+import { Users, Globe2, Radio, MessageSquare, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
 
 export default function CommunityPage() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const { data, error } = await supabase.from('profiles').select('*').limit(10);
+        if (data) {
+          setUsers(data);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, [supabase]);
+
   return (
     <div className="p-8 pb-32">
       
@@ -57,24 +79,30 @@ export default function CommunityPage() {
         </h2>
         
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden p-6 max-w-4xl">
-          {[
-            { user: "Alex", action: "shared a new playlist", target: "Late Night Drives", time: "2 mins ago" },
-            { user: "Sarah", action: "and 4 others matched Taste DNA on", target: "Indie Pop", time: "15 mins ago" },
-            { user: "Marcus", action: "commented on", target: "The Weeknd's new album", time: "1 hour ago" },
-          ].map((feed, idx) => (
-            <div key={idx} className="flex items-start gap-4 py-4 border-b border-gray-50 last:border-0">
-              <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center shrink-0">
-                <Users size={16} className="text-gray-400" />
-              </div>
-              <div>
-                <p className="text-[#1A1A1A]"><span className="font-bold">{feed.user}</span> {feed.action} <span className="font-bold text-indigo-500 cursor-pointer hover:underline">{feed.target}</span></p>
-                <p className="text-xs text-gray-400 mt-1">{feed.time}</p>
-              </div>
-              <button className="ml-auto text-gray-400 hover:text-[#FFB703] transition-colors">
-                <MessageSquare size={18} />
-              </button>
+          {loading ? (
+            <div className="flex items-center gap-2 text-gray-400">
+              <Loader2 size={18} className="animate-spin" /> Loading global activity...
             </div>
-          ))}
+          ) : users.length === 0 ? (
+            <p className="text-gray-500">No recent activity found. Be the first to start a listening room!</p>
+          ) : (
+            users.map((u, idx) => (
+              <div key={u.id || idx} className="flex items-start gap-4 py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors p-2 rounded-xl">
+                <div className="w-10 h-10 bg-gradient-to-br from-[#FFB703] to-[#8ECAE6] rounded-full flex items-center justify-center shrink-0 overflow-hidden">
+                  {u.avatar_url ? <img src={u.avatar_url} className="w-full h-full object-cover" /> : <Users size={16} className="text-white" />}
+                </div>
+                <div>
+                  <p className="text-[#1A1A1A]">
+                    <span className="font-bold">{u.full_name || u.username || 'Anonymous User'}</span> joined Resonance and is setting up their Taste DNA!
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">Recently</p>
+                </div>
+                <button className="ml-auto text-gray-400 hover:text-[#FFB703] transition-colors">
+                  <MessageSquare size={18} />
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

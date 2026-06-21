@@ -5,28 +5,42 @@ import { searchMusic } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Play, Sparkles, TrendingUp, Compass, Globe, Zap } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
 
 export default function DiscoverPage() {
   const { playTrack } = usePlayer();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>({});
+  const [dna, setDna] = useState<any>(null);
+  const supabase = createClient();
 
   useEffect(() => {
     async function load() {
       try {
-        const [hiddenGems, globalHits, indieFolk, electronic] = await Promise.all([
-          searchMusic("underrated indie hits 2024"),
-          searchMusic("top 50 global chart hits"),
-          searchMusic("acoustic indie folk"),
-          searchMusic("deep house electronic")
+        const { data: { session } } = await supabase.auth.getSession();
+        let userDna = null;
+        if (session) {
+          const { data } = await supabase.from("taste_dna").select("*").eq("user_id", session.user.id).single();
+          userDna = data;
+          setDna(data);
+        }
+
+        const genre1 = userDna?.top_genres?.[0] || "indie";
+        const genre2 = userDna?.top_genres?.[1] || "pop";
+
+        const [hiddenGems, globalHits, genreList1, genreList2] = await Promise.all([
+          searchMusic(`underrated ${genre1} hits`),
+          searchMusic(`top 50 global ${genre2}`),
+          searchMusic(`best ${genre1}`),
+          searchMusic(`deep ${genre2}`)
         ]);
 
         setData({
           hiddenGems: hiddenGems.slice(0, 4),
           charts: globalHits.slice(0, 4),
           genres: {
-            folk: indieFolk.slice(0, 4),
-            electronic: electronic.slice(0, 4)
+            first: genreList1.slice(0, 4),
+            second: genreList2.slice(0, 4)
           }
         });
       } catch (error) {
@@ -36,7 +50,7 @@ export default function DiscoverPage() {
       }
     }
     load();
-  }, []);
+  }, [supabase]);
 
   if (loading) {
     return (
