@@ -67,11 +67,11 @@ export default function LoginPage() {
       </div>
 
       {/* MAIN CONTENT CONTAINER (Perfectly Centered) */}
-      <div className="flex-1 w-full flex items-center justify-center z-20 p-6 lg:p-12">
-        <div className="w-full max-w-6xl flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24">
+      <div className="flex-1 w-full flex items-center justify-center z-20 p-6 md:p-12 min-h-screen">
+        <div className="w-full max-w-6xl flex flex-col xl:flex-row items-center justify-center gap-12 xl:gap-24 pt-24 md:pt-0">
           
           {/* LEFT SECTION - Text */}
-          <div className="hidden lg:block flex-1 w-full max-w-[440px]">
+          <div className="hidden md:block flex-1 w-full max-w-[440px] text-center xl:text-left">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <div className="inline-flex items-center gap-2.5 mb-6" style={{ background: "rgba(255,255,255,0.9)", border: "1px solid rgba(0,0,0,0.06)", padding: "8px 16px", borderRadius: 100, fontSize: 11, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", boxShadow: "0 4px 20px rgba(0,0,0,0.04)" }}>
                 <Zap size={14} color="#FFB703" fill="#FFB703" />
@@ -95,8 +95,8 @@ export default function LoginPage() {
           </div>
 
           {/* RIGHT SECTION - Auth Form */}
-          <div className="w-full flex-1 flex justify-center lg:justify-start max-w-[480px] relative">
-            <Link href="/" className="lg:hidden absolute -top-16 left-0 z-20 text-[#1A1A1A] opacity-60 hover:opacity-100 transition-opacity flex items-center gap-2" style={{ fontWeight: 700, textDecoration: "none" }}>
+          <div className="w-full flex-1 flex justify-center xl:justify-start max-w-[480px] relative">
+            <Link href="/" className="md:hidden absolute -top-16 left-0 z-20 text-[#1A1A1A] opacity-60 hover:opacity-100 transition-opacity flex items-center gap-2" style={{ fontWeight: 700, textDecoration: "none" }}>
               <ArrowLeft size={20} /> Back
             </Link>
 
