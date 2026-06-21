@@ -195,7 +195,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
             const insertAt = currentIndex + 1;
             const newQ = [
               ...q.slice(0, insertAt),
-              ...newTracks.slice(0, 50), // allow up to 50 new songs (the user requested not just 30, at least 50!)
+              ...newTracks, // No cap
               ...q.slice(insertAt),
             ];
             queueRef.current = newQ;

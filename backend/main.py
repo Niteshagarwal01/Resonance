@@ -226,7 +226,7 @@ async def get_home_feed(seed_ids: str = Query(..., description="Comma-separated 
 
         async def fetch_seed(video_id: str):
             try:
-                data = await asyncio.to_thread(ytmusic.get_watch_playlist, videoId=video_id, limit=50)
+                data = await asyncio.to_thread(ytmusic.get_watch_playlist, videoId=video_id, limit=200)
                 return data.get("tracks", [])
             except Exception:
                 return []
@@ -251,7 +251,7 @@ async def get_home_feed(seed_ids: str = Query(..., description="Comma-separated 
                             "duration": format_duration(item.get("duration") or item.get("length")),
                         })
 
-        return {"tracks": all_tracks[:50]}
+        return {"tracks": all_tracks[:200]}
     except HTTPException:
         raise
     except Exception as e:
@@ -304,7 +304,7 @@ async def get_moods():
 @app.get("/api/radio")
 async def get_radio(seed_id: str = Query(...)):
     try:
-        radio_queue = await asyncio.to_thread(ytmusic.get_watch_playlist, videoId=seed_id, limit=50)
+        radio_queue = await asyncio.to_thread(ytmusic.get_watch_playlist, videoId=seed_id, limit=200)
         tracks = []
         for track in radio_queue.get("tracks", []):
             video_id = track.get("videoId")
@@ -437,7 +437,7 @@ async def get_album(album_id: str):
 @app.get("/api/playlist/{playlist_id}")
 async def get_playlist(playlist_id: str):
     try:
-        data = await asyncio.to_thread(ytmusic.get_playlist, playlistId=playlist_id, limit=50)
+        data = await asyncio.to_thread(ytmusic.get_playlist, playlistId=playlist_id, limit=200)
         tracks = []
         for item in data.get("tracks", []):
             video_id = item.get("videoId")
