@@ -15,25 +15,28 @@ function getGreeting() {
   return "Good Evening";
 }
 
-function ShelfRow({ title, icon, tracks, onPlay }: { title: string, icon?: React.ReactNode, tracks: Track[], onPlay: (t: Track, q: Track[]) => void }) {
+function ShelfRow({ title, icon, tracks, onPlay, type = "square" }: { title: string, icon?: React.ReactNode, tracks: Track[], onPlay: (t: Track, q: Track[]) => void, type?: "square" | "circle" | "hero" }) {
   if (!tracks || tracks.length === 0) return null;
   return (
     <section className="mb-12">
       <div className="flex items-center justify-between mb-5 px-8">
-        <h2 className="text-xl font-black text-[#1A1A1A] flex items-center gap-2">
+        <h2 className="text-2xl font-bold text-[#1A1A1A] flex items-center gap-2 tracking-tight">
           {icon} {title}
         </h2>
+        <button className="text-sm font-bold text-gray-500 hover:text-[#1A1A1A] transition-colors">
+          Show all
+        </button>
       </div>
       <div className="relative">
-        <div className="flex gap-4 overflow-x-auto scrollbar-hide px-8 pb-2" style={{ scrollSnapType: "x mandatory" }}>
+        <div className="flex gap-6 overflow-x-auto scrollbar-hide px-8 pb-2" style={{ scrollSnapType: "x mandatory" }}>
           {tracks.map((item, idx) => (
             <div
               key={`${item.id}-${idx}`}
-              className="group flex-shrink-0 w-44 cursor-pointer"
+              className={`group flex-shrink-0 cursor-pointer ${type === 'hero' ? 'w-96' : 'w-48'}`}
               style={{ scrollSnapAlign: "start" }}
               onClick={() => onPlay(item, tracks)}
             >
-              <div className="relative w-44 h-44 rounded-2xl overflow-hidden mb-3 shadow-sm group-hover:shadow-xl transition-all duration-300">
+              <div className={`relative overflow-hidden mb-4 shadow-sm group-hover:shadow-xl transition-all duration-300 ${type === 'circle' ? 'w-48 h-48 rounded-full' : type === 'hero' ? 'w-96 h-56 rounded-2xl' : 'w-48 h-48 rounded-xl'}`}>
                 {item.thumbnail ? (
                   <Image src={item.thumbnail} alt={item.title || ""} fill className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
                 ) : (
@@ -41,14 +44,14 @@ function ShelfRow({ title, icon, tracks, onPlay }: { title: string, icon?: React
                     <Music2 size={40} className="text-gray-300" />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-300 flex items-end justify-end p-3">
-                  <div className="w-12 h-12 rounded-full bg-[#FFB703] flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                    <Play size={20} fill="#1A1A1A" className="text-[#1A1A1A] ml-1" />
+                <div className={`absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-300 flex items-end justify-end p-4 ${type === 'hero' ? 'hidden' : ''}`}>
+                  <div className="w-12 h-12 rounded-full bg-[#1ED760] flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                    <Play size={20} fill="#000" className="text-black ml-1" />
                   </div>
                 </div>
               </div>
-              <p className="font-bold text-[#1A1A1A] text-sm truncate group-hover:text-[#FFB703] transition-colors">{item.title}</p>
-              <p className="text-xs text-gray-500 truncate mt-0.5">{item.artist}</p>
+              <p className={`font-bold text-[#1A1A1A] text-base truncate group-hover:text-[#FFB703] transition-colors ${type === 'circle' ? 'text-center' : ''}`}>{item.title}</p>
+              <p className={`text-sm text-gray-500 truncate mt-1 ${type === 'circle' ? 'text-center' : ''}`}>{item.artist}</p>
             </div>
           ))}
         </div>
@@ -58,6 +61,7 @@ function ShelfRow({ title, icon, tracks, onPlay }: { title: string, icon?: React
     </section>
   );
 }
+
 
 export default function HomePage() {
   const { playTrack } = usePlayer();
@@ -148,12 +152,20 @@ export default function HomePage() {
     <div className="pb-32">
       {/* ── Hero Header ── */}
       <div className="px-8 pt-8 pb-6 bg-gradient-to-b from-[#8ECAE6]/30 to-transparent mb-6">
-        <h1 className="text-4xl font-black text-[#1A1A1A] tracking-tight mb-6">
-          {getGreeting()}<span className="text-[#FFB703]">.</span>
+        <div className="flex gap-3 mb-8">
+          {["All", "Music", "Podcasts"].map((p, i) => (
+            <button key={p} className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${i === 0 ? "bg-[#1A1A1A] text-white" : "bg-gray-100 text-[#1A1A1A] hover:bg-gray-200"}`}>
+              {p}
+            </button>
+          ))}
+        </div>
+
+        <h1 className="text-3xl font-bold text-[#1A1A1A] tracking-tight mb-6">
+          {getGreeting()}
         </h1>
 
         {/* Good Morning / Recently Played Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {recentlyPlayed.slice(0, 8).map((track, idx) => (
             <div
               key={track.id + idx}
@@ -230,8 +242,8 @@ export default function HomePage() {
       {/* 8. Popular Albums */}
       <ShelfRow title="Popular Albums" icon={<Disc3 className="text-purple-500"/>} tracks={popularAlbums} onPlay={playTrack} />
       
-      {/* 9. Popular Artists */}
-      <ShelfRow title="Popular Artists" icon={<Mic2 className="text-blue-500"/>} tracks={popularArtists} onPlay={playTrack} />
+      {/* 9. Popular Artists (Circular) */}
+      <ShelfRow title="Popular Artists" tracks={popularArtists} onPlay={playTrack} type="circle" />
 
     </div>
   );
