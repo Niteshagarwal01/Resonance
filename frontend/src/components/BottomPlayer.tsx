@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export function BottomPlayer() {
-  const { currentTrack, isPlaying, pauseTrack, resumeTrack, nextTrack, prevTrack, progress, duration, seekTo, isShuffle, isRepeat, isMagicShuffle, toggleShuffle, toggleRepeat, toggleMagicShuffle } = usePlayer();
+  const { currentTrack, isPlaying, pauseTrack, resumeTrack, nextTrack, prevTrack, progress, duration, seekTo, isShuffle, repeatMode, isMagicShuffle, toggleShuffle, toggleRepeat, toggleMagicShuffle } = usePlayer();
 
   if (!currentTrack) {
     return (
@@ -46,8 +46,20 @@ export function BottomPlayer() {
           </button>
 
           <button onClick={nextTrack} className="text-gray-600 hover:text-[#1A1A1A] transition-colors"><SkipForward size={20} fill="currentColor" /></button>
-          <button onClick={toggleRepeat} className={`${isRepeat ? 'text-[#FFB703]' : 'text-gray-400 hover:text-[#1A1A1A]'} transition-colors`}><Repeat size={18} /></button>
-          <button onClick={toggleMagicShuffle} className={`${isMagicShuffle ? 'text-[#FFB703]' : 'text-gray-400 hover:text-[#1A1A1A]'} transition-colors`} title="Magic Shuffle (Autoplay)"><Sparkles size={18} /></button>
+          <button onClick={toggleRepeat} className={`${repeatMode !== 'off' ? 'text-[#FFB703]' : 'text-gray-400 hover:text-[#1A1A1A]'} transition-colors relative flex items-center justify-center`}>
+            <Repeat size={18} />
+            {repeatMode === 'one' && (
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full w-2.5 h-2.5 flex items-center justify-center">
+                <span className="text-[7px] font-bold text-[#1A1A1A] leading-none">1</span>
+              </div>
+            )}
+          </button>
+          <button onClick={toggleMagicShuffle} className={`${isMagicShuffle ? 'text-[#FFB703]' : 'text-gray-400 hover:text-[#1A1A1A]'} transition-colors relative flex items-center justify-center`} title="Magic Shuffle (Smart Interleave)">
+            <Sparkles size={18} />
+            {isMagicShuffle && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#FFB703] rounded-full animate-pulse shadow-[0_0_5px_#FFB703]"></span>
+            )}
+          </button>
         </div>
 
         {/* Progress Bar */}

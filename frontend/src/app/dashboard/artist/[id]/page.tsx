@@ -2,12 +2,13 @@
 
 import { usePlayer } from "@/context/PlayerContext";
 import { getArtistProfile } from "@/lib/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { Play, Heart, MoreHorizontal, CheckCircle2, Clock, Disc3, Music2, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function ArtistPage({ params }: { params: { id: string } }) {
+export default function ArtistPage({ params }: { params: Promise<{ id: string }> }) {
+  const unwrappedParams = use(params);
   const { playTrack, currentTrack, isPlaying } = usePlayer();
   const [loading, setLoading] = useState(true);
   const [artistData, setArtistData] = useState<any>(null);
@@ -16,7 +17,7 @@ export default function ArtistPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     async function load() {
       try {
-        const data = await getArtistProfile(params.id);
+        const data = await getArtistProfile(unwrappedParams.id);
         setArtistData(data);
       } catch (error) {
         console.error(error);
@@ -25,7 +26,7 @@ export default function ArtistPage({ params }: { params: { id: string } }) {
       }
     }
     load();
-  }, [params.id]);
+  }, [unwrappedParams.id]);
 
   if (loading) {
     return (

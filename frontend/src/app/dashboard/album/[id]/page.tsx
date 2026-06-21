@@ -2,12 +2,13 @@
 
 import { usePlayer } from "@/context/PlayerContext";
 import { getAlbum } from "@/lib/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { Play, Heart, MoreHorizontal, Clock, Share2, Disc3, Shuffle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function AlbumPage({ params }: { params: { id: string } }) {
+export default function AlbumPage({ params }: { params: Promise<{ id: string }> }) {
+  const unwrappedParams = use(params);
   const { playTrack, currentTrack, isPlaying } = usePlayer();
   const [loading, setLoading] = useState(true);
   const [album, setAlbum] = useState<any>(null);
@@ -16,7 +17,7 @@ export default function AlbumPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     async function load() {
       try {
-        const data = await getAlbum(params.id);
+        const data = await getAlbum(unwrappedParams.id);
         setAlbum(data);
       } catch (error) {
         console.error(error);
@@ -25,7 +26,7 @@ export default function AlbumPage({ params }: { params: { id: string } }) {
       }
     }
     load();
-  }, [params.id]);
+  }, [unwrappedParams.id]);
 
   if (loading) {
     return (

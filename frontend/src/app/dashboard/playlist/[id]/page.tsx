@@ -2,12 +2,13 @@
 
 import { usePlayer } from "@/context/PlayerContext";
 import { getPlaylist } from "@/lib/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { Play, Heart, MoreHorizontal, Clock, Share2, Shuffle, ListMusic } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function PlaylistPage({ params }: { params: { id: string } }) {
+export default function PlaylistPage({ params }: { params: Promise<{ id: string }> }) {
+  const unwrappedParams = use(params);
   const { playTrack, currentTrack, isPlaying } = usePlayer();
   const [loading, setLoading] = useState(true);
   const [playlist, setPlaylist] = useState<any>(null);
@@ -16,7 +17,7 @@ export default function PlaylistPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     async function load() {
       try {
-        const data = await getPlaylist(params.id);
+        const data = await getPlaylist(unwrappedParams.id);
         setPlaylist(data);
       } catch (error) {
         console.error(error);
@@ -25,7 +26,7 @@ export default function PlaylistPage({ params }: { params: { id: string } }) {
       }
     }
     load();
-  }, [params.id]);
+  }, [unwrappedParams.id]);
 
   if (loading) {
     return (

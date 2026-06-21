@@ -29,7 +29,7 @@ interface PlayerContextType {
   setVolume: (vol: number) => void;
   seekTo: (percent: number) => void;
   isShuffle: boolean;
-  isRepeat: boolean;
+  repeatMode: 'off' | 'all' | 'one';
   isMagicShuffle: boolean;
   toggleShuffle: () => void;
   toggleRepeat: () => void;
@@ -46,7 +46,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isShuffle, setIsShuffle] = useState(false);
-  const [isRepeat, setIsRepeat] = useState(false);
+  const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('off');
   const [isMagicShuffle, setIsMagicShuffle] = useState(false);
 
   // Refs hold latest values for use inside YT callbacks (stale closure fix)
@@ -54,7 +54,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const queueRef = useRef<Track[]>([]);
   const originalQueueRef = useRef<Track[]>([]); // unshuffled backup
   const isShuffleRef = useRef(false);
-  const isRepeatRef = useRef(false);
+  const repeatModeRef = useRef<'off' | 'all' | 'one'>('off');
   const isMagicShuffleRef = useRef(false);
   const magicInFlightRef = useRef(false); // prevent concurrent fetches
 
@@ -84,9 +84,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           setIsShuffle(state.isShuffle);
           isShuffleRef.current = state.isShuffle;
         }
-        if (state.isRepeat) {
-          setIsRepeat(state.isRepeat);
-          isRepeatRef.current = state.isRepeat;
+        if (state.repeatMode) {
+          setRepeatMode(state.repeatMode);
+          repeatModeRef.current = state.repeatMode;
         }
         if (state.isMagicShuffle) {
           setIsMagicShuffle(state.isMagicShuffle);
@@ -106,11 +106,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         currentTrack: currentTrackRef.current,
         volume: volume,
         isShuffle: isShuffleRef.current,
-        isRepeat: isRepeatRef.current,
+        repeatMode: repeatModeRef.current,
         isMagicShuffle: isMagicShuffleRef.current,
       }));
     } catch (e) {}
-  }, [queue, currentTrack, volume, isShuffle, isRepeat, isMagicShuffle]);
+  }, [queue, currentTrack, volume, isShuffle, repeatMode, isMagicShuffle]);
 
   useEffect(() => {
     let playerDiv = document.getElementById("youtube-hidden-player");
@@ -221,8 +221,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const curr = currentTrackRef.current;
     if (!curr) return;
 
-    // 1. Repeat: replay current
-    if (isRepeatRef.current) {
+    // 1. Repeat: replay current (if repeatMode === 'one')
+    if (repeatModeRef.current === 'one') {
       if (ytPlayerRef.current?.loadVideoById) ytPlayerRef.current.loadVideoById(curr.id);
       setIsPlaying(true);
       setProgress(0);
@@ -230,10 +230,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }
 
     const currentIndex = q.findIndex(t => t.id === curr.id);
-    const hasNext = currentIndex >= 0 && currentIndex < q.length - 1;
 
-    // 2. Magic Shuffle: Spotify-style — insert radio songs after current position
-    if (isMagicShuffleRef.current && !magicInFlightRef.current) {
+    // 2. Magic Shuffle
+    // If magic is on and we're nearing the end of the queue (less than 3 songs left)
+    if (isMagicShuffleRef.current && !magicInFlightRef.current && (q.length - currentIndex <= 3)) {
       magicInFlightRef.current = true;
       try {
         const moreTracks = await getRadioQueue(curr.id);
@@ -241,23 +241,14 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           const existingIds = new Set(q.map(t => t.id));
           const newTracks = moreTracks
             .filter(t => !existingIds.has(t.id))
-            .map(t => ({ ...t, isMagic: true }));
+            .map(t => ({ ...t, isMagic: true }))
+            .slice(0, 30);
           
           if (newTracks.length > 0) {
-            // Insert new tracks right after current position
-            const insertAt = currentIndex + 1;
-            const newQ = [
-              ...q.slice(0, insertAt),
-              ...newTracks, // insert all available new songs
-              ...q.slice(insertAt),
-            ];
+            // Append new tracks to the end of the queue to keep it flowing
+            const newQ = [...q, ...newTracks];
             queueRef.current = newQ;
             setQueue(newQ);
-            
-            // Wait state flush then play
-            setTimeout(() => _play(newQ[insertAt], newQ), 50);
-            magicInFlightRef.current = false;
-            return;
           }
         }
       } catch (e) {
@@ -266,12 +257,15 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       magicInFlightRef.current = false;
     }
 
-    // 3. Normal next
-    if (hasNext) {
-      await _play(q[currentIndex + 1], q);
-    } else if (q.length > 0) {
-      // Loop back to start
-      await _play(q[0], q);
+    // 3. Normal next (must use updated queueRef)
+    const updatedQ = queueRef.current;
+    const hasNextUpdated = currentIndex >= 0 && currentIndex < updatedQ.length - 1;
+
+    if (hasNextUpdated) {
+      await _play(updatedQ[currentIndex + 1], updatedQ);
+    } else if (updatedQ.length > 0 && repeatModeRef.current === 'all') {
+      // Loop back to start (repeatMode === 'all')
+      await _play(updatedQ[0], updatedQ);
     }
   }, [_play]);
 
@@ -281,15 +275,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     if (!q.length || !curr) return;
     const i = q.findIndex(t => t.id === curr.id);
     
-    // If at the end and magic shuffle is on, trigger it manually
-    if (i === q.length - 1 && isMagicShuffleRef.current) {
-      handleTrackEnd();
-      return;
-    }
-
     if (i >= 0 && i < q.length - 1) {
       _play(q[i + 1], q);
-    } else if (q.length > 0) {
+    } else if (q.length > 0 && repeatModeRef.current === 'all') {
       _play(q[0], q);
     }
   }
@@ -354,15 +342,57 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleRepeat = () => {
-    const newVal = !isRepeatRef.current;
-    isRepeatRef.current = newVal;
-    setIsRepeat(newVal);
+    let nextMode: 'off' | 'all' | 'one' = 'off';
+    if (repeatModeRef.current === 'off') nextMode = 'all';
+    else if (repeatModeRef.current === 'all') nextMode = 'one';
+    else if (repeatModeRef.current === 'one') nextMode = 'off';
+
+    repeatModeRef.current = nextMode;
+    setRepeatMode(nextMode);
   };
 
-  const toggleMagicShuffle = () => {
+  const toggleMagicShuffle = async () => {
     const newVal = !isMagicShuffleRef.current;
     isMagicShuffleRef.current = newVal;
     setIsMagicShuffle(newVal);
+
+    const q = queueRef.current;
+    const curr = currentTrackRef.current;
+
+    if (newVal && curr && !magicInFlightRef.current) {
+      // Turn ON: inject 10 radio songs immediately after current track (Spotify behavior)
+      magicInFlightRef.current = true;
+      try {
+        const moreTracks = await getRadioQueue(curr.id);
+        if (moreTracks && moreTracks.length > 0) {
+          const existingIds = new Set(q.map(t => t.id));
+          const newTracks = moreTracks
+            .filter(t => !existingIds.has(t.id))
+            .map(t => ({ ...t, isMagic: true }))
+            .slice(0, 10);
+          
+          if (newTracks.length > 0) {
+            const currIdx = q.findIndex(t => t.id === curr.id);
+            const insertAt = currIdx >= 0 ? currIdx + 1 : q.length;
+            const newQ = [
+              ...q.slice(0, insertAt),
+              ...newTracks,
+              ...q.slice(insertAt),
+            ];
+            queueRef.current = newQ;
+            setQueue(newQ);
+          }
+        }
+      } catch (e) {}
+      magicInFlightRef.current = false;
+    } else if (!newVal) {
+      // Turn OFF: remove all unplayed magic tracks
+      const currIdx = curr ? q.findIndex(t => t.id === curr.id) : -1;
+      const keepIdx = currIdx >= 0 ? currIdx : 0;
+      const newQ = q.filter((t, i) => i <= keepIdx || !t.isMagic);
+      queueRef.current = newQ;
+      setQueue(newQ);
+    }
   };
 
   return (
@@ -370,7 +400,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       currentTrack, queue, isPlaying, volume, progress, duration,
       playTrack, pauseTrack, resumeTrack, nextTrack, prevTrack,
       setVolume, seekTo,
-      isShuffle, isRepeat, isMagicShuffle,
+      isShuffle, repeatMode, isMagicShuffle,
       toggleShuffle, toggleRepeat, toggleMagicShuffle,
     }}>
       {children}
