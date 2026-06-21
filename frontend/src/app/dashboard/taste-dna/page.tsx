@@ -20,39 +20,40 @@ export default function TasteDNAPage() {
   const [topSongTracks, setTopSongTracks] = useState<any[]>([]);
   const [songsLoading, setSongsLoading] = useState(false);
 
-  const loadDNA = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+  useEffect(() => {
+    async function loadDNA() {
+      setLoading(true);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
 
-      const { data } = await supabase
-        .from("taste_dna")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .single();
+        const { data } = await supabase
+          .from("taste_dna")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .single();
 
-      setDna(data);
+        setDna(data);
 
-      // Fetch real tracks for top songs
-      if (data?.top_songs?.length > 0) {
-        setSongsLoading(true);
-        const results = await Promise.all(
-          data.top_songs.slice(0, 5).map((s: any) =>
-            searchMusic(`${s.title} ${s.artist}`).then(r => r[0]).catch(() => null)
-          )
-        );
-        setTopSongTracks(results.filter(Boolean));
-        setSongsLoading(false);
+        // Fetch real tracks for top songs
+        if (data?.top_songs?.length > 0) {
+          setSongsLoading(true);
+          const results = await Promise.all(
+            data.top_songs.slice(0, 5).map((s: any) =>
+              searchMusic(`${s.title} ${s.artist}`).then(r => r[0]).catch(() => null)
+            )
+          );
+          setTopSongTracks(results.filter(Boolean));
+          setSongsLoading(false);
+        }
+      } catch (err) {
+        console.error("Failed to load Taste DNA:", err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Failed to load Taste DNA:", err);
-    } finally {
-      setLoading(false);
     }
+    loadDNA();
   }, [supabase]);
-
-  useEffect(() => { loadDNA(); }, [loadDNA]);
 
   if (loading) return (
     <div className="w-full h-full flex flex-col items-center justify-center gap-4 p-8">
