@@ -9,14 +9,14 @@ export function BottomPlayer() {
 
   if (!currentTrack) {
     return (
-      <div className="fixed bottom-0 left-0 right-0 h-24 bg-white border-t border-gray-200 z-[100] flex items-center justify-center text-gray-400">
+      <div className="w-full h-24 shrink-0 relative bg-white border-t border-gray-200 z-[100] flex items-center justify-center text-gray-400">
         <p className="font-semibold text-sm">No track playing. Discover something new!</p>
       </div>
     );
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-24 bg-white/80 backdrop-blur-xl border-t border-gray-200 z-[100] px-6 flex items-center justify-between shadow-[0_-10px_40px_rgba(0,0,0,0.03)]">
+    <div className="w-full h-24 shrink-0 relative bg-white/80 backdrop-blur-xl border-t border-gray-200 z-[100] px-6 flex items-center justify-between shadow-[0_-10px_40px_rgba(0,0,0,0.03)]">
       
       {/* Track Info */}
       <div className="flex items-center gap-4 w-1/3 min-w-[200px]">
