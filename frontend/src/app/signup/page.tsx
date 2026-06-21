@@ -62,7 +62,7 @@ export default function SignupPage() {
       </div>
 
       {/* LEFT SECTION - Branding & Cinematic Visuals */}
-      <div className="hidden lg:flex w-1/2 flex-col justify-center items-end p-12 lg:p-16 lg:pr-12 xl:pr-24 relative z-20">
+      <div className="hidden lg:flex w-1/2 flex-col justify-start items-end p-12 lg:p-16 lg:pr-12 xl:pr-24 relative z-20 pt-[15vh] lg:pt-[22vh]">
         <div className="absolute top-12 left-12 lg:top-16 lg:left-16 z-30">
           <Link href="/" className="flex items-center gap-3 w-fit group" style={{ textDecoration: "none" }}>
             <motion.div whileHover={{ rotate: 90 }} transition={{ type: "spring", stiffness: 200 }}
@@ -99,7 +99,7 @@ export default function SignupPage() {
       </div>
 
       {/* RIGHT SECTION - Auth Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center lg:justify-start lg:pl-12 xl:pl-24 relative z-20">
+      <div className="w-full lg:w-1/2 flex items-center lg:items-start justify-center lg:justify-start lg:pl-12 xl:pl-24 relative z-20 lg:pt-[22vh]">
         
 
         <Link href="/" className="lg:hidden absolute top-8 left-8 z-20 text-[#1A1A1A] opacity-60 hover:opacity-100 transition-opacity flex items-center gap-2" style={{ fontWeight: 700, textDecoration: "none" }}>
