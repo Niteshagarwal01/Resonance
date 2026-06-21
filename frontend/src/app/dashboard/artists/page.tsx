@@ -1,6 +1,6 @@
 "use client";
 
-import { Mic2, Star, TrendingUp, Check, Loader2 } from "lucide-react";
+import { Mic2, Star, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { searchArtists } from "@/lib/api";

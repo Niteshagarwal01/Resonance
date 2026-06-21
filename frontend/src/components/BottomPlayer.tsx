@@ -5,7 +5,7 @@ import { Play, Pause, SkipBack, SkipForward, Volume2, Maximize2, Shuffle, Repeat
 import Image from "next/image";
 
 export function BottomPlayer() {
-  const { currentTrack, isPlaying, playTrack, pauseTrack, resumeTrack, nextTrack, prevTrack, progress, duration, seekTo } = usePlayer();
+  const { currentTrack, isPlaying, pauseTrack, resumeTrack, nextTrack, prevTrack, progress, duration, seekTo } = usePlayer();
 
   if (!currentTrack) {
     return (

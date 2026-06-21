@@ -5,7 +5,7 @@ import { searchMusic } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { Play, Heart, MoreHorizontal, Clock, Share2 } from "lucide-react";
 
-export default function PlaylistPage({ params }: { params: { id: string } }) {
+export default function PlaylistPage() {
   const { playTrack } = usePlayer();
   const [loading, setLoading] = useState(true);
   const [tracks, setTracks] = useState<any[]>([]);

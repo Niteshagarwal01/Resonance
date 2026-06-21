@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
@@ -101,6 +100,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     return () => {
       if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const playTrack = async (track: Track, newQueue?: Track[]) => {

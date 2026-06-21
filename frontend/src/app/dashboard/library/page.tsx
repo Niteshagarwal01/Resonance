@@ -1,6 +1,6 @@
 "use client";
 
-import { Library as LibraryIcon, Play, Heart, Clock, Download, Music } from "lucide-react";
+import { Library as LibraryIcon, Play, Heart, Clock, Music } from "lucide-react";
 import { usePlayer } from "@/context/PlayerContext";
 import { searchMusic, Track } from "@/lib/api";
 import { useEffect, useState } from "react";

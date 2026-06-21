@@ -3,15 +3,13 @@
 import { usePlayer } from "@/context/PlayerContext";
 import { searchMusic, getCharts } from "@/lib/api";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { Play, Sparkles, TrendingUp, Compass, Globe, Zap } from "lucide-react";
+import { Play, Compass, Globe, Zap } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 
 export default function DiscoverPage() {
   const { playTrack } = usePlayer();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>({});
-  const [dna, setDna] = useState<any>(null);
   const [expanded, setExpanded] = useState({ gems: false, charts: false });
   const supabase = createClient();
 
@@ -23,7 +21,6 @@ export default function DiscoverPage() {
         if (session) {
           const { data } = await supabase.from("taste_dna").select("*").eq("user_id", session.user.id).single();
           userDna = data;
-          setDna(data);
         }
 
         const genre1 = userDna?.top_genres?.[0] || "indie";

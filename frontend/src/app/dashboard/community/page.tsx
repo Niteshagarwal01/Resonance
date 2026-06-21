@@ -92,7 +92,7 @@ export default function CommunityPage() {
                 <div className="flex -space-x-2">
                   {room.members.slice(0, 5).map((m: any, i: number) => (
                     <div key={i} className="w-8 h-8 rounded-full border-2 border-[#1A1A1A] bg-gray-600 overflow-hidden">
-                      {m.avatar_url ? <img src={m.avatar_url} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-indigo-500 flex items-center justify-center text-xs">{m.username?.[0] || '?'}</div>}
+                      {m.avatar_url ? <img src={m.avatar_url} alt={`${m.username}'s avatar`} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-indigo-500 flex items-center justify-center text-xs">{m.username?.[0] || '?'}</div>}
                     </div>
                   ))}
                   {room.members.length > 5 && (
@@ -124,7 +124,7 @@ export default function CommunityPage() {
             users.map((u, idx) => (
               <div key={u.id || idx} className="flex items-start gap-4 py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors p-2 rounded-xl">
                 <div className="w-10 h-10 bg-gradient-to-br from-[#FFB703] to-[#8ECAE6] rounded-full flex items-center justify-center shrink-0 overflow-hidden">
-                  {u.avatar_url ? <img src={u.avatar_url} className="w-full h-full object-cover" /> : <Users size={16} className="text-white" />}
+                  {u.avatar_url ? <img src={u.avatar_url} alt={`${u.username}'s avatar`} className="w-full h-full object-cover" /> : <Users size={16} className="text-white" />}
                 </div>
                 <div>
                   <p className="text-[#1A1A1A]">
