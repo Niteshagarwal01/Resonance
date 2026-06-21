@@ -13,12 +13,21 @@ const GENRES = [
 ];
 
 const MOCK_ARTISTS = [
-  { id: "1", name: "The Weeknd", image: "https://i.ytimg.com/vi/4NRXx6U8ABQ/hqdefault.jpg" },
-  { id: "2", name: "Taylor Swift", image: "https://i.ytimg.com/vi/b1kbLwvqugk/hqdefault.jpg" },
-  { id: "3", name: "Kendrick Lamar", image: "https://i.ytimg.com/vi/tvTRZJ-4EyI/hqdefault.jpg" },
-  { id: "4", name: "Dua Lipa", image: "https://i.ytimg.com/vi/oygrmJFKYZY/hqdefault.jpg" },
-  { id: "5", name: "Drake", image: "https://i.ytimg.com/vi/uxpDa-c-4Mc/hqdefault.jpg" },
-  { id: "6", name: "Billie Eilish", image: "https://i.ytimg.com/vi/cWGE9GiRV3Q/hqdefault.jpg" },
+  { id: "1", name: "The Weeknd", image: "https://images.unsplash.com/photo-1549834125-82d3c48159a3?w=400&q=80" },
+  { id: "2", name: "Taylor Swift", image: "https://images.unsplash.com/photo-1493225457124-a1a2a4af3750?w=400&q=80" },
+  { id: "3", name: "Kendrick Lamar", image: "https://images.unsplash.com/photo-1520635360276-79f3dbd809f6?w=400&q=80" },
+  { id: "4", name: "Dua Lipa", image: "https://images.unsplash.com/photo-1516280440502-8610eb6bb2f1?w=400&q=80" },
+  { id: "5", name: "Drake", image: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400&q=80" },
+  { id: "6", name: "Billie Eilish", image: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=400&q=80" },
+  { id: "7", name: "Post Malone", image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80" },
+  { id: "8", name: "Ariana Grande", image: "https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43?w=400&q=80" },
+  { id: "9", name: "Bad Bunny", image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&q=80" },
+  { id: "10", name: "Frank Ocean", image: "https://images.unsplash.com/photo-1488161628813-04466f872be2?w=400&q=80" },
+  { id: "11", name: "SZA", image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&q=80" },
+  { id: "12", name: "Tyler, The Creator", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" },
+  { id: "13", name: "Olivia Rodrigo", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80" },
+  { id: "14", name: "Harry Styles", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80" },
+  { id: "15", name: "J. Cole", image: "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=400&q=80" }
 ];
 
 const VIBES = [
@@ -35,6 +44,7 @@ export default function OnboardingWizard() {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedArtists, setSelectedArtists] = useState<string[]>([]);
   const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
+  const [artistSearch, setArtistSearch] = useState("");
 
   const supabase = createClient();
 
@@ -210,13 +220,17 @@ export default function OnboardingWizard() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input 
                 type="text" 
+                value={artistSearch}
+                onChange={(e) => setArtistSearch(e.target.value)}
                 placeholder="Search artists..." 
                 className="w-full bg-white border-2 border-gray-100 rounded-full py-3 pl-12 pr-4 font-medium focus:outline-none focus:border-[#FFB703]"
               />
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-2xl w-full">
-              {MOCK_ARTISTS.map((artist) => {
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl w-full h-[400px] overflow-y-auto scrollbar-hide px-4 pb-10">
+              {MOCK_ARTISTS
+                .filter(artist => artist.name.toLowerCase().includes(artistSearch.toLowerCase()))
+                .map((artist) => {
                 const isSelected = selectedArtists.includes(artist.id);
                 return (
                   <div 
@@ -224,7 +238,7 @@ export default function OnboardingWizard() {
                     onClick={() => toggleSelection(artist.id, selectedArtists, setSelectedArtists, 10)}
                     className="flex flex-col items-center gap-3 cursor-pointer group"
                   >
-                    <div className={`relative w-32 h-32 rounded-full overflow-hidden transition-all duration-300 ${isSelected ? "ring-4 ring-[#FFB703] scale-105" : "group-hover:scale-105 group-hover:shadow-xl"}`}>
+                    <div className={`relative w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden transition-all duration-300 ${isSelected ? "ring-4 ring-[#FFB703] scale-105" : "group-hover:scale-105 group-hover:shadow-xl"}`}>
                       <img src={artist.image} alt={artist.name} className="w-full h-full object-cover" />
                       {isSelected && (
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[2px]">
@@ -232,10 +246,16 @@ export default function OnboardingWizard() {
                         </div>
                       )}
                     </div>
-                    <span className={`font-bold text-sm ${isSelected ? "text-[#1A1A1A]" : "text-gray-600"}`}>{artist.name}</span>
+                    <span className={`font-bold text-sm text-center ${isSelected ? "text-[#1A1A1A]" : "text-gray-600"}`}>{artist.name}</span>
                   </div>
                 );
               })}
+              
+              {MOCK_ARTISTS.filter(artist => artist.name.toLowerCase().includes(artistSearch.toLowerCase())).length === 0 && (
+                <div className="col-span-full text-center text-gray-400 py-10 font-medium">
+                  No artists found. Try another search!
+                </div>
+              )}
             </div>
 
             <button 
