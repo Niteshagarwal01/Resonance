@@ -62,6 +62,59 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const ytPlayerRef = useRef<any>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // ── Load from Local Storage on Mount ──
+  useEffect(() => {
+    try {
+      const savedQ = localStorage.getItem("reso_queue");
+      const savedTrack = localStorage.getItem("reso_currentTrack");
+      const savedShuffle = localStorage.getItem("reso_isShuffle");
+      const savedRepeat = localStorage.getItem("reso_isRepeat");
+      const savedMagic = localStorage.getItem("reso_isMagicShuffle");
+
+      if (savedQ) {
+        const q = JSON.parse(savedQ);
+        setQueue(q);
+        queueRef.current = q;
+        originalQueueRef.current = q;
+      }
+      if (savedTrack) {
+        const t = JSON.parse(savedTrack);
+        setCurrentTrack(t);
+        currentTrackRef.current = t;
+      }
+      if (savedShuffle) {
+        const val = JSON.parse(savedShuffle);
+        setIsShuffle(val);
+        isShuffleRef.current = val;
+      }
+      if (savedRepeat) {
+        const val = JSON.parse(savedRepeat);
+        setIsRepeat(val);
+        isRepeatRef.current = val;
+      }
+      if (savedMagic) {
+        const val = JSON.parse(savedMagic);
+        setIsMagicShuffle(val);
+        isMagicShuffleRef.current = val;
+      }
+    } catch (e) {
+      console.error("Failed to load player state from localStorage", e);
+    }
+  }, []);
+
+  // ── Save to Local Storage on Change ──
+  useEffect(() => {
+    try {
+      localStorage.setItem("reso_queue", JSON.stringify(queue));
+      localStorage.setItem("reso_currentTrack", JSON.stringify(currentTrack));
+      localStorage.setItem("reso_isShuffle", JSON.stringify(isShuffle));
+      localStorage.setItem("reso_isRepeat", JSON.stringify(isRepeat));
+      localStorage.setItem("reso_isMagicShuffle", JSON.stringify(isMagicShuffle));
+    } catch (e) {
+      console.error("Failed to save player state to localStorage", e);
+    }
+  }, [queue, currentTrack, isShuffle, isRepeat, isMagicShuffle]);
+
   useEffect(() => {
     let playerDiv = document.getElementById("youtube-hidden-player");
     if (!playerDiv) {

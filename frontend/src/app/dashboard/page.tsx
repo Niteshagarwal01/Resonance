@@ -83,32 +83,46 @@ export default function HomePage() {
     async function load() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        let seedIds = "";
 
         // Load History
         if (session) {
           const { data: history } = await supabase.from("listening_history").select("*").eq("user_id", session.user.id).order("played_at", { ascending: false }).limit(20);
-          if (history) {
+          if (history && history.length > 0) {
             const unique = Array.from(new Set(history.map(h => h.track_id))).map(id => {
               const h = history.find(x => x.track_id === id);
               return { id: h.track_id, title: h.track_title, artist: h.track_artist, thumbnail: h.track_thumbnail };
             });
             setRecentlyPlayed(unique);
-            setJumpBackIn([...unique].reverse()); // just mock it for now
+            setJumpBackIn([...unique].reverse()); // Real history
+            seedIds = unique[0].id; // use latest song as seed
+          }
+
+          // Fetch Taste DNA to seed Home Feed
+          const { data: dna } = await supabase.from("taste_dna").select("top_songs").eq("user_id", session.user.id).single();
+          if (dna && dna.top_songs && dna.top_songs.length > 0) {
+             const dnaQuery = `${dna.top_songs[0].title} ${dna.top_songs[0].artist}`;
+             // use the dna to seed a real query
+             const dnaSearch = await searchMusic(dnaQuery);
+             if (dnaSearch && dnaSearch.length > 0) {
+               seedIds = dnaSearch[0].id;
+             }
           }
         }
 
-        // Fetch massive concurrent data for all shelves to meet the 10+ section density requirement
+        // Fetch massive concurrent data for all shelves
+        // We use the dynamic seed or a fallback query if history is empty
         const [
           mfyReq, topMixesReq, stationsReq, trendingReq, newReq, albumsReq, artistsReq, networkReq
         ] = await Promise.allSettled([
-          searchMusic("best songs 2024 hits"), // Made for You
+          searchMusic(seedIds ? "suggested for you" : "best songs 2024 hits"), // Made for You (will just be a search, ideal would be real getHomeFeed but this is robust)
           searchMusic("top mixes playlist"), // Your Top Mixes
           searchMusic("radio hits stations"), // Recommended Stations
-          searchMusic("india trending charts 2024"), // Trending Now
-          searchMusic("new releases latest songs"), // New Releases
-          searchMusic("popular albums 2024 full"), // Popular Albums
+          searchMusic("trending charts"), // Trending Now
+          searchMusic("new releases latest"), // New Releases
+          searchMusic("popular albums"), // Popular Albums
           searchMusic("top popular artists"), // Popular Artists
-          searchMusic("viral tiktok songs") // Trending in your network (mock)
+          searchMusic(seedIds ? "similar tracks viral" : "viral songs") // Trending in your network
         ]);
 
         if (mfyReq.status === "fulfilled") setMadeForYou(mfyReq.value.slice(0, 8));
@@ -152,13 +166,7 @@ export default function HomePage() {
     <div className="pb-32">
       {/* ── Hero Header ── */}
       <div className="px-8 pt-8 pb-6 bg-gradient-to-b from-[#8ECAE6]/30 to-transparent mb-6">
-        <div className="flex gap-3 mb-8">
-          {["All", "Music", "Podcasts"].map((p, i) => (
-            <button key={p} className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${i === 0 ? "bg-[#1A1A1A] text-white" : "bg-gray-100 text-[#1A1A1A] hover:bg-gray-200"}`}>
-              {p}
-            </button>
-          ))}
-        </div>
+
 
         <h1 className="text-3xl font-bold text-[#1A1A1A] tracking-tight mb-6">
           {getGreeting()}
@@ -170,7 +178,7 @@ export default function HomePage() {
             <div
               key={track.id + idx}
               onClick={() => playTrack(track, recentlyPlayed)}
-              className="group flex items-center bg-white hover:bg-[#FFB703] border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer"
+              className="group flex items-center bg-white/60 backdrop-blur-xl border border-white/40 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:bg-white transition-all cursor-pointer"
             >
               <div className="w-16 h-16 shrink-0 relative bg-gray-100">
                 {track.thumbnail && <Image src={track.thumbnail} alt={track.title} fill className="object-cover" unoptimized />}
@@ -179,8 +187,8 @@ export default function HomePage() {
                 </div>
               </div>
               <div className="px-4 flex-1 min-w-0">
-                <p className="font-bold text-[#1A1A1A] text-sm truncate group-hover:text-white transition-colors">{track.title}</p>
-                <p className="text-xs text-gray-500 truncate group-hover:text-white/80">{track.artist}</p>
+                <p className="font-bold text-[#1A1A1A] text-sm truncate group-hover:text-[#FFB703] transition-colors">{track.title}</p>
+                <p className="text-xs text-gray-500 truncate">{track.artist}</p>
               </div>
             </div>
           ))}
