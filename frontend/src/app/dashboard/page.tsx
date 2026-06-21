@@ -31,7 +31,7 @@ export default function DashboardHome() {
         }
 
         const vibeQuery = userDna?.core_vibe ? `${userDna.core_vibe} mix` : "Lofi chill beats";
-        const trendQuery = userDna?.top_genres?.[0] ? `top global ${userDna.top_genres[0]}` : "Top global pop 2024";
+        const trendQuery = userDna?.top_artists?.[0] ? `${userDna.top_artists[0]} top tracks` : (userDna?.top_genres?.[0] ? `top global ${userDna.top_genres[0]}` : "Top global pop 2024");
 
         const [picks, trend] = await Promise.all([
           searchMusic(vibeQuery),

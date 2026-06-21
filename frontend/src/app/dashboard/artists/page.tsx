@@ -25,7 +25,7 @@ export default function ArtistsPage() {
               const artistData = res?.[0];
               return {
                 name: name,
-                image: artistData?.thumbnail || "https://i.ytimg.com/vi/4NRXx6U8ABQ/hqdefault.jpg",
+                image: artistData?.image || "https://i.ytimg.com/vi/4NRXx6U8ABQ/hqdefault.jpg",
                 followers: artistData?.subscribers || "1M+",
                 following: true
               };

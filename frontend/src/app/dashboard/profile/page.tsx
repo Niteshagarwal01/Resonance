@@ -1,6 +1,6 @@
 "use client";
 
-import { UserCircle, Settings, Edit3, Shield, CreditCard, LogOut } from "lucide-react";
+import { UserCircle, Settings, Edit3, Shield, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
@@ -60,7 +60,6 @@ export default function ProfilePage() {
         </div>
         
         <div className="flex-1 text-center md:text-left">
-          <span className="bg-[#FFB703]/10 text-[#FFB703] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-2 inline-block">Pro Member</span>
           <h1 className="text-5xl font-black text-[#1A1A1A] mb-2">
             {profile?.display_name || "Guest Listener"}
           </h1>
@@ -99,16 +98,7 @@ export default function ProfilePage() {
           <p className="text-sm text-gray-500">Control who sees your Taste DNA and listening activity.</p>
         </div>
 
-        <div 
-          onClick={() => setActiveTab('subscription')}
-          className={`bg-white p-6 rounded-3xl border shadow-sm cursor-pointer transition-colors ${activeTab === 'subscription' ? 'border-[#FFB703] ring-2 ring-[#FFB703]/20' : 'border-gray-100 hover:border-[#FFB703]'}`}
-        >
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-4 ${activeTab === 'subscription' ? 'bg-[#FFB703] text-white' : 'bg-gray-50 text-gray-600'}`}>
-            <CreditCard size={20} />
-          </div>
-          <h3 className="text-lg font-bold text-[#1A1A1A] mb-1">Subscription</h3>
-          <p className="text-sm text-gray-500">You are currently on the Resonance Pro plan.</p>
-        </div>
+
 
         {/* Logout Button */}
         <div 
@@ -137,11 +127,6 @@ export default function ProfilePage() {
                 <label className="block text-sm font-bold text-gray-700 mb-1">Display Name</label>
                 <input type="text" defaultValue={profile?.display_name || ''} className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#FFB703]" />
               </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Email Address</label>
-                <input type="email" defaultValue={profile?.email || ''} disabled className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-500 cursor-not-allowed" />
-                <p className="text-xs text-gray-400 mt-1">Email cannot be changed directly.</p>
-              </div>
             </div>
           )}
 
@@ -158,24 +143,14 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {activeTab === 'subscription' && (
-            <div className="bg-[#1A1A1A] text-white p-6 rounded-2xl">
-              <h4 className="text-xl font-bold mb-2 text-[#FFB703]">Resonance Pro</h4>
-              <p className="text-gray-300 mb-4">Your next billing date is Oct 14, 2024.</p>
-              <button className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-bold transition-colors">Manage Billing via Stripe</button>
-            </div>
-          )}
-
           <div className="mt-8 flex justify-end items-center gap-4">
             {toast && <span className="text-emerald-500 font-bold text-sm">{toast}</span>}
-            {activeTab !== 'subscription' && (
-              <button 
-                onClick={handleSave} 
-                className="bg-[#1A1A1A] text-white px-6 py-3 rounded-full font-bold hover:bg-[#FFB703] hover:text-[#1A1A1A] transition-colors"
-              >
-                {saving ? 'Saving...' : 'Save Changes'}
-              </button>
-            )}
+            <button 
+              onClick={handleSave} 
+              className="bg-[#1A1A1A] text-white px-6 py-3 rounded-full font-bold hover:bg-[#FFB703] hover:text-[#1A1A1A] transition-colors"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
           </div>
         </div>
       )}
