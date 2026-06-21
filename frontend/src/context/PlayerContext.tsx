@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
@@ -119,21 +120,21 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setIsPlaying(true);
   };
 
-  const nextTrack = () => {
+  function nextTrack() {
     if (queue.length === 0 || !currentTrack) return;
     const currentIndex = queue.findIndex(t => t.id === currentTrack.id);
     if (currentIndex >= 0 && currentIndex < queue.length - 1) {
       playTrack(queue[currentIndex + 1]);
     }
-  };
+  }
 
-  const prevTrack = () => {
+  function prevTrack() {
     if (queue.length === 0 || !currentTrack) return;
     const currentIndex = queue.findIndex(t => t.id === currentTrack.id);
     if (currentIndex > 0) {
       playTrack(queue[currentIndex - 1]);
     }
-  };
+  }
 
   const setVolume = (vol: number) => {
     setVolumeState(vol);

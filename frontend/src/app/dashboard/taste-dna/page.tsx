@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Activity, Disc3, Layers, Zap, Heart, RefreshCw, Sparkles } from "lucide-react";
+import { Activity, Disc3, Layers, Zap, Heart, RefreshCw, Sparkles, Compass } from "lucide-react";
 
 export default function TasteDNAPage() {
   return (
@@ -44,7 +44,7 @@ export default function TasteDNAPage() {
           </div>
           <div>
             <h3 className="text-3xl font-black text-[#1A1A1A] mb-2">Nostalgic 2010s</h3>
-            <p className="text-gray-500">You've been revisiting Indie Pop anthems from the early 2010s heavily.</p>
+            <p className="text-gray-500">You&apos;re deeply anchored in the mid-2010s blog era, but frequently venture into modern hyperpop.</p>
           </div>
         </div>
 
