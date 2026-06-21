@@ -23,6 +23,19 @@ export const searchMusic = async (query: string): Promise<Track[]> => {
   }
 };
 
+export const searchArtists = async (query: string): Promise<any[]> => {
+  if (!query) return [];
+  try {
+    const res = await fetch(`${API_BASE}/search/artists?q=${encodeURIComponent(query)}`);
+    if (!res.ok) throw new Error("Artist Search failed");
+    const data = await res.json();
+    return data.results || [];
+  } catch (err) {
+    console.error("Artist Search API Error:", err);
+    return [];
+  }
+};
+
 export const getRadioQueue = async (seedId: string): Promise<Track[]> => {
   if (!seedId) return [];
   try {

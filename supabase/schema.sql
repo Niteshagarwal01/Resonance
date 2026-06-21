@@ -16,6 +16,7 @@ CREATE TABLE public.taste_dna (
   user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
   top_genres JSONB DEFAULT '[]'::jsonb,
   top_artists JSONB DEFAULT '[]'::jsonb,
+  top_songs JSONB DEFAULT '[]'::jsonb,
   core_vibe TEXT,
   energy_level INTEGER DEFAULT 50,
   era_preference TEXT,

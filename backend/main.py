@@ -46,6 +46,25 @@ async def search_music(q: str = Query(..., min_length=1)):
         print(f"Search error: {e}")
         raise HTTPException(status_code=500, detail="Search failed")
 
+@app.get("/api/search/artists")
+async def search_artists(q: str = Query(..., min_length=1)):
+    """
+    Searches YouTube Music specifically for Artists.
+    """
+    try:
+        raw_results = await asyncio.to_thread(ytmusic.search, query=q, filter="artists", limit=8)
+        formatted = []
+        for item in raw_results:
+            formatted.append({
+                "id": item.get("browseId"),
+                "name": item.get("artist"),
+                "image": item.get("thumbnails", [{}])[-1].get("url") if item.get("thumbnails") else None
+            })
+        return {"query": q, "results": formatted}
+    except Exception as e:
+        print(f"Artist Search error: {e}")
+        raise HTTPException(status_code=500, detail="Artist Search failed")
+
 @app.get("/api/radio")
 async def get_radio(seed_id: str = Query(..., description="The seed video ID from YouTube Music")):
     """
