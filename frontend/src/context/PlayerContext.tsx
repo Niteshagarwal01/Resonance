@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
-import { Track } from "@/lib/api";
+import { Track, getRadioQueue } from "@/lib/api";
 import { createClient } from "@/utils/supabase/client";
 
 interface PlayerContextType {
@@ -20,8 +20,10 @@ interface PlayerContextType {
   seekTo: (percent: number) => void;
   isShuffle: boolean;
   isRepeat: boolean;
+  isMagicShuffle: boolean;
   toggleShuffle: () => void;
   toggleRepeat: () => void;
+  toggleMagicShuffle: () => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -35,11 +37,13 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [duration, setDuration] = useState(0);
   const [isShuffle, setIsShuffle] = useState(false);
   const [isRepeat, setIsRepeat] = useState(false);
+  const [isMagicShuffle, setIsMagicShuffle] = useState(false);
 
   const currentTrackRef = useRef<Track | null>(null);
   const queueRef = useRef<Track[]>([]);
   const isShuffleRef = useRef(false);
   const isRepeatRef = useRef(false);
+  const isMagicShuffleRef = useRef(false);
 
   const supabase = createClient();
 
@@ -154,7 +158,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setIsPlaying(true);
   };
 
-  function nextTrack() {
+  async function nextTrack() {
     const q = queueRef.current;
     const curr = currentTrackRef.current;
     if (q.length === 0 || !curr) return;
@@ -173,6 +177,23 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const currentIndex = q.findIndex(t => t.id === curr.id);
     if (currentIndex >= 0 && currentIndex < q.length - 1) {
       playTrack(q[currentIndex + 1], q);
+    } else if (isMagicShuffleRef.current) {
+      // Magic Shuffle: Fetch radio queue based on current track
+      try {
+        const moreTracks = await getRadioQueue(curr.id);
+        if (moreTracks && moreTracks.length > 0) {
+          // Avoid duplicate current track if the radio includes it as first
+          const nextTracks = moreTracks[0].id === curr.id ? moreTracks.slice(1) : moreTracks;
+          if (nextTracks.length > 0) {
+            const newQ = [...q, ...nextTracks];
+            playTrack(nextTracks[0], newQ);
+            return;
+          }
+        }
+        if (q.length > 0) playTrack(q[0], q);
+      } catch (err) {
+        if (q.length > 0) playTrack(q[0], q);
+      }
     } else if (q.length > 0) {
       playTrack(q[0], q); // loop to beginning if at end and clicked next
     }
@@ -213,9 +234,14 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     isRepeatRef.current = !isRepeatRef.current;
   };
 
+  const toggleMagicShuffle = () => {
+    setIsMagicShuffle(!isMagicShuffle);
+    isMagicShuffleRef.current = !isMagicShuffleRef.current;
+  };
+
   return (
     <PlayerContext.Provider
-      value={{ currentTrack, queue, isPlaying, volume, progress, duration, playTrack, pauseTrack, resumeTrack, nextTrack, prevTrack, setVolume, seekTo, isShuffle, isRepeat, toggleShuffle, toggleRepeat }}
+      value={{ currentTrack, queue, isPlaying, volume, progress, duration, playTrack, pauseTrack, resumeTrack, nextTrack, prevTrack, setVolume, seekTo, isShuffle, isRepeat, isMagicShuffle, toggleShuffle, toggleRepeat, toggleMagicShuffle }}
     >
       {children}
     </PlayerContext.Provider>

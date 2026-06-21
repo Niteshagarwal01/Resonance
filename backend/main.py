@@ -147,7 +147,7 @@ async def get_radio(seed_id: str = Query(..., description="The seed video ID fro
     Hits YT Music's Watch Next algorithm to get the perfect auto-play queue.
     """
     try:
-        radio_queue = await asyncio.to_thread(ytmusic.get_watch_playlist, videoId=seed_id)
+        radio_queue = await asyncio.to_thread(ytmusic.get_watch_playlist, videoId=seed_id, limit=50)
         tracks = []
         for track in radio_queue.get("tracks", []):
             video_id = track.get("videoId")
@@ -187,7 +187,7 @@ async def get_home_feed(seed_ids: str = Query(..., description="Comma-separated 
 
         async def fetch_seed(video_id: str):
             try:
-                data = await asyncio.to_thread(ytmusic.get_watch_playlist, videoId=video_id)
+                data = await asyncio.to_thread(ytmusic.get_watch_playlist, videoId=video_id, limit=50)
                 return data.get("tracks", [])
             except Exception:
                 return []
@@ -212,7 +212,7 @@ async def get_home_feed(seed_ids: str = Query(..., description="Comma-separated 
                             "duration": item.get("duration") or item.get("length"),
                         })
 
-        return {"tracks": all_tracks[:30]}
+        return {"tracks": all_tracks[:50]}
     except HTTPException:
         raise
     except Exception as e:

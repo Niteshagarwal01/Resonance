@@ -1,11 +1,11 @@
 "use client";
 
 import { usePlayer } from "@/context/PlayerContext";
-import { Play, Pause, SkipBack, SkipForward, Volume2, Maximize2, Shuffle, Repeat } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, Maximize2, Shuffle, Repeat, Sparkles } from "lucide-react";
 import Image from "next/image";
 
 export function BottomPlayer() {
-  const { currentTrack, isPlaying, pauseTrack, resumeTrack, nextTrack, prevTrack, progress, duration, seekTo, isShuffle, isRepeat, toggleShuffle, toggleRepeat } = usePlayer();
+  const { currentTrack, isPlaying, pauseTrack, resumeTrack, nextTrack, prevTrack, progress, duration, seekTo, isShuffle, isRepeat, isMagicShuffle, toggleShuffle, toggleRepeat, toggleMagicShuffle } = usePlayer();
 
   if (!currentTrack) {
     return (
@@ -46,6 +46,7 @@ export function BottomPlayer() {
 
           <button onClick={nextTrack} className="text-gray-600 hover:text-[#1A1A1A] transition-colors"><SkipForward size={20} fill="currentColor" /></button>
           <button onClick={toggleRepeat} className={`${isRepeat ? 'text-[#FFB703]' : 'text-gray-400 hover:text-[#1A1A1A]'} transition-colors`}><Repeat size={18} /></button>
+          <button onClick={toggleMagicShuffle} className={`${isMagicShuffle ? 'text-[#FFB703]' : 'text-gray-400 hover:text-[#1A1A1A]'} transition-colors`} title="Magic Shuffle (Autoplay)"><Sparkles size={18} /></button>
         </div>
 
         {/* Progress Bar */}
