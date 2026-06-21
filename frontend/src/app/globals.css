@@ -1,34 +1,145 @@
 @import "tailwindcss";
 
-@theme inline {
-  /* Brand Colors from Design References */
-  --color-brand-orange: #FF7B47;
-  --color-brand-green: #29C26E;
-  --color-brand-purple: #A45EE5;
-  --color-brand-blue: #3E7DFF;
-  --color-brand-yellow: #FFC93F;
-  --color-brand-dark: #121212;
-  
-  /* Background & Foreground */
-  --color-background: #F8F6F1; /* Off-white / Cream */
-  --color-foreground: #121212;
-  
-  /* Typography */
-  --font-sans: "Outfit", "Inter", sans-serif;
-  
-  /* Custom Shadows for 3D elements */
-  --shadow-soft-3d: 0 10px 40px -10px rgba(0,0,0,0.08), 0 4px 10px -4px rgba(0,0,0,0.04);
+@theme {
+  --font-sans: var(--font-sans), system-ui, sans-serif;
 }
 
-:root {
-  --background: #F8F6F1;
-  --foreground: #121212;
+/* ============================================
+   NOISE / GRAIN OVERLAY
+   ============================================ */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
 }
+
+/* ============================================
+   DOT GRID BACKGROUND
+   ============================================ */
+.dot-grid {
+  background-image: radial-gradient(circle, #c8c8c8 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ============================================
+   ANIMATED GRADIENT BLOBS
+   ============================================ */
+.blob-orange {
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(255, 183, 3, 0.55) 0%, rgba(255, 143, 112, 0.1) 65%, transparent 100%);
+  filter: blur(60px);
+  pointer-events: none;
+}
+.blob-green {
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(100, 220, 150, 0.45) 0%, rgba(100, 220, 150, 0.05) 65%, transparent 100%);
+  filter: blur(60px);
+  pointer-events: none;
+}
+.blob-purple {
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.35) 0%, rgba(139, 92, 246, 0.05) 65%, transparent 100%);
+  filter: blur(70px);
+  pointer-events: none;
+}
+.blob-blue {
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.05) 65%, transparent 100%);
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+/* ============================================
+   CARD STYLES
+   ============================================ */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+/* ============================================
+   TOGGLE SWITCH (DSM Aesthetic)
+   ============================================ */
+.toggle-pill {
+  display: inline-flex;
+  align-items: center;
+  background: white;
+  border-radius: 9999px;
+  padding: 4px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.05);
+  border: 1.5px solid rgba(0,0,0,0.06);
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+/* ============================================
+   BASE RESET
+   ============================================ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  /* Optional soft noise texture */
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background: #FAFAF8;
+  color: #1A1A1A;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   ANIMATED ELEMENTS
+   ============================================ */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(2deg); }
+}
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) rotate(-3deg); }
+  50% { transform: translateY(-18px) rotate(1deg); }
+}
+@keyframes ping-slow {
+  0% { opacity: 0.8; transform: scale(1); }
+  70% { opacity: 0; transform: scale(2); }
+  100% { opacity: 0; transform: scale(2); }
+}
+
+.float-1 { animation: float 6s ease-in-out infinite; }
+.float-2 { animation: float-slow 8s ease-in-out infinite; }
+.float-3 { animation: float 7s ease-in-out infinite 1s; }
+
+
+/* ============================================
+   TEXT HOVER GLOW
+   ============================================ */
+h1, h2, h3, p, a, button {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), text-shadow 0.4s ease, color 0.4s ease;
+}
+h1:hover, h2:hover, h3:hover, p:hover, a:hover, button:hover {
+  transform: translateY(-2px);
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+.dark-section h1:hover, .dark-section h2:hover, .dark-section p:hover, .dark-section a:hover, .dark-section button:hover {
+  text-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
 }
