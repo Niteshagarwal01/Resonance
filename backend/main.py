@@ -152,3 +152,38 @@ async def get_radio(seed_id: str = Query(..., description="The seed video ID fro
     except Exception as e:
         print(f"Radio error: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch recommendation queue.")
+
+@app.get("/api/artist/{artist_id}")
+async def get_artist_profile(artist_id: str):
+    """
+    Fetches the artist profile including top songs, albums, and description using their channel/browse ID.
+    """
+    try:
+        artist_data = await asyncio.to_thread(ytmusic.get_artist, channelId=artist_id)
+        
+        # Format top songs
+        top_songs = []
+        if artist_data.get("songs") and artist_data["songs"].get("results"):
+            for song in artist_data["songs"]["results"]:
+                video_id = song.get("videoId")
+                top_songs.append({
+                    "id": video_id,
+                    "title": song.get("title"),
+                    "artist": ", ".join([a["name"] for a in song.get("artists", [])]) if song.get("artists") else artist_data.get("name"),
+                    "album": song.get("album", {}).get("name") if song.get("album") else None,
+                    "thumbnail": upgrade_ytimg_thumbnail(None, video_id),
+                    "duration": song.get("duration")
+                })
+                
+        return {
+            "id": artist_data.get("channelId") or artist_id,
+            "name": artist_data.get("name"),
+            "description": artist_data.get("description"),
+            "views": artist_data.get("views"),
+            "subscribers": artist_data.get("subscribers"),
+            "image": best_thumbnail(artist_data.get("thumbnails", [])),
+            "top_tracks": top_songs
+        }
+    except Exception as e:
+        print(f"Artist profile error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch artist profile.")

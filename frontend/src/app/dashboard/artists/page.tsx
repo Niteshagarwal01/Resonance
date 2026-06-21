@@ -4,6 +4,7 @@ import { Mic2, Star, TrendingUp, Check, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { searchArtists } from "@/lib/api";
+import Link from "next/link";
 
 export default function ArtistsPage() {
   const [artists, setArtists] = useState<any[]>([]);
@@ -73,14 +74,14 @@ export default function ArtistsPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
             {artists.map((artist) => (
               <div key={artist.name} className="flex flex-col items-center group cursor-pointer">
-                <div className="relative w-full aspect-square rounded-full overflow-hidden mb-4 shadow-md group-hover:shadow-2xl group-hover:scale-105 transition-all duration-300">
+                <Link href={`/dashboard/artist/${artist.id}`} className="relative w-full aspect-square rounded-full overflow-hidden mb-4 shadow-md group-hover:shadow-2xl group-hover:scale-105 transition-all duration-300 block">
                   <img src={artist.image} alt={artist.name} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                     <div className="bg-[#1A1A1A] text-white px-3 py-1 rounded-full text-xs font-bold opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all">
                       View Profile
                     </div>
                   </div>
-                </div>
+                </Link>
                 <h3 className="font-bold text-[#1A1A1A] text-center w-full truncate">{artist.name}</h3>
                 <p className="text-sm text-gray-500">{artist.followers} Followers</p>
                 

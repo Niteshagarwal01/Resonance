@@ -62,3 +62,15 @@ export const getRadioQueue = async (seedId: string): Promise<Track[]> => {
     return [];
   }
 };
+
+export const getArtistProfile = async (artistId: string): Promise<any> => {
+  if (!artistId) return null;
+  try {
+    const res = await fetchWithTimeout(`${API_BASE}/artist/${encodeURIComponent(artistId)}`);
+    if (!res.ok) throw new Error("Artist Profile failed");
+    return await res.json();
+  } catch (err) {
+    console.error("Artist Profile API Error:", err);
+    return null;
+  }
+};
