@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 import { ArrowLeft, Mail, Lock, AlertCircle, Loader2, Music, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -56,14 +57,7 @@ export default function LoginPage() {
 
       {/* BRANDING LOGO (Absolute Top Left) */}
       <div className="absolute top-8 left-8 lg:top-12 lg:left-12 z-30">
-        <Link href="/" className="flex items-center gap-3 w-fit group" style={{ textDecoration: "none" }}>
-          <motion.div whileHover={{ rotate: 90 }} transition={{ type: "spring", stiffness: 200 }}
-            className="w-12 h-12 flex items-center justify-center shadow-lg" style={{ background: "#1A1A1A", borderRadius: 14 }}
-          >
-            <Music size={22} color="white" strokeWidth={3} />
-          </motion.div>
-          <span style={{ fontWeight: 900, fontSize: 24, letterSpacing: "-0.04em", color: "#1A1A1A" }}>Resonance</span>
-        </Link>
+        <Logo variant="horizontal" size={48} />
       </div>
 
       {/* MAIN CONTENT CONTAINER (Perfectly Centered) */}
