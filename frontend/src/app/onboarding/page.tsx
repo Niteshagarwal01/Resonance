@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Check, Search, Music, Mic2, Sparkles, UserCircle } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
 
 const GENRES = [
   "Pop", "Hip-Hop", "R&B", "Indie Rock", "Electronic",
@@ -35,13 +36,45 @@ export default function OnboardingWizard() {
   const [selectedArtists, setSelectedArtists] = useState<string[]>([]);
   const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
 
+  const supabase = createClient();
+
   const handleNext = () => setStep((s) => s + 1);
-  const handleComplete = () => {
+  const handleComplete = async () => {
     setStep(4);
-    // Simulate API call to save Taste DNA profile
-    setTimeout(() => {
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("No active session");
+
+      // 1. Update Profile
+      await supabase
+        .from("profiles")
+        .update({ 
+          display_name: profile.name,
+          age_range: profile.age,
+          has_completed_onboarding: true 
+        })
+        .eq("id", session.user.id);
+
+      // 2. Insert Taste DNA
+      await supabase
+        .from("taste_dna")
+        .insert({
+          user_id: session.user.id,
+          top_genres: selectedGenres,
+          top_artists: selectedArtists,
+          core_vibe: selectedVibes[0], // primary vibe
+          energy_level: Math.floor(Math.random() * 40) + 60, // Mock calculation
+          era_preference: "Nostalgic 2010s", // Mock calculation
+          discovery_rate: Math.floor(Math.random() * 20) + 10 // Mock calculation
+        });
+
       router.push("/dashboard");
-    }, 3000);
+    } catch (error) {
+      console.error("Failed to save Taste DNA:", error);
+      alert("Something went wrong saving your Taste DNA.");
+      setStep(3); // Go back on error
+    }
   };
 
   const toggleSelection = (item: string, list: string[], setList: (l: string[]) => void, max: number) => {

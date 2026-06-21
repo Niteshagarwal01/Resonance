@@ -4,11 +4,49 @@ import { Sidebar } from "@/components/Sidebar";
 import { BottomPlayer } from "@/components/BottomPlayer";
 import { PlayerProvider } from "@/context/PlayerContext";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
+
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+  const supabase = createClient();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function checkAuth() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push("/login");
+        return;
+      }
+
+      // Check if onboarding is complete
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("has_completed_onboarding")
+        .eq("id", session.user.id)
+        .single();
+
+      if (profile && !profile.has_completed_onboarding) {
+        router.push("/onboarding");
+      } else {
+        setLoading(false);
+      }
+    }
+    checkAuth();
+  }, [router, supabase]);
+
+  if (loading) {
+    return <div className="h-screen w-full flex items-center justify-center bg-[#FDFBF7]">
+      <div className="w-12 h-12 border-4 border-[#FFB703]/20 border-t-[#FFB703] rounded-full animate-spin"></div>
+    </div>;
+  }
+
   return (
     <PlayerProvider>
       <div className="flex flex-col h-screen bg-[#FDFBF7] overflow-hidden font-sans">
