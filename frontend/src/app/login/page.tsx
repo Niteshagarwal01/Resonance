@@ -62,10 +62,10 @@ export default function LoginPage() {
 
       {/* MAIN CONTENT CONTAINER (Perfectly Centered) */}
       <div className="flex-1 w-full flex items-center justify-center z-20 p-6 md:p-12 min-h-screen">
-        <div className="w-full max-w-6xl flex flex-col xl:flex-row items-center justify-center gap-12 xl:gap-24">
+        <div className="w-full max-w-7xl flex flex-col xl:flex-row items-center xl:justify-between justify-center gap-12 xl:gap-24">
           
           {/* LEFT SECTION - Text */}
-          <div className="hidden md:block flex-1 w-full max-w-[440px] text-center xl:text-left">
+          <div className="hidden md:block flex-1 w-full max-w-[440px] xl:max-w-[600px] text-center xl:text-left">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <div className="inline-flex items-center gap-2.5 mb-6" style={{ background: "rgba(255,255,255,0.9)", border: "1px solid rgba(0,0,0,0.06)", padding: "8px 16px", borderRadius: 100, fontSize: 11, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", boxShadow: "0 4px 20px rgba(0,0,0,0.04)" }}>
                 <Zap size={14} color="#FFB703" fill="#FFB703" />
@@ -82,14 +82,14 @@ export default function LoginPage() {
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-              style={{ color: "#555", fontSize: "1.25rem", marginTop: 24, maxWidth: 440, fontWeight: 500, lineHeight: 1.6 }}
+              style={{ color: "#555", fontSize: "1.25rem", marginTop: 24, maxWidth: 500, fontWeight: 500, lineHeight: 1.6 }}
             >
               Access your saved tracks, custom playlists, and infinite auto-play sessions.
             </motion.p>
           </div>
 
           {/* RIGHT SECTION - Auth Form */}
-          <div className="w-full flex-1 flex justify-center xl:justify-start max-w-[480px] relative">
+          <div className="w-full flex-1 flex justify-center xl:justify-end max-w-[480px] xl:max-w-[500px] relative">
 
             {/* Floating Glassmorphic Login Card */}
             <motion.div 
