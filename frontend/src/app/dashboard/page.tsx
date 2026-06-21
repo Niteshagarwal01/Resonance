@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getHomeFeed, getCharts, getHomeShelves, HomeShelf, Track } from "@/lib/api";
+import { getHomeFeed, getCharts, getHomeShelves, HomeShelf, Track, searchMusic } from "@/lib/api";
 import { usePlayer } from "@/context/PlayerContext";
 import Image from "next/image";
 import { Play, Sparkles, TrendingUp, Radio, ChevronRight, Disc3, Clock, Music2 } from "lucide-react";
@@ -280,11 +280,22 @@ export default function DashboardHome() {
           ?.slice(0, 3)
           ?.join(",") || "4NRXx6U8ABQ,34Na4j8HLjc";
 
-        const [picks, trend, homeShelvesData] = await Promise.all([
+        const [picksResult, trendResult, shelvesResult] = await Promise.allSettled([
           getHomeFeed(ids),
           getCharts("IN"),
           getHomeShelves(),
         ]);
+
+        const picks = picksResult.status === "fulfilled" ? picksResult.value : [];
+        let trend = trendResult.status === "fulfilled" ? trendResult.value : [];
+
+        // Fallback: if charts API fails, use search for trending
+        if (trend.length === 0) {
+          const fallback = await searchMusic("india trending songs 2024");
+          trend = fallback;
+        }
+
+        const homeShelvesData = shelvesResult.status === "fulfilled" ? shelvesResult.value : [];
 
         if (picks.length === 0 && trend.length === 0) {
           setBackendError(true);
