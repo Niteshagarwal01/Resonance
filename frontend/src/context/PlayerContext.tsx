@@ -62,58 +62,55 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const ytPlayerRef = useRef<any>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // ── Load from Local Storage on Mount ──
+  // Initialize from localStorage
   useEffect(() => {
     try {
-      const savedQ = localStorage.getItem("reso_queue");
-      const savedTrack = localStorage.getItem("reso_currentTrack");
-      const savedShuffle = localStorage.getItem("reso_isShuffle");
-      const savedRepeat = localStorage.getItem("reso_isRepeat");
-      const savedMagic = localStorage.getItem("reso_isMagicShuffle");
-
-      if (savedQ) {
-        const q = JSON.parse(savedQ);
-        setQueue(q);
-        queueRef.current = q;
-        originalQueueRef.current = q;
-      }
-      if (savedTrack) {
-        const t = JSON.parse(savedTrack);
-        setCurrentTrack(t);
-        currentTrackRef.current = t;
-      }
-      if (savedShuffle) {
-        const val = JSON.parse(savedShuffle);
-        setIsShuffle(val);
-        isShuffleRef.current = val;
-      }
-      if (savedRepeat) {
-        const val = JSON.parse(savedRepeat);
-        setIsRepeat(val);
-        isRepeatRef.current = val;
-      }
-      if (savedMagic) {
-        const val = JSON.parse(savedMagic);
-        setIsMagicShuffle(val);
-        isMagicShuffleRef.current = val;
+      const saved = localStorage.getItem("reson_player_state");
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state.queue?.length > 0) {
+          setQueue(state.queue);
+          queueRef.current = state.queue;
+          originalQueueRef.current = state.queue;
+        }
+        if (state.currentTrack) {
+          setCurrentTrack(state.currentTrack);
+          currentTrackRef.current = state.currentTrack;
+        }
+        if (state.volume !== undefined) {
+          setVolumeState(state.volume);
+        }
+        if (state.isShuffle) {
+          setIsShuffle(state.isShuffle);
+          isShuffleRef.current = state.isShuffle;
+        }
+        if (state.isRepeat) {
+          setIsRepeat(state.isRepeat);
+          isRepeatRef.current = state.isRepeat;
+        }
+        if (state.isMagicShuffle) {
+          setIsMagicShuffle(state.isMagicShuffle);
+          isMagicShuffleRef.current = state.isMagicShuffle;
+        }
       }
     } catch (e) {
-      console.error("Failed to load player state from localStorage", e);
+      console.error("Failed to load player state", e);
     }
   }, []);
 
-  // ── Save to Local Storage on Change ──
+  // Save to localStorage when state changes
   useEffect(() => {
     try {
-      localStorage.setItem("reso_queue", JSON.stringify(queue));
-      localStorage.setItem("reso_currentTrack", JSON.stringify(currentTrack));
-      localStorage.setItem("reso_isShuffle", JSON.stringify(isShuffle));
-      localStorage.setItem("reso_isRepeat", JSON.stringify(isRepeat));
-      localStorage.setItem("reso_isMagicShuffle", JSON.stringify(isMagicShuffle));
-    } catch (e) {
-      console.error("Failed to save player state to localStorage", e);
-    }
-  }, [queue, currentTrack, isShuffle, isRepeat, isMagicShuffle]);
+      localStorage.setItem("reson_player_state", JSON.stringify({
+        queue: queueRef.current,
+        currentTrack: currentTrackRef.current,
+        volume: volume,
+        isShuffle: isShuffleRef.current,
+        isRepeat: isRepeatRef.current,
+        isMagicShuffle: isMagicShuffleRef.current,
+      }));
+    } catch (e) {}
+  }, [queue, currentTrack, volume, isShuffle, isRepeat, isMagicShuffle]);
 
   useEffect(() => {
     let playerDiv = document.getElementById("youtube-hidden-player");
@@ -242,18 +239,23 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         const moreTracks = await getRadioQueue(curr.id);
         if (moreTracks && moreTracks.length > 0) {
           const existingIds = new Set(q.map(t => t.id));
-          const newTracks = moreTracks.filter(t => !existingIds.has(t.id)).map(t => ({ ...t, isMagic: true }));
+          const newTracks = moreTracks
+            .filter(t => !existingIds.has(t.id))
+            .map(t => ({ ...t, isMagic: true }));
+          
           if (newTracks.length > 0) {
             // Insert new tracks right after current position
             const insertAt = currentIndex + 1;
             const newQ = [
               ...q.slice(0, insertAt),
-              ...newTracks, // No cap
+              ...newTracks, // insert all available new songs
               ...q.slice(insertAt),
             ];
             queueRef.current = newQ;
             setQueue(newQ);
-            await _play(newQ[insertAt], newQ);
+            
+            // Wait state flush then play
+            setTimeout(() => _play(newQ[insertAt], newQ), 50);
             magicInFlightRef.current = false;
             return;
           }
@@ -278,6 +280,13 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const curr = currentTrackRef.current;
     if (!q.length || !curr) return;
     const i = q.findIndex(t => t.id === curr.id);
+    
+    // If at the end and magic shuffle is on, trigger it manually
+    if (i === q.length - 1 && isMagicShuffleRef.current) {
+      handleTrackEnd();
+      return;
+    }
+
     if (i >= 0 && i < q.length - 1) {
       _play(q[i + 1], q);
     } else if (q.length > 0) {

@@ -38,7 +38,8 @@ export default function LibraryPage() {
           .from("listening_history")
           .select("*")
           .eq("user_id", session.user.id)
-          .order("played_at", { ascending: false });
+          .order("played_at", { ascending: false })
+          .limit(50);
         
         if (!historyError && historyData) {
           const seen = new Set();

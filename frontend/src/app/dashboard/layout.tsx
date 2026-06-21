@@ -62,7 +62,7 @@ export default function DashboardLayout({
 
           <Sidebar />
 
-          <main className="flex-1 overflow-y-auto scrollbar-hide relative z-10">
+          <main className="flex-1 overflow-y-auto scrollbar-hide relative z-10 bg-white ml-2 mt-2 mb-2 mr-2 rounded-3xl shadow-sm border border-gray-100">
             {children}
           </main>
         </div>

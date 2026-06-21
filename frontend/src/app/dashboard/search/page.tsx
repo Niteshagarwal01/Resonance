@@ -354,21 +354,18 @@ export default function SearchPage() {
             {/* Category grid */}
             <div>
               <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-4">Browse All</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 {CATEGORIES.map(cat => (
-                  <div
+                  <button
                     key={cat.name}
                     onClick={() => browseCategory(cat)}
-                    className={`relative w-full aspect-square rounded-xl cursor-pointer overflow-hidden bg-gradient-to-br ${cat.gradient} p-4 hover:scale-[1.02] transition-transform shadow-md group`}
+                    className={`group relative bg-gradient-to-br ${cat.gradient} rounded-2xl p-5 text-left overflow-hidden h-24 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow-lg`}
                   >
-                    <h3 className="text-white font-black text-xl tracking-tight leading-tight w-2/3">
-                      {cat.name}
-                    </h3>
-                    {/* Tilted element to mimic Spotify's cover art inside categories */}
-                    <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-black/20 rounded-lg transform rotate-12 group-hover:rotate-6 transition-transform flex items-center justify-center text-4xl shadow-xl">
+                    <span className="text-white font-black text-lg leading-tight block">{cat.name}</span>
+                    <div className="absolute bottom-2 right-3 text-3xl opacity-80 group-hover:scale-110 transition-transform">
                       {cat.emoji}
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
