@@ -3,12 +3,14 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 
 interface LogoProps {
-  variant?: 'icon-only' | 'horizontal' | 'monochrome' | 'app-icon';
+  variant?: 'icon-only' | 'horizontal' | 'app-icon';
+  theme?: 'light' | 'dark';
+  showSubtitle?: boolean;
   className?: string;
   size?: number;
 }
 
-export function Logo({ variant = 'horizontal', className = '', size = 48 }: LogoProps) {
+export function Logo({ variant = 'horizontal', theme = 'light', showSubtitle = true, className = '', size = 48 }: LogoProps) {
   // The exact brand colors from the design system
   const colors = {
     orange: '#FF7A3D',
@@ -16,7 +18,10 @@ export function Logo({ variant = 'horizontal', className = '', size = 48 }: Logo
     purple: '#B97BE6',
     blue: '#5D7FFF',
     dark: '#111111',
+    light: '#FFFFFF',
   };
+
+  const primaryColor = theme === 'light' ? colors.dark : colors.light;
 
   // An approximated SVG of the Resonance ear/spiral logo based on the construction grid.
   // We will ask the user to swap this path with the final exported SVG from Figma.
@@ -28,7 +33,7 @@ export function Logo({ variant = 'horizontal', className = '', size = 48 }: Logo
       fill="none" 
       xmlns="http://www.w3.org/2000/svg"
     >
-      <g fill={variant === 'monochrome' ? colors.dark : colors.dark}>
+      <g fill={primaryColor}>
         {/* Left dot */}
         <circle cx="20" cy="50" r="8" />
         {/* Connecting line */}
@@ -75,26 +80,26 @@ export function Logo({ variant = 'horizontal', className = '', size = 48 }: Logo
       )}
 
       {/* Typography */}
-      {(variant === 'horizontal' || variant === 'monochrome') && (
+      {variant === 'horizontal' && (
         <div className="flex flex-col justify-center">
           <span 
             style={{ 
               fontWeight: 900, 
               fontSize: size * 0.8, 
               letterSpacing: "-0.04em", 
-              color: colors.dark,
+              color: primaryColor,
               lineHeight: 0.9
             }}
           >
             Resonance
           </span>
-          {variant === 'horizontal' && (
+          {showSubtitle && (
             <span 
               style={{ 
                 fontWeight: 700, 
                 fontSize: size * 0.22, 
                 letterSpacing: "0.15em", 
-                color: "#666",
+                color: theme === 'light' ? "#666" : "rgba(255,255,255,0.6)",
                 marginTop: size * 0.1,
                 textTransform: "uppercase"
               }}

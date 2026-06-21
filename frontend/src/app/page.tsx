@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 import { motion, useScroll, useTransform, useMotionValue, useSpring, animate, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
@@ -258,14 +259,7 @@ export default function Home() {
         <div className="max-w-5xl mx-auto flex items-center justify-between px-8 py-4 rounded-2xl"
           style={{ background: "rgba(255,255,255,0.78)", backdropFilter: "blur(24px)", border: "1.5px solid rgba(255,255,255,0.9)", boxShadow: "0 8px 32px rgba(0,0,0,0.07)" }}
         >
-          <Link href="/" className="flex items-center gap-3">
-            <motion.div whileHover={{ rotate: 90 }} transition={{ type: "spring", stiffness: 200 }}
-              className="w-10 h-10 flex items-center justify-center" style={{ background: "#1A1A1A", borderRadius: 12 }}
-            >
-              <Music size={18} color="white" strokeWidth={3} />
-            </motion.div>
-            <span style={{ fontWeight: 900, fontSize: 20, letterSpacing: "-0.04em" }}>Resonance</span>
-          </Link>
+          <Logo variant="horizontal" size={36} showSubtitle={false} />
 
           <div className="hidden md:flex items-center gap-10" style={{ fontWeight: 700, fontSize: 14, color: "#555" }}>
             {["Features", "Timeline", "Pricing"].map((l, i) => (
@@ -308,12 +302,9 @@ export default function Home() {
             </div>
 
             <div className="flex justify-between items-center mb-12 relative z-10 px-2">
-              <Link href="/" className="flex items-center gap-3" onClick={() => setIsMobileMenuOpen(false)}>
-                <div className="w-10 h-10 flex items-center justify-center" style={{ background: "white", borderRadius: 12 }}>
-                  <Music size={18} color="#0a0a0a" strokeWidth={3} />
-                </div>
-                <span style={{ fontWeight: 900, fontSize: 20, letterSpacing: "-0.04em", color: "white" }}>Resonance</span>
-              </Link>
+              <div onClick={() => setIsMobileMenuOpen(false)}>
+                <Logo variant="horizontal" size={32} theme="dark" showSubtitle={false} />
+              </div>
               <button className="p-2 rounded-full hover:bg-white/10 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
                 <X size={32} color="white" />
               </button>
@@ -853,11 +844,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-24">
             <div className="md:col-span-5">
-              <div className="flex items-center gap-3 mb-6">
-                <div style={{ width: 44, height: 44, borderRadius: 14, background: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Music size={22} color="#111" strokeWidth={3} />
-                </div>
-                <span style={{ fontSize: 28, fontWeight: 900, letterSpacing: "-0.05em" }}>Resonance.</span>
+              <div className="mb-6">
+                <Logo variant="horizontal" size={48} theme="dark" showSubtitle={false} />
               </div>
               <p style={{ fontSize: 17, color: "rgba(255,255,255,0.4)", lineHeight: 1.8, maxWidth: 340, margin: "0 0 32px" }}>
                 The open-source music player that hijacked YouTube Music&apos;s algorithm. Free. Forever.
