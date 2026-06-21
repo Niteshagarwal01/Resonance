@@ -33,11 +33,24 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    // Create the hidden div for the youtube player outside of React's control
+    let playerDiv = document.getElementById("youtube-hidden-player");
+    if (!playerDiv) {
+      playerDiv = document.createElement("div");
+      playerDiv.id = "youtube-hidden-player";
+      playerDiv.style.display = "none";
+      document.body.appendChild(playerDiv);
+    }
+
     // Load YouTube IFrame API
     const tag = document.createElement("script");
     tag.src = "https://www.youtube.com/iframe_api";
     const firstScriptTag = document.getElementsByTagName("script")[0];
-    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    if (firstScriptTag && firstScriptTag.parentNode) {
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    } else {
+      document.head.appendChild(tag);
+    }
 
     (window as any).onYouTubeIframeAPIReady = () => {
       ytPlayerRef.current = new (window as any).YT.Player("youtube-hidden-player", {
@@ -141,7 +154,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     <PlayerContext.Provider
       value={{ currentTrack, queue, isPlaying, volume, progress, duration, playTrack, pauseTrack, resumeTrack, nextTrack, prevTrack, setVolume, seekTo }}
     >
-      <div id="youtube-hidden-player" style={{ display: "none" }}></div>
       {children}
     </PlayerContext.Provider>
   );
