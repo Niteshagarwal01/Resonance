@@ -48,8 +48,6 @@ def best_thumbnail(thumbnails: list, video_id: str | None = None) -> str | None:
     url = sorted_thumbs[0].get("url")
     if url and "yt3.googleusercontent.com" in url:
         return upgrade_yt3_image(url, size=500)
-    if url and "ytimg.com" in url:
-        return upgrade_ytimg_thumbnail(url, video_id)
     return url
 
 
@@ -85,7 +83,7 @@ def format_track(item: dict) -> dict | None:
         "artist": artist_str,
         "album": album_name,
         "duration": format_duration(duration_raw),
-        "thumbnail": upgrade_ytimg_thumbnail(None, video_id),
+        "thumbnail": best_thumbnail(item.get("thumbnails", []), video_id),
     }
 
 
@@ -113,7 +111,7 @@ async def search_music(q: str = Query(..., min_length=1)):
                 "artist": ", ".join([a["name"] for a in item.get("artists", [])]),
                 "album": item.get("album", {}).get("name") if item.get("album") else None,
                 "duration": format_duration(item.get("duration")),
-                "thumbnail": upgrade_ytimg_thumbnail(None, video_id),
+                "thumbnail": best_thumbnail(item.get("thumbnails", []), video_id),
             })
         return {"query": q, "results": formatted}
     except Exception as e:
@@ -314,7 +312,7 @@ async def get_radio(seed_id: str = Query(...)):
                 "id": video_id,
                 "title": track.get("title"),
                 "artist": ", ".join([a["name"] for a in track.get("artists", [])]),
-                "thumbnail": upgrade_ytimg_thumbnail(None, video_id),
+                "thumbnail": best_thumbnail(track.get("thumbnails", []), video_id),
                 "duration": format_duration(track.get("length") or track.get("duration")),
             })
         return {
@@ -346,7 +344,7 @@ async def get_artist_profile(artist_id: str):
                     "title": song.get("title"),
                     "artist": ", ".join(a["name"] for a in artists if a.get("name")) or data.get("name"),
                     "album": (song.get("album") or {}).get("name"),
-                    "thumbnail": upgrade_ytimg_thumbnail(None, video_id),
+                    "thumbnail": best_thumbnail(song.get("thumbnails", []), video_id),
                     "duration": format_duration(song.get("duration")),
                 })
 
@@ -411,7 +409,7 @@ async def get_album(album_id: str):
                 "artist": ", ".join(a["name"] for a in artists if a.get("name")) or data.get("artist", [{}])[0].get("name", ""),
                 "duration": format_duration(track.get("duration")),
                 "trackNumber": i + 1,
-                "thumbnail": upgrade_ytimg_thumbnail(None, video_id),
+                "thumbnail": best_thumbnail(track.get("thumbnails", []), video_id),
             })
         
         album_artists = data.get("artists") or []
@@ -450,7 +448,7 @@ async def get_playlist(playlist_id: str):
                 "artist": ", ".join(a["name"] for a in artists if a.get("name")),
                 "album": (item.get("album") or {}).get("name"),
                 "duration": format_duration(item.get("duration")),
-                "thumbnail": upgrade_ytimg_thumbnail(None, video_id),
+                "thumbnail": best_thumbnail(item.get("thumbnails", []), video_id),
             })
         return {
             "id": playlist_id,
