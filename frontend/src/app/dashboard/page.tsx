@@ -51,6 +51,7 @@ function ShelfRow({ title, icon, tracks, onPlay }: { title: string, icon?: React
               <p className="text-xs text-gray-500 truncate mt-0.5">{item.artist}</p>
             </div>
           ))}
+        </div>
       </div>
     </section>
   );
@@ -71,14 +72,23 @@ export default function HomePage() {
   const [popularAlbums, setPopularAlbums] = useState<Track[]>([]);
   const [popularArtists, setPopularArtists] = useState<Track[]>([]);
   const [trendingInNetwork, setTrendingInNetwork] = useState<Track[]>([]);
+  
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [userDna, setUserDna] = useState<any>(null);
 
   useEffect(() => {
     async function load() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
 
-        // Load History
         if (session) {
+          // Load Profile & DNA
+          const { data: profile } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
+          const { data: dna } = await supabase.from("taste_dna").select("*").eq("user_id", session.user.id).single();
+          if (profile) setUserProfile(profile);
+          if (dna) setUserDna(dna);
+
+          // Load History
           const { data: history } = await supabase.from("listening_history").select("*").eq("user_id", session.user.id).order("played_at", { ascending: false }).limit(20);
           if (history) {
             const unique = Array.from(new Set(history.map(h => h.track_id))).map(id => {
@@ -171,6 +181,41 @@ export default function HomePage() {
           ))}
         </div>
       </div>
+
+      {/* Vibe Playlist Hero */}
+      {userDna && userProfile && userDna.top_songs && (
+        <div className="px-8 mb-12">
+          <div className="relative overflow-hidden rounded-3xl bg-[#1A1A1A] p-8 shadow-xl flex flex-col md:flex-row items-center gap-8 group">
+            {/* Background elements */}
+            <div className="absolute -top-32 -right-32 w-96 h-96 bg-[#FFB703] rounded-full mix-blend-screen filter blur-[100px] opacity-20 group-hover:opacity-40 transition-opacity duration-700"></div>
+            <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-purple-500 rounded-full mix-blend-screen filter blur-[100px] opacity-20 group-hover:opacity-40 transition-opacity duration-700"></div>
+            
+            <div className="relative w-40 h-40 shrink-0 shadow-2xl rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-500">
+              <Image src={userDna.top_songs[0]?.thumbnail || "/icon.png"} alt="Vibe Cover" fill className="object-cover opacity-80 group-hover:opacity-100 transition-opacity" unoptimized />
+              <div className="absolute inset-0 bg-gradient-to-tr from-black/80 via-transparent to-transparent"></div>
+              <div className="absolute bottom-3 left-3 right-3">
+                <p className="text-white font-black text-lg leading-tight">{userProfile.full_name?.split(' ')[0] || userProfile.username}'s Vibe</p>
+              </div>
+            </div>
+
+            <div className="flex-1 relative z-10 text-center md:text-left">
+              <p className="text-[#FFB703] font-bold text-sm tracking-widest uppercase mb-2">Taste DNA Playlist</p>
+              <h2 className="text-3xl md:text-4xl font-black text-white mb-3">Your {userDna.core_vibe?.replace(/[^\w\s]/gi, '') || "Daily"} Mix</h2>
+              <p className="text-gray-400 max-w-lg mb-6">
+                A perfectly curated blend of {userDna.favorite_genres?.slice(0, 2).join(" and ") || "your favorite genres"}, constantly updated based on your listening habits.
+              </p>
+              <div className="flex items-center justify-center md:justify-start gap-4">
+                <button onClick={() => playTrack(userDna.top_songs[0], userDna.top_songs)} className="px-8 py-3 bg-[#FFB703] hover:bg-[#ffc124] text-[#1A1A1A] rounded-full font-black text-sm shadow-[0_0_20px_rgba(255,183,3,0.3)] hover:shadow-[0_0_30px_rgba(255,183,3,0.5)] hover:scale-105 transition-all flex items-center gap-2">
+                  <Play size={18} fill="currentColor" /> Play Vibe
+                </button>
+                <Link href="/dashboard/taste-dna" className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold text-sm backdrop-blur-md transition-all">
+                  View DNA
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 10 Dense Sections fulfilling user request exactly */}
       
