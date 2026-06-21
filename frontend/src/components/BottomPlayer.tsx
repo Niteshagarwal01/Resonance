@@ -5,7 +5,7 @@ import { Play, Pause, SkipBack, SkipForward, Volume2, Maximize2, Shuffle, Repeat
 import Image from "next/image";
 
 export function BottomPlayer() {
-  const { currentTrack, isPlaying, pauseTrack, resumeTrack, nextTrack, prevTrack, progress, duration, seekTo } = usePlayer();
+  const { currentTrack, isPlaying, pauseTrack, resumeTrack, nextTrack, prevTrack, progress, duration, seekTo, isShuffle, isRepeat, toggleShuffle, toggleRepeat } = usePlayer();
 
   if (!currentTrack) {
     return (
@@ -34,7 +34,7 @@ export function BottomPlayer() {
       {/* Main Controls */}
       <div className="flex flex-col items-center justify-center w-1/3 max-w-[500px]">
         <div className="flex items-center gap-6 mb-2">
-          <button className="text-gray-400 hover:text-[#1A1A1A] transition-colors"><Shuffle size={18} /></button>
+          <button onClick={toggleShuffle} className={`${isShuffle ? 'text-[#FFB703]' : 'text-gray-400 hover:text-[#1A1A1A]'} transition-colors`}><Shuffle size={18} /></button>
           <button onClick={prevTrack} className="text-gray-600 hover:text-[#1A1A1A] transition-colors"><SkipBack size={20} fill="currentColor" /></button>
           
           <button 
@@ -45,7 +45,7 @@ export function BottomPlayer() {
           </button>
 
           <button onClick={nextTrack} className="text-gray-600 hover:text-[#1A1A1A] transition-colors"><SkipForward size={20} fill="currentColor" /></button>
-          <button className="text-gray-400 hover:text-[#1A1A1A] transition-colors"><Repeat size={18} /></button>
+          <button onClick={toggleRepeat} className={`${isRepeat ? 'text-[#FFB703]' : 'text-gray-400 hover:text-[#1A1A1A]'} transition-colors`}><Repeat size={18} /></button>
         </div>
 
         {/* Progress Bar */}

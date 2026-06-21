@@ -52,7 +52,7 @@ export default function DashboardHome() {
         if (picks.length === 0 && trend.length === 0) {
           setBackendError(true);
         } else {
-          setDailyPicks(picks.slice(0, 5));
+          setDailyPicks(picks);
           setTrending(trend.slice(0, 10));
         }
       } catch (error) {
@@ -155,6 +155,42 @@ export default function DashboardHome() {
           </div>
         </div>
       </motion.section>
+
+      {/* Daily Mix Tracks */}
+      {dailyPicks.length > 0 && (
+        <section className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-black text-[#1A1A1A] flex items-center gap-2">
+              <Radio size={24} className="text-[#FFB703]" /> Your Daily Mix
+            </h2>
+            <span className="text-sm font-bold text-gray-400">{dailyPicks.length} Tracks • ~2 Hours</span>
+          </div>
+          
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            {dailyPicks.map((track, idx) => (
+              <div 
+                key={`${track.id}-${idx}`}
+                onClick={() => playTrack(track, dailyPicks)}
+                className="flex items-center gap-4 p-4 hover:bg-gray-50 cursor-pointer group border-b border-gray-50 last:border-0 transition-colors"
+              >
+                <span className="text-gray-300 font-bold w-6 text-center text-sm group-hover:hidden">{idx + 1}</span>
+                <div className="w-6 text-center hidden group-hover:flex justify-center text-[#FFB703]">
+                  <Play size={16} fill="currentColor" />
+                </div>
+                
+                <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-gray-100">
+                  {track.thumbnail && <img src={track.thumbnail} alt={track.title} className="w-full h-full object-cover" />}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-[#1A1A1A] truncate group-hover:text-[#FFB703] transition-colors">{track.title}</p>
+                  <p className="text-sm text-gray-400 truncate">{track.artist}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Trending Section */}
       <section>

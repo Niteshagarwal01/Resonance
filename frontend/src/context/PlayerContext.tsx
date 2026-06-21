@@ -18,6 +18,10 @@ interface PlayerContextType {
   prevTrack: () => void;
   setVolume: (vol: number) => void;
   seekTo: (percent: number) => void;
+  isShuffle: boolean;
+  isRepeat: boolean;
+  toggleShuffle: () => void;
+  toggleRepeat: () => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -29,6 +33,13 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [volume, setVolumeState] = useState(50);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isShuffle, setIsShuffle] = useState(false);
+  const [isRepeat, setIsRepeat] = useState(false);
+
+  const currentTrackRef = useRef<Track | null>(null);
+  const queueRef = useRef<Track[]>([]);
+  const isShuffleRef = useRef(false);
+  const isRepeatRef = useRef(false);
 
   const supabase = createClient();
 
@@ -105,7 +116,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
   const playTrack = async (track: Track, newQueue?: Track[]) => {
     setCurrentTrack(track);
-    if (newQueue) setQueue(newQueue);
+    currentTrackRef.current = track;
+    if (newQueue) {
+      setQueue(newQueue);
+      queueRef.current = newQueue;
+    }
     setIsPlaying(true);
     setProgress(0);
     if (ytPlayerRef.current?.loadVideoById) {
@@ -140,18 +155,36 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   };
 
   function nextTrack() {
-    if (queue.length === 0 || !currentTrack) return;
-    const currentIndex = queue.findIndex(t => t.id === currentTrack.id);
-    if (currentIndex >= 0 && currentIndex < queue.length - 1) {
-      playTrack(queue[currentIndex + 1]);
+    const q = queueRef.current;
+    const curr = currentTrackRef.current;
+    if (q.length === 0 || !curr) return;
+    
+    if (isRepeatRef.current) {
+      playTrack(curr, q);
+      return;
+    }
+    
+    if (isShuffleRef.current) {
+      const randomIndex = Math.floor(Math.random() * q.length);
+      playTrack(q[randomIndex], q);
+      return;
+    }
+
+    const currentIndex = q.findIndex(t => t.id === curr.id);
+    if (currentIndex >= 0 && currentIndex < q.length - 1) {
+      playTrack(q[currentIndex + 1], q);
+    } else if (q.length > 0) {
+      playTrack(q[0], q); // loop to beginning if at end and clicked next
     }
   }
 
   function prevTrack() {
-    if (queue.length === 0 || !currentTrack) return;
-    const currentIndex = queue.findIndex(t => t.id === currentTrack.id);
+    const q = queueRef.current;
+    const curr = currentTrackRef.current;
+    if (q.length === 0 || !curr) return;
+    const currentIndex = q.findIndex(t => t.id === curr.id);
     if (currentIndex > 0) {
-      playTrack(queue[currentIndex - 1]);
+      playTrack(q[currentIndex - 1], q);
     }
   }
 
@@ -170,9 +203,19 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const toggleShuffle = () => {
+    setIsShuffle(!isShuffle);
+    isShuffleRef.current = !isShuffleRef.current;
+  };
+
+  const toggleRepeat = () => {
+    setIsRepeat(!isRepeat);
+    isRepeatRef.current = !isRepeatRef.current;
+  };
+
   return (
     <PlayerContext.Provider
-      value={{ currentTrack, queue, isPlaying, volume, progress, duration, playTrack, pauseTrack, resumeTrack, nextTrack, prevTrack, setVolume, seekTo }}
+      value={{ currentTrack, queue, isPlaying, volume, progress, duration, playTrack, pauseTrack, resumeTrack, nextTrack, prevTrack, setVolume, seekTo, isShuffle, isRepeat, toggleShuffle, toggleRepeat }}
     >
       {children}
     </PlayerContext.Provider>
