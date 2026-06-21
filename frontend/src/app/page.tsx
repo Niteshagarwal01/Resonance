@@ -22,7 +22,7 @@ import { useEffect, useRef, useState } from "react";
 /* ─── Removed Custom Cursor as per user request ──────────────────────── */
 
 /* ─── Magnetic Button ──────────────────────────────────── */
-function MagneticBtn({ children, href, style }: { children: React.ReactNode; href: string; style?: React.CSSProperties }) {
+function MagneticBtn({ children, href, style, className = "" }: { children: React.ReactNode; href: string; style?: React.CSSProperties; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -36,7 +36,7 @@ function MagneticBtn({ children, href, style }: { children: React.ReactNode; hre
   };
   const reset = () => { x.set(0); y.set(0); };
   return (
-    <motion.div ref={ref} style={{ x: sx, y: sy, display: "inline-block" }} onMouseMove={handle} onMouseLeave={reset} whileTap={{ scale: 0.94 }}>
+    <motion.div ref={ref} className={className} style={{ x: sx, y: sy, display: className.includes('hidden') ? undefined : "inline-block" }} onMouseMove={handle} onMouseLeave={reset} whileTap={{ scale: 0.94 }}>
       <Link href={href} style={{ ...style, display: "inline-flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
         {children}
       </Link>
@@ -274,7 +274,7 @@ export default function Home() {
 
           <div className="flex items-center gap-2 sm:gap-4">
             <Link href="/login" style={{ fontWeight: 700, fontSize: 14, color: "#555", textDecoration: "none" }} className="hover:text-black transition-colors hidden sm:block">Login</Link>
-            <MagneticBtn href="/signup" style={{ background: "#1A1A1A", color: "white", fontWeight: 800, fontSize: 14, padding: "11px 18px", borderRadius: 12, boxShadow: "0 4px 16px rgba(0,0,0,0.15)" }}>
+            <MagneticBtn href="/signup" className="hidden sm:inline-block" style={{ background: "#1A1A1A", color: "white", fontWeight: 800, fontSize: 14, padding: "11px 18px", borderRadius: 12, boxShadow: "0 4px 16px rgba(0,0,0,0.15)" }}>
               <span className="hidden sm:inline">Start Free</span><span className="sm:hidden">Start</span> <ArrowRight size={15} strokeWidth={2.5} />
             </MagneticBtn>
             <button className="md:hidden flex items-center justify-center p-2 ml-1 rounded-full hover:bg-black/5 transition-colors" onClick={() => setIsMobileMenuOpen(true)}>
@@ -328,17 +328,29 @@ export default function Home() {
                 </motion.div>
               ))}
               
-              <div className="mt-auto pb-4">
+              <div className="mt-auto pb-4 flex flex-col gap-3">
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: "spring", stiffness: 100, damping: 15, delay: 0.4 }}
                 >
+                  <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)} 
+                    className="flex items-center justify-center w-full py-5 rounded-2xl active:scale-95 transition-transform gap-2"
+                    style={{ background: "#FFB703", color: "#0a0a0a", fontSize: "1.2rem", fontWeight: 900, textDecoration: "none", boxShadow: "0 10px 30px rgba(255,183,3,0.2)" }}
+                  >
+                    Start Free <ArrowRight size={20} strokeWidth={3} />
+                  </Link>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ type: "spring", stiffness: 100, damping: 15, delay: 0.5 }}
+                >
                   <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} 
                     className="flex items-center justify-center w-full py-5 rounded-2xl active:scale-95 transition-transform"
-                    style={{ background: "white", color: "#0a0a0a", fontSize: "1.2rem", fontWeight: 800, textDecoration: "none", boxShadow: "0 10px 30px rgba(255,255,255,0.15)" }}
+                    style={{ background: "rgba(255,255,255,0.05)", color: "white", fontSize: "1.2rem", fontWeight: 800, textDecoration: "none" }}
                   >
-                    Login to Account
+                    Login
                   </Link>
                 </motion.div>
               </div>
