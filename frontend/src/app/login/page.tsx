@@ -54,55 +54,56 @@ export default function LoginPage() {
         </svg>
       </div>
 
-      {/* LEFT SECTION - Branding & Cinematic Visuals */}
-      <div className="hidden lg:flex w-1/2 flex-col justify-start items-end p-12 lg:p-16 lg:pr-12 xl:pr-24 relative z-20 pt-[15vh] lg:pt-[22vh]">
-        <div className="absolute top-12 left-12 lg:top-16 lg:left-16 z-30">
-          <Link href="/" className="flex items-center gap-3 w-fit group" style={{ textDecoration: "none" }}>
-            <motion.div whileHover={{ rotate: 90 }} transition={{ type: "spring", stiffness: 200 }}
-              className="w-12 h-12 flex items-center justify-center shadow-lg" style={{ background: "#1A1A1A", borderRadius: 14 }}
-            >
-              <Music size={22} color="white" strokeWidth={3} />
-            </motion.div>
-            <span style={{ fontWeight: 900, fontSize: 24, letterSpacing: "-0.04em", color: "#1A1A1A" }}>Resonance</span>
-          </Link>
-        </div>
-
-        <div className="relative z-10 w-full max-w-[440px]">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="inline-flex items-center gap-2.5 mb-6" style={{ background: "rgba(255,255,255,0.9)", border: "1px solid rgba(0,0,0,0.06)", padding: "8px 16px", borderRadius: 100, fontSize: 11, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", boxShadow: "0 4px 20px rgba(0,0,0,0.04)" }}>
-              <Zap size={14} color="#FFB703" fill="#FFB703" />
-              Welcome Back
-            </div>
+      {/* BRANDING LOGO (Absolute Top Left) */}
+      <div className="absolute top-8 left-8 lg:top-12 lg:left-12 z-30">
+        <Link href="/" className="flex items-center gap-3 w-fit group" style={{ textDecoration: "none" }}>
+          <motion.div whileHover={{ rotate: 90 }} transition={{ type: "spring", stiffness: 200 }}
+            className="w-12 h-12 flex items-center justify-center shadow-lg" style={{ background: "#1A1A1A", borderRadius: 14 }}
+          >
+            <Music size={22} color="white" strokeWidth={3} />
           </motion.div>
-          <motion.h1 
-            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            style={{ fontSize: "clamp(3.5rem, 6vw, 6.5rem)", fontWeight: 900, color: "#1A1A1A", letterSpacing: "-0.04em", lineHeight: 0.95 }}
-          >
-            Pick up<br/>
-            <span style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundImage: "linear-gradient(135deg, #1A1A1A 0%, #888 100%)", backgroundClip: "text" }}>right where</span><br/>
-            you left off<span style={{ color: "#FFB703" }}>.</span>
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            style={{ color: "#555", fontSize: "1.25rem", marginTop: 24, maxWidth: 440, fontWeight: 500, lineHeight: 1.6 }}
-          >
-            Access your saved tracks, custom playlists, and infinite auto-play sessions.
-          </motion.p>
-        </div>
+          <span style={{ fontWeight: 900, fontSize: 24, letterSpacing: "-0.04em", color: "#1A1A1A" }}>Resonance</span>
+        </Link>
       </div>
 
-      {/* RIGHT SECTION - Auth Form */}
-      <div className="w-full lg:w-1/2 flex items-center lg:items-start justify-center lg:justify-start lg:pl-12 xl:pl-24 relative z-20 lg:pt-[22vh]">
-        
+      {/* MAIN CONTENT CONTAINER (Perfectly Centered) */}
+      <div className="flex-1 w-full flex items-center justify-center z-20 p-6 lg:p-12">
+        <div className="w-full max-w-6xl flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24">
+          
+          {/* LEFT SECTION - Text */}
+          <div className="hidden lg:block flex-1 w-full max-w-[440px]">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              <div className="inline-flex items-center gap-2.5 mb-6" style={{ background: "rgba(255,255,255,0.9)", border: "1px solid rgba(0,0,0,0.06)", padding: "8px 16px", borderRadius: 100, fontSize: 11, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", boxShadow: "0 4px 20px rgba(0,0,0,0.04)" }}>
+                <Zap size={14} color="#FFB703" fill="#FFB703" />
+                Welcome Back
+              </div>
+            </motion.div>
+            <motion.h1 
+              initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+              style={{ fontSize: "clamp(3.5rem, 6vw, 6.5rem)", fontWeight: 900, color: "#1A1A1A", letterSpacing: "-0.04em", lineHeight: 0.95 }}
+            >
+              Pick up<br/>
+              <span style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundImage: "linear-gradient(135deg, #1A1A1A 0%, #888 100%)", backgroundClip: "text" }}>right where</span><br/>
+              you left off<span style={{ color: "#FFB703" }}>.</span>
+            </motion.h1>
+            <motion.p 
+              initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+              style={{ color: "#555", fontSize: "1.25rem", marginTop: 24, maxWidth: 440, fontWeight: 500, lineHeight: 1.6 }}
+            >
+              Access your saved tracks, custom playlists, and infinite auto-play sessions.
+            </motion.p>
+          </div>
 
-        <Link href="/" className="lg:hidden absolute top-8 left-8 z-20 text-[#1A1A1A] opacity-60 hover:opacity-100 transition-opacity flex items-center gap-2" style={{ fontWeight: 700, textDecoration: "none" }}>
-          <ArrowLeft size={20} /> Back
-        </Link>
+          {/* RIGHT SECTION - Auth Form */}
+          <div className="w-full flex-1 flex justify-center lg:justify-start max-w-[480px] relative">
+            <Link href="/" className="lg:hidden absolute -top-16 left-0 z-20 text-[#1A1A1A] opacity-60 hover:opacity-100 transition-opacity flex items-center gap-2" style={{ fontWeight: 700, textDecoration: "none" }}>
+              <ArrowLeft size={20} /> Back
+            </Link>
 
-        {/* Floating Glassmorphic Login Card */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.96, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: "spring", stiffness: 80, damping: 20 }}
-          className="w-full max-w-[440px] p-8 sm:p-12 rounded-[2.5rem] relative z-10 mx-auto lg:mx-0 px-6 lg:px-12"
+            {/* Floating Glassmorphic Login Card */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.96, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: "spring", stiffness: 80, damping: 20 }}
+              className="w-full p-8 sm:p-12 rounded-[2.5rem] relative z-10"
           style={{ 
             background: "rgba(255,255,255,0.75)", 
             backdropFilter: "blur(30px)", 
@@ -169,6 +170,8 @@ export default function LoginPage() {
             Don't have an account? <Link href="/signup" className="text-[#1A1A1A] hover:underline" style={{ fontWeight: 800 }}>Sign up</Link>
           </p>
         </motion.div>
+          </div>
+        </div>
       </div>
     </div>
   );
