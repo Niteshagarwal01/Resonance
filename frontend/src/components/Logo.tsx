@@ -17,7 +17,7 @@ export function Logo({ variant = 'horizontal', theme = 'light', showSubtitle = t
     <>
       {variant === 'app-icon' ? (
         <Image 
-          src="/appicon.png" 
+          src="/logofiles/favappicon.svg" 
           alt="Resonance Icon" 
           width={size} 
           height={size} 
@@ -25,7 +25,7 @@ export function Logo({ variant = 'horizontal', theme = 'light', showSubtitle = t
         />
       ) : (
         <Image 
-          src="/mainlogo.png" 
+          src="/logofiles/main%20logo.svg" 
           alt="Resonance Logo" 
           width={variant === 'horizontal' ? size * 4 : size} 
           height={size} 
