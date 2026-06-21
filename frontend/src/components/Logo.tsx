@@ -17,19 +17,23 @@ export function Logo({ variant = 'horizontal', theme = 'light', className = '', 
   const innerContent = (
     <>
       {variant === 'app-icon' ? (
-        <Image 
-          src={favAppIcon} 
-          alt="Resonance Icon" 
-          style={{ height: size, width: 'auto' }}
-          className="shrink-0 object-contain drop-shadow-xl"
-        />
+        <div style={{ width: size, height: size }} className="relative flex items-center justify-center shrink-0">
+          <Image 
+            src={favAppIcon} 
+            alt="Resonance Icon" 
+            style={{ width: '100%', height: 'auto', transform: 'scale(1.2)' }}
+            className="shrink-0 object-contain drop-shadow-xl"
+          />
+        </div>
       ) : (
-        <Image 
-          src={mainLogo} 
-          alt="Resonance Logo" 
-          style={{ height: size, width: 'auto' }}
-          className={`shrink-0 object-contain ${theme === 'dark' ? 'invert brightness-0' : ''}`}
-        />
+        <div style={{ width: size * 3.5, height: size }} className="relative flex items-center justify-center shrink-0">
+          <Image 
+            src={mainLogo} 
+            alt="Resonance Logo" 
+            style={{ width: '100%', height: 'auto', transform: 'scale(3.5)' }}
+            className={`shrink-0 object-contain ${theme === 'dark' ? 'invert brightness-0' : ''}`}
+          />
+        </div>
       )}
     </>
   );
