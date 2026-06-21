@@ -3,32 +3,28 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 
 import Image from 'next/image';
-
 interface LogoProps {
   variant?: 'icon-only' | 'horizontal' | 'app-icon';
   theme?: 'light' | 'dark';
-  showSubtitle?: boolean;
   className?: string;
   size?: number;
 }
 
-export function Logo({ variant = 'horizontal', theme = 'light', showSubtitle = true, className = '', size = 48 }: LogoProps) {
+export function Logo({ variant = 'horizontal', theme = 'light', className = '', size = 48 }: LogoProps) {
   const innerContent = (
     <>
       {variant === 'app-icon' ? (
-        <Image 
+        <img 
           src="/logofiles/favappicon.svg" 
           alt="Resonance Icon" 
-          width={size} 
-          height={size} 
+          style={{ height: size, width: size }}
           className="shrink-0 object-contain drop-shadow-xl"
         />
       ) : (
-        <Image 
+        <img 
           src="/logofiles/main%20logo.svg" 
           alt="Resonance Logo" 
-          width={variant === 'horizontal' ? size * 4 : size} 
-          height={size} 
+          style={{ height: size, width: 'auto' }}
           className={`shrink-0 object-contain ${theme === 'dark' ? 'invert brightness-0' : ''}`}
         />
       )}
