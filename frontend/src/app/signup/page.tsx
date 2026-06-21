@@ -62,7 +62,7 @@ export default function SignupPage() {
       </div>
 
       {/* LEFT SECTION - Branding & Cinematic Visuals */}
-      <div className="hidden lg:flex w-1/2 flex-col justify-between p-12 lg:p-16 relative z-20">
+      <div className="hidden lg:flex w-1/2 flex-col p-12 lg:p-16 relative z-20">
         <div className="relative z-10 flex items-center gap-3">
           <Link href="/" className="flex items-center gap-3 w-fit group" style={{ textDecoration: "none" }}>
             <motion.div whileHover={{ rotate: 90 }} transition={{ type: "spring", stiffness: 200 }}
@@ -74,7 +74,7 @@ export default function SignupPage() {
           </Link>
         </div>
 
-        <div className="relative z-10 pb-12">
+        <div className="relative z-10 mt-24 xl:mt-32">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="inline-flex items-center gap-2.5 mb-6" style={{ background: "rgba(255,255,255,0.9)", border: "1px solid rgba(0,0,0,0.06)", padding: "8px 16px", borderRadius: 100, fontSize: 11, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", boxShadow: "0 4px 20px rgba(0,0,0,0.04)" }}>
               <Zap size={14} color="#22c55e" fill="#22c55e" />
