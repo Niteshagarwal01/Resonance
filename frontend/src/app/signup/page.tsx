@@ -103,9 +103,6 @@ export default function SignupPage() {
 
           {/* RIGHT SECTION - Auth Form */}
           <div className="w-full flex-1 flex justify-center xl:justify-start max-w-[480px] relative">
-            <Link href="/" className="md:hidden absolute -top-16 left-0 z-20 text-[#1A1A1A] opacity-60 hover:opacity-100 transition-opacity flex items-center gap-2" style={{ fontWeight: 700, textDecoration: "none" }}>
-              <ArrowLeft size={20} /> Back
-            </Link>
 
             {/* Floating Glassmorphic Signup Card */}
             <motion.div 
