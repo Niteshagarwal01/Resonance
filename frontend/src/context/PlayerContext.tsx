@@ -189,13 +189,13 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         const moreTracks = await getRadioQueue(curr.id);
         if (moreTracks && moreTracks.length > 0) {
           const existingIds = new Set(q.map(t => t.id));
-          const newTracks = moreTracks.filter(t => !existingIds.has(t.id));
+          const newTracks = moreTracks.filter(t => !existingIds.has(t.id)).map(t => ({ ...t, isMagic: true }));
           if (newTracks.length > 0) {
             // Insert new tracks right after current position
             const insertAt = currentIndex + 1;
             const newQ = [
               ...q.slice(0, insertAt),
-              ...newTracks.slice(0, 10), // insert up to 10 new songs
+              ...newTracks.slice(0, 50), // allow up to 50 new songs (the user requested not just 30, at least 50!)
               ...q.slice(insertAt),
             ];
             queueRef.current = newQ;

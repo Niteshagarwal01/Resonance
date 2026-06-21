@@ -21,6 +21,7 @@ export interface Track {
   album?: string;
   duration?: string | null;
   thumbnail?: string;
+  isMagic?: boolean;
 }
 
 export const searchMusic = async (query: string): Promise<Track[]> => {

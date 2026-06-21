@@ -165,6 +165,11 @@ export default function QueuePage() {
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-[#1A1A1A] text-sm truncate group-hover:text-[#FFB703] transition-colors">{track.title}</p>
                       <p className="text-xs text-gray-500 truncate">{track.artist}</p>
+                      {track.isMagic && (
+                        <p className="text-[10px] font-bold text-[#FFB703] mt-1 uppercase tracking-wider flex items-center gap-1">
+                          ✨ Recommended by Magic Shuffle
+                        </p>
+                      )}
                     </div>
                     <span className="text-xs text-gray-400 font-medium shrink-0 tabular-nums">{track.duration || "—"}</span>
                   </div>
