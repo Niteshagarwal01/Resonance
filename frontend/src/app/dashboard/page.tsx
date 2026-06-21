@@ -45,7 +45,7 @@ function ShelfRow({ title, icon, tracks, onPlay, type = "square" }: { title: str
                   </div>
                 )}
                 <div className={`absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-300 flex items-end justify-end p-4 ${type === 'hero' ? 'hidden' : ''}`}>
-                  <div className="w-12 h-12 rounded-full bg-[#1ED760] flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                  <div className="w-12 h-12 rounded-full bg-[#FFB703] flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
                     <Play size={20} fill="#000" className="text-black ml-1" />
                   </div>
                 </div>
@@ -165,7 +165,7 @@ export default function HomePage() {
   return (
     <div className="pb-32">
       {/* ── Hero Header ── */}
-      <div className="px-8 pt-8 pb-6 bg-gradient-to-b from-[#8ECAE6]/30 to-transparent mb-6">
+      <div className="px-8 pt-8 pb-6 mb-2">
 
 
         <h1 className="text-3xl font-bold text-[#1A1A1A] tracking-tight mb-6">

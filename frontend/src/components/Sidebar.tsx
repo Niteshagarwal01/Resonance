@@ -27,7 +27,7 @@ export function Sidebar() {
     href === "/dashboard" ? pathname === href : pathname.startsWith(href);
 
   return (
-    <aside className="w-64 h-full bg-[#FDFBF7] border-r border-[#1A1A1A]/5 flex flex-col shrink-0">
+    <aside className="w-64 h-full bg-[#FDFBF7] border-r border-gray-200 shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex flex-col shrink-0 relative z-20">
       {/* Logo */}
       <div className="px-6 pt-6 pb-4 shrink-0">
         <Logo variant="horizontal" size={28} />
