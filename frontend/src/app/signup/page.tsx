@@ -75,7 +75,7 @@ export default function SignupPage() {
 
       {/* MAIN CONTENT CONTAINER (Perfectly Centered) */}
       <div className="flex-1 w-full flex items-center justify-center z-20 p-6 md:p-12 min-h-screen">
-        <div className="w-full max-w-6xl flex flex-col xl:flex-row items-center justify-center gap-12 xl:gap-24 pt-24 md:pt-0">
+        <div className="w-full max-w-6xl flex flex-col xl:flex-row items-center justify-center gap-12 xl:gap-24">
           
           {/* LEFT SECTION - Text */}
           <div className="hidden md:block flex-1 w-full max-w-[440px] text-center xl:text-left">
