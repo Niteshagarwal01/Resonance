@@ -151,12 +151,12 @@ export default function HomePage() {
           if (historyRes.status === "fulfilled" && historyRes.value.data) {
             historyData = historyRes.value.data;
             const history = historyData;
-            const unique = Array.from(new Set(history.map((h: any) => h.track_id))).map(id => {
-              const h = history.find((x: any) => x.track_id === id);
-              return { id: h.track_id, title: h.track_title, artist: h.track_artist, thumbnail: h.track_thumbnail };
+            const unique = Array.from(new Set(history.map((h: any) => h.video_id))).map(id => {
+              const h = history.find((x: any) => x.video_id === id);
+              return { id: h.video_id, title: h.title, artist: h.artist, thumbnail: "" }; // History currently doesn't store thumbnail
             });
-            setRecentlyPlayed(unique as Track[]);
-            setJumpBackIn([...unique] as Track[]);
+            setRecentlyPlayed(unique.filter(t => t.id) as Track[]);
+            setJumpBackIn([...unique].filter(t => t.id) as Track[]);
           }
           
           if (dnaRes.status === "fulfilled" && dnaRes.value.data) {

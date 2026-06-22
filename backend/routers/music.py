@@ -85,7 +85,12 @@ async def get_home_mixes(request: Request, user: dict = Depends(verify_token)):
     main_seed = top_seeds[0] if top_seeds else "RDAMVM"
     
     # 3. Fetch a custom radio queue based on this evolving seed
-    radio_queue = await YTMusicService.get_radio(main_seed, limit=40)
+    try:
+        radio_queue = await YTMusicService.get_radio(main_seed, limit=40)
+    except Exception as e:
+        print(f"Failed to fetch radio for seed {main_seed}, falling back to default: {e}")
+        # Fallback to Top 100 Music Videos Global
+        radio_queue = await YTMusicService.get_radio("PL4fGSI1pccsot-gAIV_q5E04SjT-HwL_0", limit=40)
     
     tracks = []
     for item in radio_queue.get("tracks", []):

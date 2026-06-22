@@ -58,7 +58,11 @@ class YTMusicService:
 
     @staticmethod
     async def get_radio(seed_id: str, limit: int = 50):
-        return await YTMusicService.run_with_cache(f"radio:{seed_id}", ytmusic.get_watch_playlist, videoId=seed_id, limit=limit)
+        is_playlist = seed_id.startswith("RD") or seed_id.startswith("PL") or seed_id.startswith("VL")
+        if is_playlist:
+            return await YTMusicService.run_with_cache(f"radio:{seed_id}", ytmusic.get_watch_playlist, playlistId=seed_id, limit=limit)
+        else:
+            return await YTMusicService.run_with_cache(f"radio:{seed_id}", ytmusic.get_watch_playlist, videoId=seed_id, limit=limit)
 
     @staticmethod
     async def get_charts(country: str = "IN"):
