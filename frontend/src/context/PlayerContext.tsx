@@ -155,7 +155,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
                 progressIntervalRef.current = setInterval(() => {
                   const t = event.target.getCurrentTime();
                   const d = event.target.getDuration();
-                  if (d > 0) setProgress((t / d) * 100);
+                  if (d > 0) {
+                    setProgress((t / d) * 100);
+                    setDuration(d); // continually update duration in case it was 0 initially
+                  }
                 }, 1000);
               }
             } else {

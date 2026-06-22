@@ -145,12 +145,14 @@ export default function HomePage() {
         }
 
         const topArtist = dna?.top_artists?.[0] || "top pop";
+        const artistMix = dna?.top_artists?.slice(0, 3).join(" ") || "top pop";
         const topGenre = dna?.top_genres?.[0] || "hits";
+        const genreMix = dna?.top_genres?.slice(0, 2).join(" ") || "hits";
         const coreVibe = dna?.core_vibe ? dna.core_vibe.replace(/[^\w\s]/gi, '').trim() : "viral";
 
         const [mfyReq, topMixesReq, stationsReq, trendingReq, newReq, albumsReq, networkReq] = await Promise.allSettled([
-          searchMusic(`${topArtist} top songs`),
-          searchMusic(`${topGenre} trending mixes today`),
+          searchMusic(`${artistMix} best tracks`),
+          searchMusic(`${genreMix} trending mixes today`),
           searchMusic(`${coreVibe} radio stations`),
           searchMusic("global trending charts today"),
           searchMusic("latest new releases"),
@@ -207,18 +209,6 @@ export default function HomePage() {
           <div className="mb-6">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Recently Played</h3>
-              <button 
-                onClick={async () => {
-                  const { data: { session } } = await supabase.auth.getSession();
-                  if (session) {
-                    await supabase.from("listening_history").delete().eq("user_id", session.user.id);
-                    window.location.reload();
-                  }
-                }}
-                className="text-xs font-bold text-red-500 hover:text-red-600 transition-colors"
-              >
-                Clear History
-              </button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {recentlyPlayed.slice(0, 8).map((track, idx) => (
