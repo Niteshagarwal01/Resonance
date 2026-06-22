@@ -52,11 +52,32 @@ export default function ArtistsPage() {
           image: a.artist_image
         }));
 
-        // Merge and Deduplicate by ID
+        // Merge and Deduplicate
         const allArtistsMap = new Map();
         [...normalizedDna, ...normalizedLiked].forEach(a => {
-          if (a.id && !allArtistsMap.has(a.id)) {
-            allArtistsMap.set(a.id, a);
+          if (!a.id && !a.name) return;
+          
+          // Find if we already have an artist with this exact name (case-insensitive)
+          let existingKey = null;
+          for (const [key, val] of allArtistsMap.entries()) {
+            if (val.name?.toLowerCase() === a.name?.toLowerCase()) {
+              existingKey = key;
+              break;
+            }
+          }
+
+          if (existingKey) {
+            const existing = allArtistsMap.get(existingKey);
+            const existingIsLegacy = typeof existing.id === "string" && existing.id.startsWith("legacy-");
+            const newIsLegacy = typeof a.id === "string" && a.id.startsWith("legacy-");
+            
+            // If the existing one is legacy and the new one is real, replace it!
+            if (existingIsLegacy && !newIsLegacy) {
+              allArtistsMap.delete(existingKey);
+              allArtistsMap.set(a.id, a);
+            }
+          } else {
+            allArtistsMap.set(a.id || a.name, a);
           }
         });
 

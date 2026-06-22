@@ -50,10 +50,13 @@ export default function TasteDNAPage() {
     // Merge and deduplicate
     const merged = [...recentArtists, ...base.map((b: any) => typeof b === "string" ? { id: null, name: b, image: null } : b)];
     const unique = [];
-    const seen = new Set();
+    const seenNames = new Set();
     for (const a of merged) {
-       const key = a.id || a.name;
-       if (key && !seen.has(key)) { seen.add(key); unique.push(a); }
+       const nameKey = a.name?.toLowerCase();
+       if (nameKey && !seenNames.has(nameKey)) { 
+         seenNames.add(nameKey); 
+         unique.push(a); 
+       }
     }
     return unique.slice(0, 8);
   }, [baseDna, historyTracks]);
