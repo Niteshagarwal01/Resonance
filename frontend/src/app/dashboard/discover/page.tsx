@@ -75,7 +75,23 @@ export default function DiscoverPage() {
   const [indiaCharts, setIndiaCharts] = useState<Track[]>([]);
   const [genreSections, setGenreSections] = useState<{ label: string; color: string; tracks: Track[] }[]>([]);
   const [error, setError] = useState(false);
+  const [loadingMood, setLoadingMood] = useState<string | null>(null);
   const supabase = createClient();
+
+  const handleMoodClick = async (mood: string, query: string) => {
+    if (loadingMood) return;
+    setLoadingMood(mood);
+    try {
+      const results = await searchMusic(query);
+      if (results && results.length > 0) {
+        playTrack(results[0], results);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingMood(null);
+    }
+  };
 
   useEffect(() => {
     async function load() {
@@ -180,17 +196,29 @@ export default function DiscoverPage() {
       {/* ── Mood & Context Explorer ── */}
       <section className="px-8 mb-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="rounded-2xl p-6 bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-purple-500/30">
-                Midnight Drive
+            <div 
+                onClick={() => handleMoodClick("midnight", "midnight drive late night songs")}
+                className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-purple-500/30">
+                <span className={loadingMood === "midnight" ? "opacity-0" : "opacity-100 transition-opacity"}>Midnight Drive</span>
+                {loadingMood === "midnight" && <div className="absolute inset-0 flex items-center justify-center"><div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div></div>}
             </div>
-            <div className="rounded-2xl p-6 bg-gradient-to-br from-orange-400 to-pink-500 text-white font-bold cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-pink-500/30">
-                Morning Energy
+            <div 
+                onClick={() => handleMoodClick("morning", "morning energy upbeat pop songs")}
+                className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-orange-400 to-pink-500 text-white font-bold cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-pink-500/30">
+                <span className={loadingMood === "morning" ? "opacity-0" : "opacity-100 transition-opacity"}>Morning Energy</span>
+                {loadingMood === "morning" && <div className="absolute inset-0 flex items-center justify-center"><div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div></div>}
             </div>
-            <div className="rounded-2xl p-6 bg-gradient-to-br from-emerald-400 to-teal-500 text-white font-bold cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-teal-500/30">
-                Deep Focus
+            <div 
+                onClick={() => handleMoodClick("focus", "deep focus lofi chill beats")}
+                className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-emerald-400 to-teal-500 text-white font-bold cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-teal-500/30">
+                <span className={loadingMood === "focus" ? "opacity-0" : "opacity-100 transition-opacity"}>Deep Focus</span>
+                {loadingMood === "focus" && <div className="absolute inset-0 flex items-center justify-center"><div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div></div>}
             </div>
-            <div className="rounded-2xl p-6 bg-gradient-to-br from-blue-400 to-cyan-500 text-white font-bold cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-cyan-500/30">
-                Chill Vibes
+            <div 
+                onClick={() => handleMoodClick("chill", "chill vibes relaxed acoustic songs")}
+                className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-blue-400 to-cyan-500 text-white font-bold cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-cyan-500/30">
+                <span className={loadingMood === "chill" ? "opacity-0" : "opacity-100 transition-opacity"}>Chill Vibes</span>
+                {loadingMood === "chill" && <div className="absolute inset-0 flex items-center justify-center"><div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div></div>}
             </div>
         </div>
       </section>

@@ -94,19 +94,15 @@ export function BottomPlayer() {
               {Math.floor((progress / 100 * duration) / 60) || 0}:
               {Math.floor((progress / 100 * duration) % 60).toString().padStart(2, '0') || '00'}
             </span>
-            <div 
-              className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden cursor-pointer group relative"
-              onClick={(e) => {
-                const bounds = e.currentTarget.getBoundingClientRect();
-                const percent = ((e.clientX - bounds.left) / bounds.width) * 100;
-                seekTo(percent);
-              }}
-            >
-              <div 
-                className="absolute top-0 left-0 h-full bg-[#1A1A1A] group-hover:bg-[#FFB703] transition-colors" 
-                style={{ width: `${progress}%` }} 
-              />
-            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="0.1"
+              value={progress || 0}
+              onChange={(e) => seekTo(Number(e.target.value))}
+              className="flex-1 h-1.5 bg-gray-200 rounded-full appearance-none cursor-pointer accent-[#1A1A1A] hover:accent-[#FFB703] transition-all focus:outline-none focus:ring-2 focus:ring-[#FFB703]/20"
+            />
             <span className="text-[10px] font-medium text-gray-500 w-8">
               {Math.floor(duration / 60) || 0}:
               {Math.floor(duration % 60).toString().padStart(2, '0') || '00'}
@@ -121,16 +117,14 @@ export function BottomPlayer() {
             onClick={() => setVolume(volume === 0 ? 50 : 0)} 
             className="cursor-pointer hover:text-[#1A1A1A] transition-colors" 
           />
-          <div 
-            className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden cursor-pointer group"
-            onClick={(e) => {
-              const bounds = e.currentTarget.getBoundingClientRect();
-              const percent = ((e.clientX - bounds.left) / bounds.width) * 100;
-              setVolume(Math.max(0, Math.min(100, percent)));
-            }}
-          >
-            <div className="h-full bg-[#1A1A1A] group-hover:bg-[#FFB703] transition-colors" style={{ width: `${volume}%` }}></div>
-          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={volume}
+            onChange={(e) => setVolume(Number(e.target.value))}
+            className="w-24 h-1.5 bg-gray-200 rounded-full appearance-none cursor-pointer accent-[#1A1A1A] hover:accent-[#FFB703] transition-all focus:outline-none focus:ring-2 focus:ring-[#FFB703]/20"
+          />
           <Link href="/dashboard/queue" className="hover:text-[#FFB703] transition-colors" title="View Queue">
             <ListMusic size={18} />
           </Link>

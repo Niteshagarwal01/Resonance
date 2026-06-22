@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { searchMusic, getHomeMixes, getRadioQueue, Track } from "@/lib/api";
+import { searchMusic, getHomeMixes, getRadioQueue, getCharts, Track } from "@/lib/api";
 import { usePlayer } from "@/context/PlayerContext";
 import { SafeImage as Image } from "@/components/SafeImage";
 import { Play, TrendingUp, Music2, Clock, Zap, Star, Radio, Disc3, Mic2, Users, ChevronRight, Flame, Sparkles } from "lucide-react";
@@ -176,18 +176,18 @@ export default function HomePage() {
           }
         }
 
-        const genre1 = localUserDna?.top_genres?.[0] || "chill";
-        const genre2 = localUserDna?.top_genres?.[1] || "pop";
+        const genre1 = localUserDna?.top_genres?.[0] || "desi hip hop";
+        const genre2 = localUserDna?.top_genres?.[1] || "bollywood pop";
         const topArtist1Obj = localUserDna?.top_artists?.[0];
-        const topArtist1 = (typeof topArtist1Obj === 'object' ? topArtist1Obj?.name : topArtist1Obj) || "The Weeknd";
+        const topArtist1 = (typeof topArtist1Obj === 'object' ? topArtist1Obj?.name : topArtist1Obj) || "King";
         
         const topArtist2Obj = localUserDna?.top_artists?.[1];
-        const topArtist2 = (typeof topArtist2Obj === 'object' ? topArtist2Obj?.name : topArtist2Obj) || "A.R. Rahman";
+        const topArtist2 = (typeof topArtist2Obj === 'object' ? topArtist2Obj?.name : topArtist2Obj) || "Bella";
 
         const [artist1Req, artist2Req, trendingReq, newReq] = await Promise.allSettled([
           (topArtist1Obj && typeof topArtist1Obj === 'object' && topArtist1Obj.id) ? getRadioQueue(topArtist1Obj.id) : searchMusic(`songs by ${topArtist1}`),
           (topArtist2Obj && typeof topArtist2Obj === 'object' && topArtist2Obj.id) ? getRadioQueue(topArtist2Obj.id) : searchMusic(`songs by ${topArtist2}`),
-          searchMusic(`trending ${genre1} songs`),
+          getCharts("IN"),
           searchMusic(`latest ${genre2} new releases`),
         ]);
 
