@@ -153,13 +153,40 @@ async def get_artist(artist_id: str):
                     "album": item.get("album", {}).get("name") if item.get("album") else None,
                     "thumbnail": Formatter.get_thumbnail(item.get("thumbnails"))
                 })
+                
+    albums = []
+    if "albums" in data and "results" in data["albums"]:
+        for item in data["albums"]["results"]:
+            browse_id = item.get("browseId")
+            if browse_id:
+                albums.append({
+                    "id": browse_id,
+                    "title": item.get("title", ""),
+                    "year": item.get("year", ""),
+                    "thumbnail": Formatter.get_thumbnail(item.get("thumbnails"))
+                })
+                
+    singles = []
+    if "singles" in data and "results" in data["singles"]:
+        for item in data["singles"]["results"]:
+            browse_id = item.get("browseId")
+            if browse_id:
+                singles.append({
+                    "id": browse_id,
+                    "title": item.get("title", ""),
+                    "year": item.get("year", ""),
+                    "thumbnail": Formatter.get_thumbnail(item.get("thumbnails"))
+                })
+
     return {
         "id": artist_id,
         "name": data.get("name"),
         "description": data.get("description"),
         "subscribers": data.get("subscribers"),
         "image": Formatter.get_thumbnail(data.get("thumbnails")),
-        "top_songs": top_songs
+        "top_songs": top_songs,
+        "albums": albums,
+        "singles": singles
     }
 
 @router.get("/album/{album_id}")

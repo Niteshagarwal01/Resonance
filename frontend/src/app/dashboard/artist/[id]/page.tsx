@@ -63,7 +63,7 @@ export default function ArtistPage({ params }: { params: Promise<{ id: string }>
     );
   }
 
-  const topTracks: any[] = artistData.top_tracks || [];
+  const topTracks: any[] = artistData.top_songs || [];
   const albums: any[] = artistData.albums || [];
   const singles: any[] = artistData.singles || [];
   
