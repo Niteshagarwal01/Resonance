@@ -91,14 +91,14 @@ export default function DiscoverPage() {
         const topArtists = userDna?.top_artists || ["Trending"];
         
         const dynamicSections = [
-          { label: `Because you love ${topArtists[0] || 'Good Music'}`, query: `tracks similar to ${topArtists[0] || 'popular'}`, color: COLORS[0] },
+          { label: `Because you love ${(typeof topArtists[0] === 'object' ? topArtists[0].name : topArtists[0]) || 'Good Music'}`, query: `tracks similar to ${(typeof topArtists[0] === 'object' ? topArtists[0].name : topArtists[0]) || 'popular'}`, color: COLORS[0] },
           { label: `Trending ${genres[0] || 'Hits'}`, query: `trending popular ${genres[0] || 'pop'} songs`, color: COLORS[1] },
           { label: `Deep ${genres[1] || 'Vibes'}`, query: `underrated hidden ${genres[1] || 'indie'} tracks`, color: COLORS[2] },
         ];
 
         // Run all fetches in parallel, fail gracefully
         const fetches = [
-          searchMusic(`fresh new releases ${topArtists[0] || 'trending'}`), // Fresh Finds
+          searchMusic(`fresh new releases ${(typeof topArtists[0] === 'object' ? topArtists[0].name : topArtists[0]) || 'trending'}`), // Fresh Finds
           getCharts("ZZ"),
           getCharts("IN"),
           ...dynamicSections.map(s => searchMusic(s.query))

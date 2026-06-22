@@ -122,6 +122,16 @@ export default function HomePage() {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [userDna, setUserDna] = useState<any>(null);
   const [vibeLoading, setVibeLoading] = useState(false);
+  const [greeting, setGreeting] = useState("Welcome");
+  const [greetingEmoji, setGreetingEmoji] = useState("👋");
+  const [vibeGreeting, setVibeGreeting] = useState("Your Mix");
+
+  useEffect(() => {
+    setGreeting(getGreeting());
+    setGreetingEmoji(getGreetingEmoji());
+    const h = new Date().getHours();
+    setVibeGreeting(h < 12 ? "Morning Energy" : h < 17 ? "Afternoon Vibes" : "Late Night Focus");
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -168,8 +178,11 @@ export default function HomePage() {
 
         const genre1 = localUserDna?.top_genres?.[0] || "chill";
         const genre2 = localUserDna?.top_genres?.[1] || "pop";
-        const topArtist1 = localUserDna?.top_artists?.[0] || "The Weeknd";
-        const topArtist2 = localUserDna?.top_artists?.[1] || "A.R. Rahman";
+        const topArtist1Obj = localUserDna?.top_artists?.[0];
+        const topArtist1 = (typeof topArtist1Obj === 'object' ? topArtist1Obj?.name : topArtist1Obj) || "The Weeknd";
+        
+        const topArtist2Obj = localUserDna?.top_artists?.[1];
+        const topArtist2 = (typeof topArtist2Obj === 'object' ? topArtist2Obj?.name : topArtist2Obj) || "A.R. Rahman";
 
         const [artist1Req, artist2Req, trendingReq, newReq] = await Promise.allSettled([
           searchMusic(`${topArtist1} essential hits`),
@@ -214,9 +227,9 @@ export default function HomePage() {
     <div className="pb-32">
       {/* ── Hero Header ── */}
       <div className={`${PX} pt-8 pb-6`} style={{ background: "linear-gradient(to bottom, rgba(255,183,3,0.08) 0%, transparent 100%)" }}>
-        <p className="text-sm font-semibold text-gray-400 mb-1">{getGreetingEmoji()}</p>
+        <p className="text-sm font-semibold text-gray-400 mb-1">{greetingEmoji}</p>
         <h1 className="text-4xl font-black text-[#1A1A1A] tracking-tight mb-6">
-          {getGreeting()}<span className="text-[#FFB703]">.</span>
+          {greeting}<span className="text-[#FFB703]">.</span>
         </h1>
 
         {/* Recently Played Quick Grid */}
@@ -269,10 +282,10 @@ export default function HomePage() {
                 <Sparkles size={12} /> Taste DNA Playlist
               </p>
               <h2 className="text-2xl md:text-3xl font-black text-white mb-2 drop-shadow-lg">
-                {new Date().getHours() < 12 ? "Morning Energy" : new Date().getHours() < 17 ? "Afternoon Vibes" : "Late Night Focus"}
+                {vibeGreeting}
               </h2>
               <p className="text-white/80 text-sm max-w-md mb-5 drop-shadow-md">
-                Your {userDna.core_vibe?.replace(/[^\w\s]/gi, '') || "Daily"} mix, curated from {userDna.top_artists?.[0] || "your favorites"} & {userDna.top_artists?.[1] || "recent history"}.
+                Your {userDna.core_vibe?.replace(/[^\w\s]/gi, '') || "Daily"} mix, curated from {(typeof userDna.top_artists?.[0] === 'object' ? userDna.top_artists[0].name : userDna.top_artists?.[0]) || "your favorites"} & {(typeof userDna.top_artists?.[1] === 'object' ? userDna.top_artists[1].name : userDna.top_artists?.[1]) || "recent history"}.
               </p>
               <div className="flex items-center gap-3 justify-center md:justify-start">
                 <button
