@@ -27,7 +27,7 @@ export interface Track {
 export const searchMusic = async (query: string): Promise<Track[]> => {
   if (!query) return [];
   try {
-    const res = await fetchWithTimeout(`${API_BASE}/search?q=${encodeURIComponent(query)}`);
+    const res = await fetchWithTimeout(`${API_BASE}/search?q=${encodeURIComponent(query)}`, { cache: 'no-store' });
     if (!res.ok) throw new Error("Search failed");
     const data = await res.json();
     return data.results || [];
@@ -40,7 +40,7 @@ export const searchMusic = async (query: string): Promise<Track[]> => {
 export const searchArtists = async (query: string): Promise<any[]> => {
   if (!query) return [];
   try {
-    const res = await fetchWithTimeout(`${API_BASE}/search/artists?q=${encodeURIComponent(query)}`);
+    const res = await fetchWithTimeout(`${API_BASE}/search/artists?q=${encodeURIComponent(query)}`, { cache: 'no-store' });
     if (!res.ok) throw new Error("Artist Search failed");
     const data = await res.json();
     return data.results || [];

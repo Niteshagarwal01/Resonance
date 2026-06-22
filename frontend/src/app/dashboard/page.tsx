@@ -204,7 +204,23 @@ export default function HomePage() {
 
         {/* Recently Played Quick Grid */}
         {recentlyPlayed.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Recently Played</h3>
+              <button 
+                onClick={async () => {
+                  const { data: { session } } = await supabase.auth.getSession();
+                  if (session) {
+                    await supabase.from("listening_history").delete().eq("user_id", session.user.id);
+                    window.location.reload();
+                  }
+                }}
+                className="text-xs font-bold text-red-500 hover:text-red-600 transition-colors"
+              >
+                Clear History
+              </button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {recentlyPlayed.slice(0, 8).map((track, idx) => (
               <div
                 key={track.id + idx}
@@ -223,6 +239,7 @@ export default function HomePage() {
                 </div>
               </div>
             ))}
+          </div>
           </div>
         )}
       </div>
@@ -253,47 +270,13 @@ export default function HomePage() {
                 Curated from {userDna.favorite_genres?.slice(0, 2).join(" & ") || "your listening habits"} — always fresh.
               </p>
               <div className="flex items-center gap-3 justify-center md:justify-start">
-                <button
-                  onClick={async () => {
-                    // Quick personalized mix for home page
-                    try {
-                      const { data: { session } } = await supabase.auth.getSession();
-                      let history = [];
-                      if (session) {
-                        const { data } = await supabase.from("listening_history").select("*").eq("user_id", session.user.id).order("played_at", { ascending: false }).limit(5);
-                        history = data || [];
-                      }
-                      
-                      const sources = [];
-                      if (history.length > 0) sources.push(searchMusic(`${history[0].track_artist} hits`));
-                      if (userDna.top_artists?.length > 0) sources.push(searchMusic(`${userDna.top_artists[0]} best songs`));
-                      if (userDna.top_genres?.length > 0) sources.push(searchMusic(`${userDna.top_genres[0]} hits 2024`));
-                      if (userDna.core_vibe) sources.push(searchMusic(`${userDna.core_vibe.replace(/[^\w\s]/gi, '').trim()} music`));
-                      
-                      const results = await Promise.all(sources);
-                      const allTracks = results.flat();
-                      
-                      const unique = [];
-                      const seen = new Set();
-                      for (const t of allTracks) {
-                        if (t && t.id && !seen.has(t.id)) { seen.add(t.id); unique.push(t); }
-                      }
-                      
-                      const shuffled = unique.sort(() => Math.random() - 0.5).slice(0, 30);
-                      if (shuffled.length > 0) {
-                        playTrack(shuffled[0], shuffled);
-                      } else {
-                        playTrack(userDna.top_songs[0], userDna.top_songs);
-                      }
-                    } catch (e) {
-                      playTrack(userDna.top_songs[0], userDna.top_songs);
-                    }
-                  }}
-                  className="px-7 py-2.5 bg-[#FFB703] text-[#1A1A1A] rounded-full font-black text-sm hover:bg-[#ffc124] hover:scale-105 active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-[#FFB703]/30 shrink-0"
+                <Link
+                  href="/dashboard/taste-dna"
+                  className="bg-[#FFB703] text-[#1A1A1A] px-6 py-2.5 rounded-full font-bold text-sm hover:scale-105 transition-transform flex items-center gap-2"
                 >
-                  <Play size={16} fill="currentColor" /> Play Vibe
-                </button>
-                <Link href="/dashboard/taste-dna" className="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold text-sm backdrop-blur-md transition-all shrink-0">
+                  <Play size={16} fill="black" /> Generate Live Vibe
+                </Link>
+                <Link href="/dashboard/taste-dna" className="bg-white/10 hover:bg-white/20 text-white border border-white/10 px-6 py-2.5 rounded-full font-bold text-sm transition-colors backdrop-blur-md">
                   View DNA
                 </Link>
               </div>
