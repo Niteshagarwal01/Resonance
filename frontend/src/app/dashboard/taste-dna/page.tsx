@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Activity, Sparkles, Compass, Music, Mic2, Loader2, Play, Pause, Shuffle, RefreshCw, Layers } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { usePlayer } from "@/context/PlayerContext";
-import { searchMusic, getRadioQueue } from "@/lib/api";
+import { searchMusic, getRadioQueue, getArtistProfile } from "@/lib/api";
 import { SafeImage as Image } from "@/components/SafeImage";
 import { SongActions } from "@/components/SongActions";
 
@@ -44,11 +44,18 @@ export default function TasteDNAPage() {
     
     const recentArtists = Object.entries(artistCounts)
       .sort((a, b) => b[1] - a[1])
-      .map(entry => entry[0])
+      .map(entry => ({ id: null, name: entry[0], image: null }))
       .slice(0, 5);
 
     // Merge and deduplicate
-    return Array.from(new Set([...recentArtists, ...base])).slice(0, 8);
+    const merged = [...recentArtists, ...base.map((b: any) => typeof b === "string" ? { id: null, name: b, image: null } : b)];
+    const unique = [];
+    const seen = new Set();
+    for (const a of merged) {
+       const key = a.id || a.name;
+       if (key && !seen.has(key)) { seen.add(key); unique.push(a); }
+    }
+    return unique.slice(0, 8);
   }, [baseDna, historyTracks]);
 
   const evolvedGenres = useMemo(() => {
@@ -56,7 +63,7 @@ export default function TasteDNAPage() {
     return baseDna.top_genres ?? [];
   }, [baseDna]);
 
-  const buildPersonalizedPlaylist = useCallback(async (dnaData: any, hTracks: any[], eArtists: string[], eGenres: string[]) => {
+  const buildPersonalizedPlaylist = useCallback(async (dnaData: any, hTracks: any[], eArtists: any[], eGenres: string[]) => {
     setPlaylistLoading(true);
     try {
       const sources: Promise<any[]>[] = [];
@@ -71,7 +78,11 @@ export default function TasteDNAPage() {
 
       // 2. From evolved artists
       for (const artist of eArtists.slice(0, 3)) {
-        sources.push(searchMusic(`${artist} top songs`).catch(() => []));
+        if (artist.id && !artist.id.startsWith("legacy-")) {
+          sources.push(getArtistProfile(artist.id).then(res => res?.songs?.results || []).catch(() => []));
+        } else {
+          sources.push(searchMusic(`${artist.name} top songs`).catch(() => []));
+        }
       }
 
       // 3. From evolved genres
@@ -245,7 +256,7 @@ export default function TasteDNAPage() {
             <div className="flex flex-wrap gap-3 relative z-10">
               {evolvedArtists.map((artist, i) => (
                 <span key={i} className="px-4 py-2 rounded-full bg-gray-50 border border-gray-200 text-gray-700 text-sm font-bold shadow-sm hover:border-violet-300 hover:text-violet-700 hover:bg-violet-50 transition-all cursor-default">
-                  {artist}
+                  {artist.name}
                 </span>
               ))}
             </div>
