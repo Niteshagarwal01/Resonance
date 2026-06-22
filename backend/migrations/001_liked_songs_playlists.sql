@@ -1,6 +1,10 @@
 -- Run this in Supabase SQL Editor
 -- Creates liked_songs, playlists, and playlist_tracks tables
 
+drop table if exists playlist_tracks cascade;
+drop table if exists playlists cascade;
+drop table if exists liked_songs cascade;
+
 -- ── Liked Songs ─────────────────────────────────────────────────────────────
 create table if not exists liked_songs (
   id            uuid primary key default gen_random_uuid(),
@@ -16,12 +20,15 @@ create table if not exists liked_songs (
 
 alter table liked_songs enable row level security;
 
+drop policy if exists "Users can view own liked songs" on liked_songs;
 create policy "Users can view own liked songs"
   on liked_songs for select using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert own liked songs" on liked_songs;
 create policy "Users can insert own liked songs"
   on liked_songs for insert with check (auth.uid() = user_id);
 
+drop policy if exists "Users can delete own liked songs" on liked_songs;
 create policy "Users can delete own liked songs"
   on liked_songs for delete using (auth.uid() = user_id);
 
@@ -38,15 +45,19 @@ create table if not exists playlists (
 
 alter table playlists enable row level security;
 
+drop policy if exists "Users can view own playlists" on playlists;
 create policy "Users can view own playlists"
   on playlists for select using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert own playlists" on playlists;
 create policy "Users can insert own playlists"
   on playlists for insert with check (auth.uid() = user_id);
 
+drop policy if exists "Users can update own playlists" on playlists;
 create policy "Users can update own playlists"
   on playlists for update using (auth.uid() = user_id);
 
+drop policy if exists "Users can delete own playlists" on playlists;
 create policy "Users can delete own playlists"
   on playlists for delete using (auth.uid() = user_id);
 
@@ -68,11 +79,14 @@ create table if not exists playlist_tracks (
 
 alter table playlist_tracks enable row level security;
 
+drop policy if exists "Users can view own playlist tracks" on playlist_tracks;
 create policy "Users can view own playlist tracks"
   on playlist_tracks for select using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert own playlist tracks" on playlist_tracks;
 create policy "Users can insert own playlist tracks"
   on playlist_tracks for insert with check (auth.uid() = user_id);
 
+drop policy if exists "Users can delete own playlist tracks" on playlist_tracks;
 create policy "Users can delete own playlist tracks"
   on playlist_tracks for delete using (auth.uid() = user_id);

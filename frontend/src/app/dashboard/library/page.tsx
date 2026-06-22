@@ -24,14 +24,37 @@ export default function LibraryPage() {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
 
-        // Fetch Taste DNA Top Songs (Liked Songs)
+        // Fetch Taste DNA Top Songs
+        let initialLiked: Track[] = [];
         const { data: dna } = await supabase.from("taste_dna").select("top_songs").eq("user_id", session.user.id).single();
         if (dna && dna.top_songs && dna.top_songs.length > 0) {
-          const results = await Promise.all(
-            dna.top_songs.map((s: any) => searchMusic(`${s.title} ${s.artist}`).then(r => r[0]).catch(() => null))
-          );
-          setLikedSongs(results.filter(Boolean));
+          initialLiked = dna.top_songs;
         }
+
+        // Fetch Actual Liked Songs
+        const { data: dbLiked } = await supabase.from("liked_songs").select("*").eq("user_id", session.user.id).order("created_at", { ascending: false });
+        let actualLiked: Track[] = [];
+        if (dbLiked) {
+          actualLiked = dbLiked.map(row => ({
+            id: row.track_id,
+            title: row.track_title,
+            artist: row.track_artist,
+            thumbnail: row.track_thumbnail,
+            duration: row.track_duration
+          }));
+        }
+
+        // Merge and deduplicate
+        const mergedLiked = [...actualLiked, ...initialLiked];
+        const uniqueLiked = [];
+        const seenLiked = new Set();
+        for (const t of mergedLiked) {
+          if (!seenLiked.has(t.id)) {
+            seenLiked.add(t.id);
+            uniqueLiked.push(t);
+          }
+        }
+        setLikedSongs(uniqueLiked);
 
         // Fetch Listening History
         const { data: historyData, error: historyError } = await supabase
