@@ -242,12 +242,12 @@ export function SongActions({ track, size = "sm", showLabel = false }: SongActio
                     placeholder="Playlist name…"
                     autoFocus
                     onClick={e => e.stopPropagation()}
-                    className="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:border-[#FFB703] font-medium"
+                    className="flex-1 min-w-0 text-sm border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:border-[#FFB703] font-medium"
                   />
                   <button
                     onClick={createPlaylist}
                     disabled={creating || !newPlaylistName.trim()}
-                    className="px-3 py-1.5 bg-[#FFB703] rounded-xl text-xs font-black text-[#1A1A1A] disabled:opacity-50 hover:bg-[#ffc124] transition-colors"
+                    className="shrink-0 px-3 py-1.5 bg-[#FFB703] rounded-xl text-xs font-black text-[#1A1A1A] disabled:opacity-50 hover:bg-[#ffc124] transition-colors"
                   >
                     {creating ? <Loader2 size={12} className="animate-spin" /> : "Create"}
                   </button>
