@@ -9,11 +9,12 @@ import { createClient } from "@/utils/supabase/client";
 import { motion } from "framer-motion";
 import { SongActions } from "@/components/SongActions";
 
-const DISCOVER_GENRES = [
-  { label: "Indie Underground", query: "indie underrated hidden gems", color: "from-emerald-500 to-teal-600" },
-  { label: "Global Hits", query: "global trending songs", color: "from-blue-500 to-indigo-600" },
-  { label: "Desi Beats", query: "bollywood hindi latest hits", color: "from-orange-500 to-yellow-500" },
-  { label: "Lo-Fi Chill", query: "lofi hip hop chill beats", color: "from-purple-500 to-violet-600" },
+const COLORS = [
+  "from-emerald-500 to-teal-600",
+  "from-blue-500 to-indigo-600",
+  "from-orange-500 to-yellow-500",
+  "from-purple-500 to-violet-600",
+  "from-pink-500 to-rose-600"
 ];
 
 function TrackCard({ track, queue, idx }: { track: any; queue: any[]; idx: number }) {
@@ -86,36 +87,36 @@ export default function DiscoverPage() {
           userDna = data;
         }
 
-        const genre1 = userDna?.top_genres?.[0] || "indie";
-        const genre2 = userDna?.top_genres?.[1] || "pop";
+        const genres = userDna?.top_genres || ["indie", "pop", "hip hop", "electronic"];
+        const genre1 = genres[0] || "indie";
+
+        const dynamicSections = [
+          { label: `Deep ${genres[0] || 'Vibes'}`, query: `underrated hidden ${genres[0] || 'indie'} tracks`, color: COLORS[0] },
+          { label: `Trending ${genres[1] || 'Hits'}`, query: `trending popular ${genres[1] || 'pop'} songs`, color: COLORS[1] },
+          { label: `Essential ${genres[2] || 'Beats'}`, query: `best classic ${genres[2] || 'hip hop'} music`, color: COLORS[2] },
+          { label: `Chill ${genres[3] || 'Mix'}`, query: `chill relaxing ${genres[3] || 'electronic'} beats`, color: COLORS[3] },
+        ];
 
         // Run all fetches in parallel, fail gracefully
-        const [gems, globalData, indiaData, ...genreResults] = await Promise.allSettled([
+        const fetches = [
           searchMusic(`underrated ${genre1} tracks 2024`),
           getCharts("ZZ"),
           getCharts("IN"),
-          searchMusic(DISCOVER_GENRES[0].query),
-          searchMusic(DISCOVER_GENRES[1].query),
-          searchMusic(`best ${genre1}`),
-          searchMusic(`deep ${genre2}`),
-        ]);
+          ...dynamicSections.map(s => searchMusic(s.query))
+        ];
+        
+        const results = await Promise.allSettled(fetches);
 
-        if (gems.status === "fulfilled") setHiddenGems(gems.value.slice(0, 8));
+        if (results[0].status === "fulfilled") setHiddenGems(results[0].value.slice(0, 8));
 
-        if (globalData.status === "fulfilled") {
-          const g = globalData.value;
-          setGlobalCharts((g as any[]).slice(0, 10));
-        }
-        if (indiaData.status === "fulfilled") {
-          const ind = indiaData.value;
-          setIndiaCharts((ind as any[]).slice(0, 10));
-        }
+        if (results[1].status === "fulfilled") setGlobalCharts((results[1].value as any[]).slice(0, 10));
+        if (results[2].status === "fulfilled") setIndiaCharts((results[2].value as any[]).slice(0, 10));
 
         const built: { label: string; color: string; tracks: Track[] }[] = [];
-        DISCOVER_GENRES.forEach((genre, i) => {
-          const result = genreResults[i];
+        dynamicSections.forEach((section, i) => {
+          const result = results[3 + i];
           if (result?.status === "fulfilled" && (result.value as Track[]).length > 0) {
-            built.push({ label: genre.label, color: genre.color, tracks: (result.value as Track[]).slice(0, 6) });
+            built.push({ label: section.label, color: section.color, tracks: (result.value as Track[]).slice(0, 6) });
           }
         });
         setGenreSections(built);

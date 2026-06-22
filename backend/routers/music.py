@@ -128,13 +128,17 @@ async def get_radio(seed_id: str = Query(..., min_length=1)):
     for item in radio_queue.get("tracks", []):
         vid = item.get("videoId")
         if not vid: continue
+        
+        # ytmusicapi get_watch_playlist sometimes returns 'thumbnail' instead of 'thumbnails'
+        thumbs = item.get("thumbnail") or item.get("thumbnails")
+        
         tracks.append({
             "id": vid,
             "title": item.get("title", ""),
             "artist": ", ".join(a.get("name", "") for a in item.get("artists", [])),
             "album": item.get("album", {}).get("name") if item.get("album") else None,
             "duration": item.get("length"),
-            "thumbnail": Formatter.get_thumbnail(item.get("thumbnails"))
+            "thumbnail": Formatter.get_thumbnail(thumbs)
         })
     return {"queue": tracks}
 
