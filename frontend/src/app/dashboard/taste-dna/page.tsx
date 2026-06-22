@@ -263,7 +263,7 @@ export default function TasteDNAPage() {
               Core Genres
             </h3>
             <div className="flex flex-wrap gap-3 relative z-10">
-              {evolvedGenres.map((g, i) => (
+              {evolvedGenres.map((g: string, i: number) => (
                 <span key={i} className={`px-4 py-2 rounded-full bg-gradient-to-r ${COLORS[i % COLORS.length]} text-white text-sm font-bold shadow-md hover:scale-105 transition-transform cursor-default`}>
                   {g}
                 </span>

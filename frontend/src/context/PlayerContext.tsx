@@ -35,6 +35,7 @@ interface PlayerContextType {
   toggleRepeat: () => void;
   toggleMagicShuffle: () => void;
   clearQueue: () => void;
+  moveTrackInQueue: (oldIndex: number, newIndex: number) => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -48,7 +49,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [duration, setDuration] = useState(0);
   const [isShuffle, setIsShuffle] = useState(false);
   const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('off');
-  const [isMagicShuffle, setIsMagicShuffle] = useState(false);
+  const [isMagicShuffle, setIsMagicShuffle] = useState(true);
 
   // Refs hold latest values for use inside YT callbacks (stale closure fix)
   const currentTrackRef = useRef<Track | null>(null);
@@ -56,7 +57,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const originalQueueRef = useRef<Track[]>([]); // unshuffled backup
   const isShuffleRef = useRef(false);
   const repeatModeRef = useRef<'off' | 'all' | 'one'>('off');
-  const isMagicShuffleRef = useRef(false);
+  const isMagicShuffleRef = useRef(true);
   const magicInFlightRef = useRef(false); // prevent concurrent fetches
 
   const supabase = createClient();
@@ -430,21 +431,49 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const clearQueue = () => {
+  function clearQueue() {
+    setQueue([]);
     queueRef.current = [];
     originalQueueRef.current = [];
-    setQueue([]);
-  };
+  }
+
+  function moveTrackInQueue(oldIndex: number, newIndex: number) {
+    if (oldIndex < 0 || oldIndex >= queueRef.current.length || newIndex < 0 || newIndex >= queueRef.current.length) return;
+    const newQueue = [...queueRef.current];
+    const [moved] = newQueue.splice(oldIndex, 1);
+    newQueue.splice(newIndex, 0, moved);
+    setQueue(newQueue);
+    queueRef.current = newQueue;
+    // We also update originalQueueRef so un-shuffling doesn't lose the new order
+    originalQueueRef.current = newQueue;
+  }
 
   return (
-    <PlayerContext.Provider value={{
-      currentTrack, queue, isPlaying, volume, progress, duration,
-      playTrack, pauseTrack, resumeTrack, nextTrack, prevTrack,
-      setVolume, seekTo,
-      isShuffle, repeatMode, isMagicShuffle,
-      toggleShuffle, toggleRepeat, toggleMagicShuffle, clearQueue,
-    }}>
-      {children}
+    <PlayerContext.Provider
+      value={{
+        currentTrack,
+        queue,
+        isPlaying,
+        volume,
+        progress,
+        duration,
+        playTrack,
+        pauseTrack,
+        resumeTrack,
+        nextTrack,
+        prevTrack,
+        setVolume: setVolume,
+        seekTo,
+        isShuffle,
+        repeatMode,
+        isMagicShuffle,
+        toggleShuffle,
+        toggleRepeat,
+        toggleMagicShuffle,
+        clearQueue,
+        moveTrackInQueue,
+      }}
+    >  {children}
     </PlayerContext.Provider>
   );
 }

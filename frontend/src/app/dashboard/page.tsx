@@ -276,13 +276,31 @@ export default function HomePage() {
       )}
 
       {/* ── Trending in Your Network ── */}
-      <ShelfRow title="Trending In Your Network" icon={<Users size={20} className="text-indigo-500" />} tracks={trendingInNetwork} onPlay={playTrack} />
+      <ShelfRow 
+        title="Trending In Your Network" 
+        icon={<Users size={20} className="text-indigo-500" />} 
+        tracks={trendingInNetwork} 
+        onPlay={playTrack} 
+        href={`/dashboard/playlist?title=${encodeURIComponent("Trending In Your Network")}&query=${encodeURIComponent("top trending hits")}`}
+      />
 
       {/* ── Made For You ── */}
-      <ShelfRow title="Made For You" icon={<Zap size={20} className="text-[#FFB703]" />} tracks={madeForYou} onPlay={playTrack} />
+      <ShelfRow 
+        title="Made For You" 
+        icon={<Zap size={20} className="text-[#FFB703]" />} 
+        tracks={madeForYou} 
+        onPlay={playTrack} 
+        href={`/dashboard/playlist?title=${encodeURIComponent("Made For You")}&query=${encodeURIComponent("personalized mix best songs")}`}
+      />
 
       {/* ── Jump Back In ── */}
-      <ShelfRow title="Jump Back In" icon={<Clock size={20} className="text-gray-400" />} tracks={jumpBackIn} onPlay={playTrack} />
+      <ShelfRow 
+        title="Jump Back In" 
+        icon={<Clock size={20} className="text-gray-400" />} 
+        tracks={jumpBackIn} 
+        onPlay={playTrack} 
+        href={`/dashboard/playlist?title=${encodeURIComponent("Jump Back In")}&query=${encodeURIComponent("recently played top tracks")}`}
+      />
 
       {/* ── Trending Now (Ranked List) ── */}
       {trendingNow.length > 0 && (
@@ -317,17 +335,59 @@ export default function HomePage() {
         </section>
       )}
 
+      {/* ── Made For You ── */}
+      <ShelfRow 
+        title="Made For You" 
+        icon={<Zap size={20} className="text-[#FFB703]" />} 
+        tracks={madeForYou} 
+        onPlay={playTrack} 
+        href={`/dashboard/playlist?title=${encodeURIComponent("Made For You")}&query=${encodeURIComponent("personalized mix best songs")}`}
+      />
+
+      {/* ── Jump Back In ── */}
+      <ShelfRow 
+        title="Jump Back In" 
+        icon={<Clock size={20} className="text-gray-400" />} 
+        tracks={jumpBackIn} 
+        onPlay={playTrack} 
+        href={`/dashboard/playlist?title=${encodeURIComponent("Jump Back In")}&query=${encodeURIComponent("recently played top tracks")}`}
+      />
+
       {/* ── Your Top Mixes ── */}
-      <ShelfRow title="Your Top Mixes" icon={<Star size={20} className="text-pink-500" />} tracks={topMixes} onPlay={playTrack} />
+      <ShelfRow 
+        title="Your Top Mixes" 
+        icon={<Star size={20} className="text-pink-500" />} 
+        tracks={topMixes} 
+        onPlay={playTrack} 
+        href={`/dashboard/playlist?title=${encodeURIComponent("Your Top Mixes")}&query=${encodeURIComponent("best mixed hits")}`}
+      />
 
       {/* ── Recommended Stations ── */}
-      <ShelfRow title="Recommended Stations" icon={<Radio size={20} className="text-emerald-500" />} tracks={recommendedStations} onPlay={playTrack} />
+      <ShelfRow 
+        title="Recommended Stations" 
+        icon={<Radio size={20} className="text-emerald-500" />} 
+        tracks={recommendedStations} 
+        onPlay={playTrack} 
+        href={`/dashboard/playlist?title=${encodeURIComponent("Recommended Stations")}&query=${encodeURIComponent("popular radio stations")}`}
+      />
 
       {/* ── New Releases ── */}
-      <ShelfRow title="New Releases" icon={<Sparkles size={20} className="text-violet-500" />} tracks={newReleases} onPlay={playTrack} />
+      <ShelfRow 
+        title="New Releases" 
+        icon={<Sparkles size={20} className="text-violet-500" />} 
+        tracks={newReleases} 
+        onPlay={playTrack} 
+        href={`/dashboard/playlist?title=${encodeURIComponent("New Releases")}&query=${encodeURIComponent("latest new releases")}`}
+      />
 
       {/* ── Popular Albums ── */}
-      <ShelfRow title="Popular Albums" icon={<Disc3 size={20} className="text-purple-500" />} tracks={popularAlbums} onPlay={playTrack} />
+      <ShelfRow 
+        title="Popular Albums" 
+        icon={<Disc3 size={20} className="text-purple-500" />} 
+        tracks={popularAlbums} 
+        onPlay={playTrack} 
+        href={`/dashboard/playlist?title=${encodeURIComponent("Popular Albums")}&query=${encodeURIComponent("top charting albums")}`}
+      />
     </div>
   );
 }

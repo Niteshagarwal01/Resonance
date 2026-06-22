@@ -9,7 +9,7 @@ interface Track {
   title: string;
   artist: string;
   thumbnail?: string;
-  duration?: string;
+  duration?: string | null;
 }
 
 interface Playlist {
@@ -20,7 +20,7 @@ interface Playlist {
 
 interface SongActionsProps {
   track: Track;
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
   showLabel?: boolean;
 }
 

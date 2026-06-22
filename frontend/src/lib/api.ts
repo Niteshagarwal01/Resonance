@@ -1,7 +1,7 @@
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000/api";
 
 const fetchWithTimeout = async (url: string, options: RequestInit = {}) => {
-  const timeout = 15000;
+  const timeout = 30000;
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
   try {

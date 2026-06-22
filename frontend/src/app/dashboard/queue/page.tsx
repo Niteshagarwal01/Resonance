@@ -16,7 +16,7 @@ interface HistoryRow {
 }
 
 export default function QueuePage() {
-  const { queue, currentTrack, playTrack, isPlaying, toggleShuffle, isShuffle, clearQueue } = usePlayer();
+  const { queue, currentTrack, playTrack, isPlaying, toggleShuffle, isShuffle, clearQueue, moveTrackInQueue } = usePlayer();
   const [dbHistory, setDbHistory] = useState<HistoryRow[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -178,34 +178,62 @@ export default function QueuePage() {
               </div>
             ) : (
               <div className="space-y-1">
-                {upNext.map((track, idx) => (
-                  <div
-                    key={`next-${track.id}-${idx}`}
-                    onClick={() => playTrack(track, queue)}
-                    className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white hover:shadow-sm transition-all cursor-pointer border border-transparent hover:border-gray-100"
-                  >
-                    <span className="text-sm font-bold text-gray-300 w-5 text-center group-hover:hidden tabular-nums">{idx + 1}</span>
-                    <Play size={14} fill="#FFB703" className="text-[#FFB703] hidden group-hover:block shrink-0" />
-                    <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-gray-100">
-                      {track.thumbnail && <Image src={track.thumbnail} alt={track.title} fill className="object-cover" unoptimized />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-[#1A1A1A] text-sm truncate group-hover:text-[#FFB703] transition-colors">{track.title}</p>
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs text-gray-500 truncate">{track.artist}</p>
-                        {(track as any).isMagic && (
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-pink-500 bg-pink-50 px-1.5 py-0.5 rounded-md">
-                            ✨ Magic
-                          </span>
-                        )}
+                {upNext.map((track, idx) => {
+                  const absoluteIdx = currentIndex + 1 + idx;
+                  return (
+                    <div
+                      key={`next-${track.id}-${idx}`}
+                      onClick={() => playTrack(track, queue)}
+                      className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-white hover:shadow-sm transition-all cursor-pointer border border-transparent hover:border-gray-100"
+                    >
+                      <span className="text-sm font-bold text-gray-300 w-5 text-center group-hover:hidden tabular-nums">{idx + 1}</span>
+                      <Play size={14} fill="#FFB703" className="text-[#FFB703] hidden group-hover:block shrink-0" />
+                      <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-gray-100">
+                        {track.thumbnail && <Image src={track.thumbnail} alt={track.title} fill className="object-cover" unoptimized />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-[#1A1A1A] text-sm truncate group-hover:text-[#FFB703] transition-colors">{track.title}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs text-gray-500 truncate">{track.artist}</p>
+                          {(track as any).isMagic && (
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-pink-500 bg-pink-50 px-1.5 py-0.5 rounded-md">
+                              ✨ Magic
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+                        <button 
+                          onClick={() => {
+                            // move up (absoluteIdx - 1) unless it's the very first upNext
+                            if (absoluteIdx > currentIndex + 1) {
+                              moveTrackInQueue(absoluteIdx, absoluteIdx - 1);
+                            }
+                          }}
+                          className="p-1.5 text-gray-400 hover:text-[#1A1A1A] hover:bg-gray-100 rounded-md transition-colors"
+                          title="Move Up"
+                        >
+                          ↑
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if (absoluteIdx < queue.length - 1) {
+                              moveTrackInQueue(absoluteIdx, absoluteIdx + 1);
+                            }
+                          }}
+                          className="p-1.5 text-gray-400 hover:text-[#1A1A1A] hover:bg-gray-100 rounded-md transition-colors"
+                          title="Move Down"
+                        >
+                          ↓
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+                        <SongActions track={track} size="sm" />
+                        <span className="text-xs text-gray-400 font-medium tabular-nums w-8 text-right">{track.duration || "—"}</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
-                      <SongActions track={track} size="sm" />
-                      <span className="text-xs text-gray-400 font-medium tabular-nums">{track.duration || "—"}</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
