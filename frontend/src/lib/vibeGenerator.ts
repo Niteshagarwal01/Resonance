@@ -77,21 +77,17 @@ export async function generateLiveVibe(
       }
     }
 
-    // 3. Contextual Genre searches (Anchored to top artists to prevent global generic drift)
+    // 3. Contextual Genre searches
     if (eGenres && eGenres.length > 0) {
-      const anchor = eArtists && eArtists.length > 0 ? eArtists[0].name : "";
       for (const genre of eGenres.slice(0, 2)) {
-        const query = anchor ? `${genre} songs like ${anchor}` : `${genre} hits`;
-        sources.push(searchMusic(query).catch(() => []));
+        sources.push(searchMusic(`${genre} hits`).catch(() => []));
       }
     }
 
     // 4. Core vibe context
     if (dnaData?.core_vibe) {
       const vibe = dnaData.core_vibe.replace(/[^\w\s]/gi, "").trim();
-      const anchor = eArtists && eArtists.length > 0 ? eArtists[0].name : "";
-      const query = anchor ? `${vibe} music like ${anchor}` : `${vibe} playlist`;
-      sources.push(searchMusic(query).catch(() => []));
+      sources.push(searchMusic(`${vibe} playlist`).catch(() => []));
     }
 
     const results = await Promise.all(sources);
