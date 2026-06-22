@@ -688,7 +688,7 @@ export default function Home() {
                 <Globe size={26} color="#FFB703" />
               </div>
               <motion.h3 whileHover={{ color: "#FFB703" }} transition={{ duration: 0.2 }} style={{ fontSize: 22, fontWeight: 900, letterSpacing: "-0.04em", color: "white", margin: "0 0 8px" }}>100% Open Source</motion.h3>
-              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", lineHeight: 1.7, margin: 0 }}>Fork it. Contribute. Self-host. Star on GitHub.</p>
+              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", lineHeight: 1.7, margin: 0 }}>Fork it. Contribute. Self-host. <a href="https://github.com/Niteshagarwal01/Resonance" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>Star on GitHub</a>.</p>
               <div className="flex items-center gap-2 mt-5">
                 {[...Array(5)].map((_, i) => <Star key={i} size={13} fill="#FFB703" color="#FFB703" />)}
                 <span style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.5)", marginLeft: 6 }}>4.9 / 5.0</span>
@@ -747,7 +747,7 @@ export default function Home() {
                 { icon: Play, color: "#a3e4b0", label: "01 — The Catalog Bypass", desc: "ytmusicapi pulls from 100M+ songs on YouTube Music. Free. No licensing. No DRM." },
                 { icon: Zap, color: "#FFB703", label: "02 — Algorithmic Hijacking", desc: "Auto-Play fires YouTube's own neural network endpoints. Their AI, inside your player." },
                 { icon: Users, color: "#818cf8", label: "03 — Supabase Community", desc: "Your listening history, playlists and likes sync in real-time to power the global feed." },
-                { icon: Globe, color: "#f87171", label: "04 — Open Platform", desc: "100% open-source. Star on GitHub, fork it, self-host it. The music is yours." },
+                { icon: Globe, color: "#f87171", label: "04 — Open Platform", desc: <>100% open-source. <a href="https://github.com/Niteshagarwal01/Resonance" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">Star on GitHub</a>, fork it, self-host it. The music is yours.</> },
               ].map((step, i) => (
                 <motion.div key={i}
                   initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0.12 * i, type: "spring", stiffness: 80 }}
@@ -854,10 +854,13 @@ export default function Home() {
               <p style={{ fontSize: 12, fontWeight: 800, color: "rgba(255,255,255,0.2)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 24px" }}>Product</p>
               <div className="flex flex-col gap-4">
                 {["Features", "How It Works", "Timeline", "Pricing", "GitHub"].map(l => (
-                  <Link key={l} href="#" style={{ color: "rgba(255,255,255,0.45)", fontWeight: 700, fontSize: 16, textDecoration: "none", transition: "color 0.2s" }}
-                    onMouseEnter={e => (e.currentTarget.style.color = "white")}
-                    onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.45)")}
-                  >{l}</Link>
+                  <li key={l} style={{ listStyle: "none" }}>
+                    {l === "GitHub" ? (
+                      <a href="https://github.com/Niteshagarwal01/Resonance" target="_blank" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,0.4)", textDecoration: "none", fontSize: 14 }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.4)"}>{l}</a>
+                    ) : (
+                      <a href="#" style={{ color: "rgba(255,255,255,0.4)", textDecoration: "none", fontSize: 14 }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.4)"}>{l}</a>
+                    )}
+                  </li>
                 ))}
               </div>
             </div>
@@ -881,7 +884,11 @@ export default function Home() {
             </p>
             <div className="flex items-center gap-6">
               {["Privacy", "Terms", "GitHub"].map(l => (
-                <Link key={l} href="#" style={{ fontSize: 13, color: "rgba(255,255,255,0.25)", fontWeight: 700, textDecoration: "none" }}>{l}</Link>
+                l === "GitHub" ? (
+                  <a key={l} href="https://github.com/Niteshagarwal01/Resonance" target="_blank" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,0.45)", fontSize: 13, fontWeight: 700, textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "white"} onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.45)"}>{l}</a>
+                ) : (
+                  <Link key={l} href="#" style={{ color: "rgba(255,255,255,0.45)", fontSize: 13, fontWeight: 700, textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "white"} onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.45)"}>{l}</Link>
+                )
               ))}
             </div>
           </div>

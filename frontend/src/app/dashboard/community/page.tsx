@@ -10,6 +10,10 @@ export default function CommunityPage() {
   const [vibeRooms, setVibeRooms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
+  
+  const [isCreatingRoom, setIsCreatingRoom] = useState(false);
+  const [newRoomName, setNewRoomName] = useState("");
+
   const supabase = createClient();
 
   useEffect(() => {
@@ -30,7 +34,7 @@ export default function CommunityPage() {
           const rooms: Record<string, any[]> = {};
           merged.forEach(u => {
             const vibe = u.dna?.core_vibe || "General Chat";
-            const cleanVibe = vibe.replace(/[🌙🧠💪☕💔✨📼🎉🌊🚗📚💕]/g, "").trim();
+            const cleanVibe = vibe.replace(/[^\w\s]/gi, "").trim() || "General";
             if (!rooms[cleanVibe]) rooms[cleanVibe] = [];
             rooms[cleanVibe].push(u);
           });
@@ -53,6 +57,15 @@ export default function CommunityPage() {
     load();
   }, [supabase]);
 
+  const handleCreateRoom = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newRoomName.trim()) {
+      setActiveRoom(newRoomName.trim());
+      setIsCreatingRoom(false);
+      setNewRoomName("");
+    }
+  };
+
   if (activeRoom) {
     return (
       <div className="p-8 pb-32">
@@ -65,14 +78,46 @@ export default function CommunityPage() {
     <div className="p-8 pb-32">
       
       {/* Header */}
-      <div className="mb-12">
-        <h1 className="text-5xl font-black text-[#1A1A1A] mb-4 flex items-center gap-4">
-          Community <Users className="text-emerald-500" size={40} />
-        </h1>
-        <p className="text-gray-500 text-lg max-w-2xl">
-          Music is social. Join global listening rooms, share your Taste DNA, and debate the latest drops.
-        </p>
+      <div className="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-5xl font-black text-[#1A1A1A] mb-4 flex items-center gap-4">
+            Community <Users className="text-emerald-500" size={40} />
+          </h1>
+          <p className="text-gray-500 text-lg max-w-2xl">
+            Music is social. Join global listening rooms, share your Taste DNA, and debate the latest drops.
+          </p>
+        </div>
+        <button 
+          onClick={() => setIsCreatingRoom(true)}
+          className="px-6 py-3 bg-[#1A1A1A] hover:bg-[#FFB703] text-white hover:text-[#1A1A1A] font-bold rounded-full shadow-lg transition-colors flex items-center gap-2 shrink-0"
+        >
+          <Radio size={20} /> Create Vibe Room
+        </button>
       </div>
+
+      {/* Create Room Modal */}
+      {isCreatingRoom && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+            <h2 className="text-2xl font-black mb-2 text-[#1A1A1A]">Create a Vibe Room</h2>
+            <p className="text-gray-500 mb-6">Start a new public room for listening and chatting.</p>
+            <form onSubmit={handleCreateRoom}>
+              <input
+                type="text"
+                autoFocus
+                value={newRoomName}
+                onChange={e => setNewRoomName(e.target.value)}
+                placeholder="e.g. Late Night Lo-Fi"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-6 focus:outline-none focus:ring-2 focus:ring-[#FFB703] transition-all text-lg font-medium"
+              />
+              <div className="flex justify-end gap-3">
+                <button type="button" onClick={() => setIsCreatingRoom(false)} className="px-5 py-2.5 rounded-full font-bold text-gray-500 hover:bg-gray-100 transition-colors">Cancel</button>
+                <button type="submit" disabled={!newRoomName.trim()} className="px-5 py-2.5 rounded-full font-bold bg-[#FFB703] text-[#1A1A1A] disabled:opacity-50 transition-colors">Create Room</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Vibe Rooms */}
       <div className="mb-16">
