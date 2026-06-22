@@ -34,6 +34,7 @@ export function ChatRoom({ roomName, onLeave }: { roomName: string, onLeave: () 
   // Jam Session State
   const [isHosting, setIsHosting] = useState(false);
   const [activeJam, setActiveJam] = useState<JamSession | null>(null);
+  const [jamListeners, setJamListeners] = useState<any[]>([]);
 
   const supabase = createClient();
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -89,6 +90,12 @@ export function ChatRoom({ roomName, onLeave }: { roomName: string, onLeave: () 
             setActiveJam(payload as JamSession);
           }
         })
+        .on('broadcast', { event: 'jam_join' }, ({ payload }) => {
+          setJamListeners(prev => {
+            if (prev.find(u => u.userId === payload.userId)) return prev;
+            return [...prev, payload];
+          });
+        })
         .on('presence', { event: 'sync' }, () => {
           const state = channel.presenceState();
           setOnlineCount(Object.keys(state).length || 1);
@@ -125,6 +132,8 @@ export function ChatRoom({ roomName, onLeave }: { roomName: string, onLeave: () 
           }
         });
       }, 3000); // broadcast every 3s
+    } else {
+      setJamListeners([]); // Clear listeners if we stop hosting
     }
     return () => { if (interval) clearInterval(interval); };
   }, [isHosting, currentTrack, isPlaying, progress, currentUser]);
@@ -147,7 +156,17 @@ export function ChatRoom({ roomName, onLeave }: { roomName: string, onLeave: () 
   };
 
   const tuneIn = () => {
-    if (!activeJam || !activeJam.track) return;
+    if (!activeJam || !activeJam.track || !currentUser) return;
+    
+    // Notify host we tuned in
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'jam_join',
+        payload: { userId: currentUser.id, username: currentUser.username || "Listener", avatarUrl: currentUser.avatar_url }
+      });
+    }
+
     playTrack(activeJam.track, [activeJam.track]);
     setTimeout(() => {
       seekTo(activeJam.progress);
@@ -185,21 +204,47 @@ export function ChatRoom({ roomName, onLeave }: { roomName: string, onLeave: () 
         </div>
       </div>
 
+      {/* Host Banner (Shows who is listening to you) */}
+      {isHosting && currentTrack && (
+        <div className="bg-[#1A1A1A] text-white px-6 py-3 flex items-center justify-between shadow-md z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center relative overflow-hidden shrink-0">
+              <Radio size={16} className="text-[#FFB703] animate-pulse" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-[#FFB703] font-bold uppercase tracking-wider">You are Broadcasting</p>
+              <p className="text-sm font-medium truncate">Playing <span className="font-bold">{currentTrack.title}</span></p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <div className="flex -space-x-2 mr-2">
+              {jamListeners.slice(0, 3).map((l, i) => (
+                <div key={i} className="w-6 h-6 rounded-full border border-[#1A1A1A] bg-gray-600 overflow-hidden" title={l.username}>
+                  {l.avatarUrl ? <img src={l.avatarUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-indigo-500 flex items-center justify-center text-[8px]">{l.username.substring(0,2)}</div>}
+                </div>
+              ))}
+            </div>
+            <span className="text-xs text-gray-400 font-bold">{jamListeners.length} Tuned In</span>
+          </div>
+        </div>
+      )}
+
       {/* Jam Banner for Listeners */}
       {activeJam && !isHosting && (
         <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-6 py-3 flex items-center justify-between shadow-md z-10">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center relative overflow-hidden">
+            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center relative overflow-hidden shrink-0">
               <Disc size={16} className={activeJam.isPlaying ? "animate-spin" : ""} />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs text-blue-200 font-bold uppercase tracking-wider">Live Jam Session</p>
-              <p className="text-sm font-medium">
+              <p className="text-sm font-medium truncate">
                 <span className="font-bold">{activeJam.hostName}</span> is playing <span className="font-bold">{activeJam.track.title}</span>
               </p>
             </div>
           </div>
-          <button onClick={tuneIn} className="px-4 py-1.5 bg-white text-blue-600 rounded-full text-xs font-black shadow hover:scale-105 transition-transform flex items-center gap-2">
+          <button onClick={tuneIn} className="shrink-0 px-4 py-1.5 bg-white text-blue-600 rounded-full text-xs font-black shadow hover:scale-105 transition-transform flex items-center gap-2">
             <Play size={12} fill="currentColor" /> Tune In
           </button>
         </div>
