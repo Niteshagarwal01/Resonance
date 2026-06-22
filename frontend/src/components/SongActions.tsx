@@ -45,6 +45,7 @@ export function SongActions({ track, size = "sm", showLabel = false, hideQueueBu
   // Check if liked on mount
   useEffect(() => {
     async function checkLiked() {
+      setIsLiked(false);
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
       const { data } = await supabase

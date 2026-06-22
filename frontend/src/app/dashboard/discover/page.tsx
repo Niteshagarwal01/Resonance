@@ -7,6 +7,7 @@ import { Play, Compass, Globe, Zap, TrendingUp, Music2, Flame, Radio } from "luc
 import { SafeImage as Image } from "@/components/SafeImage";
 import { createClient } from "@/utils/supabase/client";
 import { motion } from "framer-motion";
+import { SongActions } from "@/components/SongActions";
 
 const DISCOVER_GENRES = [
   { label: "Indie Underground", query: "indie underrated hidden gems", color: "from-emerald-500 to-teal-600" },
@@ -39,8 +40,15 @@ function TrackCard({ track, queue, idx }: { track: any; queue: any[]; idx: numbe
           </div>
         </div>
       </div>
-      <p className="font-bold text-[#1A1A1A] text-sm truncate group-hover:text-[#FFB703] transition-colors">{track.title}</p>
-      <p className="text-xs text-gray-500 truncate mt-0.5">{track.artist}</p>
+      <div className="flex items-start justify-between gap-2 mt-2">
+        <div className="flex-1 min-w-0">
+          <p className="font-bold text-[#1A1A1A] text-sm truncate group-hover:text-[#FFB703] transition-colors">{track.title}</p>
+          <p className="text-xs text-gray-500 truncate mt-0.5">{track.artist}</p>
+        </div>
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0" onClick={e => e.stopPropagation()}>
+          <SongActions track={track} size="sm" />
+        </div>
+      </div>
     </motion.div>
   );
 }
@@ -207,6 +215,9 @@ export default function DiscoverPage() {
                   <p className="font-bold text-[#1A1A1A] text-sm truncate group-hover:text-[#FFB703] transition-colors">{track.title}</p>
                   <p className="text-xs text-gray-500 truncate">{track.artist}</p>
                 </div>
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity pr-2 shrink-0" onClick={e => e.stopPropagation()}>
+                  <SongActions track={track} size="sm" />
+                </div>
                 {track.trend && (
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full shrink-0 ${
                     track.trend === "up" ? "bg-green-50 text-green-600" :
@@ -246,6 +257,9 @@ export default function DiscoverPage() {
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-[#1A1A1A] text-sm truncate group-hover:text-[#FFB703] transition-colors">{track.title}</p>
                   <p className="text-xs text-gray-500 truncate">{track.artist}</p>
+                </div>
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity pr-2 shrink-0" onClick={e => e.stopPropagation()}>
+                  <SongActions track={track} size="sm" />
                 </div>
               </div>
             ))}

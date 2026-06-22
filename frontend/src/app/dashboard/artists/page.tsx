@@ -135,9 +135,6 @@ export default function ArtistsPage() {
           <h2 className="text-2xl font-black text-[#1A1A1A] flex items-center gap-2">
             <Star className="text-[#FFB703]" size={24} fill="currentColor" /> Your Roster
           </h2>
-          <a href="/dashboard/profile" className="text-xs font-bold text-violet-600 bg-violet-50 hover:bg-violet-100 px-4 py-2 rounded-full transition-colors flex items-center gap-1 shadow-sm">
-            Edit Taste DNA
-          </a>
         </div>
 
         {loading ? (
