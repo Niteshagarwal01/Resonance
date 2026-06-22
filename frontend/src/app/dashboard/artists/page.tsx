@@ -59,17 +59,19 @@ export default function ArtistsPage() {
         if (mergedArtists.length > 0) {
           const results = await Promise.all(
             mergedArtists.map(async (artist: any) => {
-              let realSubscribers = "1M+";
+              let realSubscribers = "";
               try {
-                const details = await getArtist(artist.id);
-                if (details?.subscribers) realSubscribers = details.subscribers;
-                if (!artist.image && details?.image) artist.image = details.image;
+                if (artist.id) {
+                  const details = await getArtist(artist.id);
+                  if (details?.subscribers) realSubscribers = details.subscribers;
+                  if (!artist.image && details?.image) artist.image = details.image;
+                }
               } catch(e) {}
 
               return {
                 id: artist.id,
                 name: artist.name,
-                image: artist.image || "https://i.ytimg.com/vi/4NRXx6U8ABQ/hqdefault.jpg",
+                image: artist.image || null,
                 followers: realSubscribers,
                 following: true
               };
@@ -92,7 +94,7 @@ export default function ArtistsPage() {
       {/* Header */}
       <div className="mb-12">
         <h1 className="text-5xl font-black text-[#1A1A1A] mb-4 flex items-center gap-4">
-          Artists <Mic2 className="text-pink-500" size={40} />
+          Fav Artists <Mic2 className="text-pink-500" size={40} />
         </h1>
         <p className="text-gray-500 text-lg max-w-2xl">
           The creators behind the resonance. Track your favorites and discover rising talent.
@@ -119,7 +121,13 @@ export default function ArtistsPage() {
               <div key={artist.id || artist.name} className="flex flex-col items-center group cursor-pointer">
                 {artist.id ? (
                   <Link href={`/dashboard/artist/${artist.id}`} className="relative w-full aspect-square rounded-full overflow-hidden mb-4 shadow-md group-hover:shadow-2xl group-hover:scale-105 transition-all duration-300 block">
-                    <img src={artist.image} alt={artist.name} className="w-full h-full object-cover" />
+                    {artist.image ? (
+                      <img src={artist.image} alt={artist.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                        <Mic2 size={48} className="text-gray-300" />
+                      </div>
+                    )}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                       <div className="bg-[#1A1A1A] text-white px-3 py-1 rounded-full text-xs font-bold opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all">
                         View Profile
@@ -128,11 +136,21 @@ export default function ArtistsPage() {
                   </Link>
                 ) : (
                   <div className="relative w-full aspect-square rounded-full overflow-hidden mb-4 shadow-md">
-                    <img src={artist.image} alt={artist.name} className="w-full h-full object-cover opacity-80" />
+                    {artist.image ? (
+                      <img src={artist.image} alt={artist.name} className="w-full h-full object-cover opacity-80" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center opacity-80">
+                        <Mic2 size={48} className="text-gray-300" />
+                      </div>
+                    )}
                   </div>
                 )}
                 <h3 className="font-bold text-[#1A1A1A] text-center w-full truncate">{artist.name}</h3>
-                <p className="text-sm text-gray-500">{artist.followers} Subscribers</p>
+                {artist.followers ? (
+                  <p className="text-sm text-gray-500">{artist.followers} Subscribers</p>
+                ) : (
+                  <p className="text-sm text-gray-500">Unknown Subscribers</p>
+                )}
                 
                 <button 
                   onClick={() => toggleLikedArtist(artist)}
