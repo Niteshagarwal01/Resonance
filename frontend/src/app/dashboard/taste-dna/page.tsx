@@ -71,12 +71,12 @@ export default function TasteDNAPage() {
 
       // 2. From evolved artists
       for (const artist of eArtists.slice(0, 3)) {
-        sources.push(searchMusic(`${artist} best songs`).catch(() => []));
+        sources.push(searchMusic(`${artist} top songs`).catch(() => []));
       }
 
       // 3. From evolved genres
       for (const genre of eGenres.slice(0, 2)) {
-        sources.push(searchMusic(`${genre} hits 2024`).catch(() => []));
+        sources.push(searchMusic(`${genre} trending mixes today`).catch(() => []));
       }
 
       // 4. From core vibe
@@ -115,24 +115,20 @@ export default function TasteDNAPage() {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
 
-        const [dnaRes, historyRes] = await Promise.all([
+        const [dnaRes, likedRes] = await Promise.all([
           supabase.from("taste_dna").select("*").eq("user_id", session.user.id).single(),
-          supabase.from("listening_history").select("*").eq("user_id", session.user.id).order("played_at", { ascending: false }).limit(50),
+          supabase.from("liked_songs").select("*").eq("user_id", session.user.id).order("created_at", { ascending: false }).limit(50),
         ]);
 
         const dnaData = dnaRes.data;
         setBaseDna(dnaData);
 
-        const history = historyRes.data ?? [];
-        const seen = new Set<string>();
+        const likedData = likedRes.data ?? [];
         const hTracks: any[] = [];
-        for (const row of history) {
-          if (!seen.has(row.track_id)) {
-            seen.add(row.track_id);
-            hTracks.push({ id: row.track_id, title: row.track_title, artist: row.track_artist, thumbnail: row.track_thumbnail });
-          }
+        for (const row of likedData) {
+          hTracks.push({ id: row.track_id, title: row.track_title, artist: row.track_artist, thumbnail: row.track_thumbnail });
         }
-        setHistoryTracks(hTracks);
+        setHistoryTracks(hTracks); // We still store in historyTracks state, but it is pure liked data now
 
       } catch (err) {
         console.error("Failed to load Taste DNA:", err);

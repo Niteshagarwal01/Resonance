@@ -138,14 +138,24 @@ export default function HomePage() {
           }
         }
 
+        let dna = null;
+        if (session) {
+          const dnaRes = await supabase.from("taste_dna").select("*").eq("user_id", session.user.id).single();
+          if (dnaRes.data) dna = dnaRes.data;
+        }
+
+        const topArtist = dna?.top_artists?.[0] || "top pop";
+        const topGenre = dna?.top_genres?.[0] || "hits";
+        const coreVibe = dna?.core_vibe ? dna.core_vibe.replace(/[^\w\s]/gi, '').trim() : "viral";
+
         const [mfyReq, topMixesReq, stationsReq, trendingReq, newReq, albumsReq, networkReq] = await Promise.allSettled([
-          searchMusic("best songs 2024 hits"),
-          searchMusic("top mixes playlist"),
-          searchMusic("radio hits stations"),
-          searchMusic("india trending charts 2024"),
-          searchMusic("new releases latest songs 2024"),
-          searchMusic("popular albums 2024"),
-          searchMusic("viral trending songs 2024"),
+          searchMusic(`${topArtist} top songs`),
+          searchMusic(`${topGenre} trending mixes today`),
+          searchMusic(`${coreVibe} radio stations`),
+          searchMusic("global trending charts today"),
+          searchMusic("latest new releases"),
+          searchMusic("popular new albums"),
+          searchMusic("viral trending songs today"),
         ]);
 
         if (mfyReq.status === "fulfilled") setMadeForYou(mfyReq.value.slice(0, 10));
