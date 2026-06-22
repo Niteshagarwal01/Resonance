@@ -81,11 +81,11 @@ export default function CommunityPage() {
         </h2>
         
         {loading ? (
-          <div className="flex gap-4 overflow-x-auto pb-4">
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
             {[1,2,3,4].map(i => <div key={i} className="w-64 h-32 bg-gray-100 rounded-3xl animate-pulse shrink-0"></div>)}
           </div>
         ) : (
-          <div className="flex gap-6 overflow-x-auto pb-6 snap-x">
+          <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-6 snap-x">
             {vibeRooms.map((room, idx) => (
               <div key={idx} onClick={() => setActiveRoom(room.name)} className="shrink-0 w-72 bg-gradient-to-br from-[#1A1A1A] to-gray-900 rounded-3xl p-6 text-white shadow-xl snap-start cursor-pointer hover:scale-[1.02] transition-transform">
                 <div className="flex justify-between items-start mb-4">
