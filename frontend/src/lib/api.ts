@@ -116,7 +116,6 @@ export const searchArtists = (q: string) => api.searchArtists(q);
 export const getArtist = (id: string) => api.getArtist(id);
 export const getArtistProfile = (id: string) => api.getArtistProfile(id);
 export const getRadioQueue = (id: string) => api.getRadioQueue(id);
-export const getHomeFeed = (ids: string) => api.getHomeFeed(ids);
 export const getCharts = (country?: string) => api.getCharts(country);
 export const getMoods = () => api.getMoods();
 export const getHomeShelves = () => api.getHomeShelves();
