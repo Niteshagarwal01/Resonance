@@ -31,10 +31,18 @@ const PX = "px-8";
 function SectionHeader({ title, icon, href }: { title: string; icon?: React.ReactNode; href?: string }) {
   return (
     <div className={`flex items-center justify-between mb-5 ${PX}`}>
-      <h2 className="text-xl font-black text-[#1A1A1A] flex items-center gap-2.5">
-        {icon}
-        {title}
-      </h2>
+      {href ? (
+        <Link href={href} className="text-xl font-black text-[#1A1A1A] flex items-center gap-2.5 hover:text-[#FFB703] transition-colors group">
+          {icon}
+          {title}
+          <ChevronRight size={20} className="opacity-0 -ml-2 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+        </Link>
+      ) : (
+        <h2 className="text-xl font-black text-[#1A1A1A] flex items-center gap-2.5">
+          {icon}
+          {title}
+        </h2>
+      )}
       {href && (
         <Link href={href} className="text-xs font-bold text-gray-400 hover:text-[#FFB703] flex items-center gap-1 transition-colors">
           See all <ChevronRight size={14} />
