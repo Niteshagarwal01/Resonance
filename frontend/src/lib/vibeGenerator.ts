@@ -44,38 +44,46 @@ export async function generateLiveVibe(
 
     // 1. From listening history (most personal)
     if (hTracks && hTracks.length > 0) {
-      const seeds = hTracks.slice(0, 3);
+      const seeds = hTracks.slice(0, 2);
       for (const seed of seeds) {
         sources.push(getRadioQueue(seed.id).catch(() => []));
       }
+    } else if (eArtists && eArtists.length > 0) {
+      // Fallback to getting a radio queue based on top artist if no history
+      for (const artist of eArtists.slice(0, 1)) {
+        sources.push(
+          searchMusic(`${artist.name} song`).then(async (res) => {
+            if (res.length > 0) {
+              return await getRadioQueue(res[0].id).catch(() => res);
+            }
+            return [];
+          }).catch(() => [])
+        );
+      }
     }
 
-    // 2. From evolved artists
+    // 2. From evolved artists directly
     if (eArtists && eArtists.length > 0) {
-      for (const artist of eArtists.slice(0, 3)) {
-        if (artist.id && !artist.id.startsWith("legacy-")) {
-          sources.push(
-            getArtistProfile(artist.id)
-              .then((res) => res?.songs?.results || [])
-              .catch(() => [])
-          );
-        } else {
-          sources.push(searchMusic(`${artist.name} top songs`).catch(() => []));
-        }
+      for (const artist of eArtists.slice(0, 4)) {
+        sources.push(searchMusic(`best of ${artist.name}`).catch(() => []));
       }
     }
 
-    // 3. From evolved genres
+    // 3. Contextual Genre searches (Anchored to top artists to prevent global generic drift)
     if (eGenres && eGenres.length > 0) {
+      const anchor = eArtists && eArtists.length > 0 ? eArtists[0].name : "";
       for (const genre of eGenres.slice(0, 2)) {
-        sources.push(searchMusic(`${genre} trending mixes today`).catch(() => []));
+        const query = anchor ? `${genre} songs like ${anchor}` : `${genre} hits`;
+        sources.push(searchMusic(query).catch(() => []));
       }
     }
 
-    // 4. From core vibe
+    // 4. Core vibe context
     if (dnaData?.core_vibe) {
       const vibe = dnaData.core_vibe.replace(/[^\w\s]/gi, "").trim();
-      sources.push(searchMusic(`${vibe} music playlist`).catch(() => []));
+      const anchor = eArtists && eArtists.length > 0 ? eArtists[0].name : "";
+      const query = anchor ? `${vibe} music like ${anchor}` : `${vibe} playlist`;
+      sources.push(searchMusic(query).catch(() => []));
     }
 
     const results = await Promise.all(sources);
