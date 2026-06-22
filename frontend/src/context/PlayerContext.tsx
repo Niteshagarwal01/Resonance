@@ -34,6 +34,7 @@ interface PlayerContextType {
   toggleShuffle: () => void;
   toggleRepeat: () => void;
   toggleMagicShuffle: () => void;
+  clearQueue: () => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -426,13 +427,19 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const clearQueue = () => {
+    queueRef.current = [];
+    originalQueueRef.current = [];
+    setQueue([]);
+  };
+
   return (
     <PlayerContext.Provider value={{
       currentTrack, queue, isPlaying, volume, progress, duration,
       playTrack, pauseTrack, resumeTrack, nextTrack, prevTrack,
       setVolume, seekTo,
       isShuffle, repeatMode, isMagicShuffle,
-      toggleShuffle, toggleRepeat, toggleMagicShuffle,
+      toggleShuffle, toggleRepeat, toggleMagicShuffle, clearQueue,
     }}>
       {children}
     </PlayerContext.Provider>

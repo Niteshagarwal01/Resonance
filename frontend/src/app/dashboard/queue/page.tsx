@@ -3,7 +3,7 @@
 import { usePlayer } from "@/context/PlayerContext";
 import { createClient } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
-import { ListMusic, Play, Disc3, Clock, Shuffle, ChevronDown } from "lucide-react";
+import { ListMusic, Play, Disc3, Clock, Shuffle, ChevronDown, Trash2 } from "lucide-react";
 import Image from "next/image";
 
 interface HistoryRow {
@@ -15,9 +15,10 @@ interface HistoryRow {
 }
 
 export default function QueuePage() {
-  const { queue, currentTrack, playTrack, isPlaying, toggleShuffle, isShuffle } = usePlayer();
+  const { queue, currentTrack, playTrack, isPlaying, toggleShuffle, isShuffle, clearQueue } = usePlayer();
   const [dbHistory, setDbHistory] = useState<HistoryRow[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const supabase = createClient();
 
   // Fetch real listening history from Supabase
@@ -84,16 +85,41 @@ export default function QueuePage() {
           <h1 className="text-xl font-black text-[#1A1A1A]">Queue</h1>
           <span className="text-sm text-gray-400 font-medium">{upNext.length} up next</span>
         </div>
-        <button
-          onClick={toggleShuffle}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all border ${
-            isShuffle
-              ? "bg-[#FFB703] text-[#1A1A1A] border-[#FFB703] shadow-md shadow-[#FFB703]/30"
-              : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
-          }`}
-        >
-          <Shuffle size={16} /> Shuffle
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={toggleShuffle}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all border ${
+              isShuffle
+                ? "bg-[#FFB703] text-[#1A1A1A] border-[#FFB703] shadow-md shadow-[#FFB703]/30"
+                : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
+            }`}
+          >
+            <Shuffle size={16} /> Shuffle
+          </button>
+          {upNext.length > 0 && (
+            showClearConfirm ? (
+              <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-full px-3 py-1.5">
+                <span className="text-xs font-bold text-red-600">Clear queue?</span>
+                <button
+                  onClick={() => { clearQueue(); setShowClearConfirm(false); }}
+                  className="text-xs font-black text-red-600 hover:text-red-700"
+                >Yes</button>
+                <span className="text-red-300">·</span>
+                <button
+                  onClick={() => setShowClearConfirm(false)}
+                  className="text-xs font-bold text-gray-400 hover:text-gray-600"
+                >No</button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowClearConfirm(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold border bg-white text-gray-500 border-gray-200 hover:border-red-300 hover:text-red-500 transition-all"
+              >
+                <Trash2 size={16} /> Clear
+              </button>
+            )
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-0">
