@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
 import { ListMusic, Play, Disc3, Clock, Shuffle, ChevronDown, Trash2 } from "lucide-react";
 import Image from "next/image";
+import { SongActions } from "@/components/SongActions";
 
 interface HistoryRow {
   id: string;
@@ -199,7 +200,10 @@ export default function QueuePage() {
                         )}
                       </div>
                     </div>
-                    <span className="text-xs text-gray-400 font-medium shrink-0 tabular-nums">{track.duration || "—"}</span>
+                    <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+                      <SongActions track={track} size="sm" />
+                      <span className="text-xs text-gray-400 font-medium tabular-nums">{track.duration || "—"}</span>
+                    </div>
                   </div>
                 ))}
               </div>
