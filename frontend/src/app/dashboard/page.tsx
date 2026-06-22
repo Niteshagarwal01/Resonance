@@ -8,6 +8,8 @@ import { Play, TrendingUp, Music2, Clock, Zap, Star, Radio, Disc3, Mic2, Users, 
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import { SongActions } from "@/components/SongActions";
+import { generateLiveVibe, computeEvolvedDNA } from "@/lib/vibeGenerator";
+import { Loader2 } from "lucide-react";
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -121,6 +123,7 @@ export default function HomePage() {
   const [trendingInNetwork, setTrendingInNetwork] = useState<Track[]>([]);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [userDna, setUserDna] = useState<any>(null);
+  const [vibeLoading, setVibeLoading] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -134,35 +137,34 @@ export default function HomePage() {
           ]);
 
           if (profileRes.status === "fulfilled" && profileRes.value.data) setUserProfile(profileRes.value.data);
-          if (dnaRes.status === "fulfilled" && dnaRes.value.data) setUserDna(dnaRes.value.data);
+          
+          let historyData: any[] = [];
           if (historyRes.status === "fulfilled" && historyRes.value.data) {
-            const history = historyRes.value.data;
+            historyData = historyRes.value.data;
+            const history = historyData;
             const unique = Array.from(new Set(history.map((h: any) => h.track_id))).map(id => {
               const h = history.find((x: any) => x.track_id === id);
               return { id: h.track_id, title: h.track_title, artist: h.track_artist, thumbnail: h.track_thumbnail };
             });
             setRecentlyPlayed(unique as Track[]);
-            setJumpBackIn([...unique].reverse() as Track[]);
+            setJumpBackIn([...unique] as Track[]);
           }
-        }
-
-        // Use the new Taste Evolution Engine via /api/home
-        let homeMixes: Track[] = [];
-        try {
-          // Since getHomeMixes is an authenticated endpoint, we use the custom fetcher or api client
-          // Wait, api client (searchMusic) uses standard fetch, let's use the api class if available.
-          // For now, let's just use fetch manually to ensure token is passed.
-          if (session) {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"}/api/home`, {
-              headers: { "Authorization": `Bearer ${session.access_token}` }
-            });
-            if (res.ok) {
-              const data = await res.json();
-              homeMixes = data.tracks || [];
-            }
+          
+          if (dnaRes.status === "fulfilled" && dnaRes.value.data) {
+            const dna = dnaRes.value.data;
+            setUserDna(dna);
+            
+            // Auto-generate Vibe asynchronously
+            setVibeLoading(true);
+            const { evolvedArtists, evolvedGenres } = computeEvolvedDNA(dna, historyData);
+            generateLiveVibe(dna, historyData, evolvedArtists, evolvedGenres).then(vibe => {
+              if (vibe.length > 0) {
+                setMadeForYou(vibe.slice(0, 15));
+                setTopMixes(vibe.slice(15, 30));
+              }
+            }).catch(err => console.error(err))
+            .finally(() => setVibeLoading(false));
           }
-        } catch (err) {
-          console.error("Failed to load evolved home mixes", err);
         }
 
         const [stationsReq, trendingReq, newReq, albumsReq, networkReq] = await Promise.allSettled([
@@ -172,14 +174,6 @@ export default function HomePage() {
           searchMusic("popular new albums"),
           searchMusic("viral trending songs today"),
         ]);
-
-        if (homeMixes.length > 0) {
-          setMadeForYou(homeMixes.slice(0, 10));
-          setTopMixes(homeMixes.slice(10, 20));
-        } else {
-          setMadeForYou([]);
-          setTopMixes([]);
-        }
 
         if (stationsReq.status === "fulfilled") setRecommendedStations(stationsReq.value.slice(0, 10));
         if (trendingReq.status === "fulfilled") setTrendingNow(trendingReq.value.slice(0, 12));
@@ -279,12 +273,14 @@ export default function HomePage() {
                 Curated from {userDna.favorite_genres?.slice(0, 2).join(" & ") || "your listening habits"} — always fresh.
               </p>
               <div className="flex items-center gap-3 justify-center md:justify-start">
-                <Link
-                  href="/dashboard/taste-dna"
-                  className="bg-[#FFB703] text-[#1A1A1A] px-6 py-2.5 rounded-full font-bold text-sm hover:scale-105 transition-transform flex items-center gap-2"
+                <button
+                  disabled={vibeLoading || madeForYou.length === 0}
+                  onClick={() => playTrack(madeForYou[0], madeForYou)}
+                  className="bg-[#FFB703] text-[#1A1A1A] px-6 py-2.5 rounded-full font-bold text-sm hover:scale-105 transition-transform flex items-center gap-2 disabled:opacity-50 disabled:hover:scale-100"
                 >
-                  <Play size={16} fill="black" /> Generate Live Vibe
-                </Link>
+                  {vibeLoading ? <Loader2 size={16} className="animate-spin text-black" /> : <Play size={16} fill="black" />}
+                  {vibeLoading ? "Generating..." : "Play Your Vibe"}
+                </button>
                 <Link href="/dashboard/taste-dna" className="bg-white/10 hover:bg-white/20 text-white border border-white/10 px-6 py-2.5 rounded-full font-bold text-sm transition-colors backdrop-blur-md">
                   View DNA
                 </Link>
@@ -294,13 +290,12 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ── Trending in Your Network ── */}
+      {/* ── Jump Back In ── */}
       <ShelfRow 
-        title="Trending In Your Network" 
-        icon={<Users size={20} className="text-indigo-500" />} 
-        tracks={trendingInNetwork} 
+        title="Jump Back In" 
+        icon={<Clock size={20} className="text-gray-400" />} 
+        tracks={jumpBackIn} 
         onPlay={playTrack} 
-        href={`/dashboard/playlist?title=${encodeURIComponent("Trending In Your Network")}&query=${encodeURIComponent("top trending hits")}`}
       />
 
       {/* ── Made For You ── */}
@@ -309,16 +304,6 @@ export default function HomePage() {
         icon={<Zap size={20} className="text-[#FFB703]" />} 
         tracks={madeForYou} 
         onPlay={playTrack} 
-        href={`/dashboard/playlist?title=${encodeURIComponent("Made For You")}&query=${encodeURIComponent("personalized mix best songs")}`}
-      />
-
-      {/* ── Jump Back In ── */}
-      <ShelfRow 
-        title="Jump Back In" 
-        icon={<Clock size={20} className="text-gray-400" />} 
-        tracks={jumpBackIn} 
-        onPlay={playTrack} 
-        href={`/dashboard/playlist?title=${encodeURIComponent("Jump Back In")}&query=${encodeURIComponent("recently played top tracks")}`}
       />
 
       {/* ── Trending Now (Ranked List) ── */}
@@ -354,22 +339,12 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ── Made For You ── */}
+      {/* ── Trending In Your Network ── */}
       <ShelfRow 
-        title="Made For You" 
-        icon={<Zap size={20} className="text-[#FFB703]" />} 
-        tracks={madeForYou} 
+        title="Trending In Your Network" 
+        icon={<Users size={20} className="text-indigo-500" />} 
+        tracks={trendingInNetwork} 
         onPlay={playTrack} 
-        href={`/dashboard/playlist?title=${encodeURIComponent("Made For You")}&query=${encodeURIComponent("personalized mix best songs")}`}
-      />
-
-      {/* ── Jump Back In ── */}
-      <ShelfRow 
-        title="Jump Back In" 
-        icon={<Clock size={20} className="text-gray-400" />} 
-        tracks={jumpBackIn} 
-        onPlay={playTrack} 
-        href={`/dashboard/playlist?title=${encodeURIComponent("Jump Back In")}&query=${encodeURIComponent("recently played top tracks")}`}
       />
 
       {/* ── Your Top Mixes ── */}
@@ -378,16 +353,6 @@ export default function HomePage() {
         icon={<Star size={20} className="text-pink-500" />} 
         tracks={topMixes} 
         onPlay={playTrack} 
-        href={`/dashboard/playlist?title=${encodeURIComponent("Your Top Mixes")}&query=${encodeURIComponent("best mixed hits")}`}
-      />
-
-      {/* ── Recommended Stations ── */}
-      <ShelfRow 
-        title="Recommended Stations" 
-        icon={<Radio size={20} className="text-emerald-500" />} 
-        tracks={recommendedStations} 
-        onPlay={playTrack} 
-        href={`/dashboard/playlist?title=${encodeURIComponent("Recommended Stations")}&query=${encodeURIComponent("popular radio stations")}`}
       />
 
       {/* ── New Releases ── */}
@@ -396,7 +361,6 @@ export default function HomePage() {
         icon={<Sparkles size={20} className="text-violet-500" />} 
         tracks={newReleases} 
         onPlay={playTrack} 
-        href={`/dashboard/playlist?title=${encodeURIComponent("New Releases")}&query=${encodeURIComponent("latest new releases")}`}
       />
 
       {/* ── Popular Albums ── */}
@@ -405,7 +369,14 @@ export default function HomePage() {
         icon={<Disc3 size={20} className="text-purple-500" />} 
         tracks={popularAlbums} 
         onPlay={playTrack} 
-        href={`/dashboard/playlist?title=${encodeURIComponent("Popular Albums")}&query=${encodeURIComponent("top charting albums")}`}
+      />
+
+      {/* ── Recommended Stations ── */}
+      <ShelfRow 
+        title="Recommended Stations" 
+        icon={<Radio size={20} className="text-emerald-500" />} 
+        tracks={recommendedStations} 
+        onPlay={playTrack} 
       />
     </div>
   );

@@ -6,6 +6,7 @@ import { Activity, Sparkles, Compass, Music, Mic2, Loader2, Play, Pause, Shuffle
 import { createClient } from "@/utils/supabase/client";
 import { usePlayer } from "@/context/PlayerContext";
 import { searchMusic, getRadioQueue, getArtistProfile } from "@/lib/api";
+import { generateLiveVibe, computeEvolvedDNA } from "@/lib/vibeGenerator";
 import { SafeImage as Image } from "@/components/SafeImage";
 import { SongActions } from "@/components/SongActions";
 
@@ -30,91 +31,15 @@ export default function TasteDNAPage() {
   const [playlistLoading, setPlaylistLoading] = useState(false);
 
   // Evolved DNA State
-  const evolvedArtists = useMemo(() => {
-    if (!baseDna) return [];
-    const base = baseDna.top_artists ?? [];
-    
-    // Extract recent top artists from history
-    const artistCounts: Record<string, number> = {};
-    historyTracks.forEach(t => {
-      if (t.artist) {
-        artistCounts[t.artist] = (artistCounts[t.artist] || 0) + 1;
-      }
-    });
-    
-    const recentArtists = Object.entries(artistCounts)
-      .sort((a, b) => b[1] - a[1])
-      .map(entry => ({ id: null, name: entry[0], image: null }))
-      .slice(0, 5);
-
-    // Merge and deduplicate
-    const merged = [...recentArtists, ...base.map((b: any) => typeof b === "string" ? { id: null, name: b, image: null } : b)];
-    const unique = [];
-    const seenNames = new Set();
-    for (const a of merged) {
-       const nameKey = a.name?.toLowerCase();
-       if (nameKey && !seenNames.has(nameKey)) { 
-         seenNames.add(nameKey); 
-         unique.push(a); 
-       }
-    }
-    return unique.slice(0, 8);
+  const { evolvedArtists, evolvedGenres } = useMemo(() => {
+    return computeEvolvedDNA(baseDna, historyTracks);
   }, [baseDna, historyTracks]);
-
-  const evolvedGenres = useMemo(() => {
-    if (!baseDna) return [];
-    return baseDna.top_genres ?? [];
-  }, [baseDna]);
 
   const buildPersonalizedPlaylist = useCallback(async (dnaData: any, hTracks: any[], eArtists: any[], eGenres: string[]) => {
     setPlaylistLoading(true);
     try {
-      const sources: Promise<any[]>[] = [];
-
-      // 1. From listening history (most personal)
-      if (hTracks.length > 0) {
-        const seeds = hTracks.slice(0, 3);
-        for (const seed of seeds) {
-          sources.push(getRadioQueue(seed.id).catch(() => []));
-        }
-      }
-
-      // 2. From evolved artists
-      for (const artist of eArtists.slice(0, 3)) {
-        if (artist.id && !artist.id.startsWith("legacy-")) {
-          sources.push(getArtistProfile(artist.id).then(res => res?.songs?.results || []).catch(() => []));
-        } else {
-          sources.push(searchMusic(`${artist.name} top songs`).catch(() => []));
-        }
-      }
-
-      // 3. From evolved genres
-      for (const genre of eGenres.slice(0, 2)) {
-        sources.push(searchMusic(`${genre} trending mixes today`).catch(() => []));
-      }
-
-      // 4. From core vibe
-      if (dnaData?.core_vibe) {
-        const vibe = dnaData.core_vibe.replace(/[^\w\s]/gi, '').trim();
-        sources.push(searchMusic(`${vibe} music playlist`).catch(() => []));
-      }
-
-      const results = await Promise.all(sources);
-      const allTracks = results.flat();
-
-      // Deduplicate
-      const seen = new Set<string>();
-      const unique: any[] = [];
-      for (const t of allTracks) {
-        if (t && t.id && !seen.has(t.id)) {
-          seen.add(t.id);
-          unique.push(t);
-        }
-      }
-
-      // Shuffle and cap at 40
-      const shuffled = unique.sort(() => Math.random() - 0.5).slice(0, 40);
-      setVibePlaylist(shuffled);
+      const playlist = await generateLiveVibe(dnaData, hTracks, eArtists, eGenres);
+      setVibePlaylist(playlist);
     } catch (e) {
       console.error("Failed to build playlist:", e);
     } finally {
