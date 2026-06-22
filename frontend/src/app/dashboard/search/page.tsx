@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { searchMusic, searchArtists, Track } from "@/lib/api";
 import { usePlayer } from "@/context/PlayerContext";
-import Image from "next/image";
+import { SafeImage as Image } from "@/components/SafeImage";
 import { Search, Play, Mic2, Music2, X, Clock, TrendingUp, Disc3, Flame } from "lucide-react";
 import Link from "next/link";
 import { SongActions } from "@/components/SongActions";

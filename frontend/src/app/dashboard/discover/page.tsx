@@ -4,7 +4,7 @@ import { usePlayer } from "@/context/PlayerContext";
 import { searchMusic, getCharts, Track } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { Play, Compass, Globe, Zap, TrendingUp, Music2, Flame, Radio } from "lucide-react";
-import Image from "next/image";
+import { SafeImage as Image } from "@/components/SafeImage";
 import { createClient } from "@/utils/supabase/client";
 import { motion } from "framer-motion";
 

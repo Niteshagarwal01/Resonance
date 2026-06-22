@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePlayer } from "@/context/PlayerContext";
 import { X, Play, Pause, SkipBack, SkipForward, Repeat, Shuffle, Sparkles, Heart, ListPlus, Volume2, ChevronDown, Music2, Mic2, Disc3, ExternalLink } from "lucide-react";
-import Image from "next/image";
+import { SafeImage as Image } from "@/components/SafeImage";
 import { SongActions } from "./SongActions";
 import { getRadioQueue } from "@/lib/api";
 import Link from "next/link";

@@ -1,19 +1,21 @@
 "use client";
 
-import { Library as LibraryIcon, Play, Heart, Clock, Music, Search, Shuffle } from "lucide-react";
+import { Library as LibraryIcon, Play, Heart, Clock, Music, Search, Shuffle, ListMusic } from "lucide-react";
 import { usePlayer } from "@/context/PlayerContext";
 import { searchMusic, Track } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import Image from "next/image";
+import { SafeImage as Image } from "@/components/SafeImage";
+import Link from "next/link";
 
-type Tab = "liked" | "history";
+type Tab = "liked" | "history" | "playlists";
 
 export default function LibraryPage() {
   const { playTrack, currentTrack, isPlaying } = usePlayer();
   const [loading, setLoading] = useState(true);
   const [likedSongs, setLikedSongs] = useState<Track[]>([]);
   const [history, setHistory] = useState<Track[]>([]);
+  const [playlists, setPlaylists] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<Tab>("liked");
   const [searchQuery, setSearchQuery] = useState("");
   const supabase = createClient();
@@ -55,6 +57,10 @@ export default function LibraryPage() {
           }
         }
         setLikedSongs(uniqueLiked);
+
+        // Fetch Playlists
+        const { data: userPlaylists } = await supabase.from("playlists").select("*").eq("user_id", session.user.id).order("created_at", { ascending: false });
+        if (userPlaylists) setPlaylists(userPlaylists);
 
         // Fetch Listening History
         const { data: historyData, error: historyError } = await supabase
@@ -104,18 +110,26 @@ export default function LibraryPage() {
           <h1 className="text-5xl font-black text-[#1A1A1A] mb-4 flex items-center gap-4">
             Your Library <LibraryIcon className="text-indigo-500" size={40} />
           </h1>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3 mt-6">
             <button
               onClick={() => setActiveTab("liked")}
-              className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${
+              className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
                 activeTab === "liked" ? "bg-indigo-600 text-white shadow-md" : "bg-white border border-gray-200 text-gray-600 hover:border-gray-400"
               }`}
             >
               Liked Songs
             </button>
             <button
+              onClick={() => setActiveTab("playlists")}
+              className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
+                activeTab === "playlists" ? "bg-blue-600 text-white shadow-md" : "bg-white border border-gray-200 text-gray-600 hover:border-gray-400"
+              }`}
+            >
+              My Playlists
+            </button>
+            <button
               onClick={() => setActiveTab("history")}
-              className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${
+              className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
                 activeTab === "history" ? "bg-[#1A1A1A] text-white shadow-md" : "bg-white border border-gray-200 text-gray-600 hover:border-gray-400"
               }`}
             >
@@ -128,6 +142,29 @@ export default function LibraryPage() {
       {loading ? (
         <div className="w-full flex justify-center py-20">
           <div className="w-10 h-10 border-4 border-[#FFB703]/20 border-t-[#FFB703] rounded-full animate-spin" />
+        </div>
+      ) : activeTab === "playlists" ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          {playlists.length === 0 ? (
+            <div className="col-span-full py-20 text-center text-gray-500 flex flex-col items-center">
+              <ListMusic size={48} className="text-gray-200 mb-4" />
+              <p className="font-bold text-lg text-gray-700">No playlists yet</p>
+              <p className="text-sm">Create one from the sidebar!</p>
+            </div>
+          ) : playlists.map(pl => (
+            <Link key={pl.id} href={`/dashboard/playlists/${pl.id}`} className="group bg-white border border-gray-100 rounded-3xl p-4 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 block">
+              <div className="relative w-full aspect-square rounded-2xl bg-gradient-to-br from-indigo-50 to-blue-50 overflow-hidden mb-4 flex items-center justify-center">
+                <ListMusic size={48} className="text-blue-200 group-hover:scale-110 transition-transform duration-500" />
+                <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-white text-blue-600 flex items-center justify-center shadow-lg shadow-black/10 transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                    <Play fill="currentColor" size={20} className="ml-1" />
+                  </div>
+                </div>
+              </div>
+              <h3 className="font-bold text-[#1A1A1A] truncate">{pl.name}</h3>
+              <p className="text-xs text-gray-500 mt-1">Playlist</p>
+            </Link>
+          ))}
         </div>
       ) : (
         <div className="flex-1 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">

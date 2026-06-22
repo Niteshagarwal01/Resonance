@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { usePlayer } from "@/context/PlayerContext";
 import { Play, Pause, SkipBack, SkipForward, Volume2, Maximize2, Shuffle, Repeat, Sparkles, ListMusic, Heart } from "lucide-react";
-import Image from "next/image";
+import { SafeImage as Image } from "@/components/SafeImage";
 import Link from "next/link";
 import { NowPlayingModal } from "./NowPlayingModal";
 import { SongActions } from "./SongActions";

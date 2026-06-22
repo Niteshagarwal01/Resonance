@@ -4,7 +4,7 @@ import { usePlayer } from "@/context/PlayerContext";
 import { createClient } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
 import { ListMusic, Play, Disc3, Clock, Shuffle, ChevronDown, Trash2 } from "lucide-react";
-import Image from "next/image";
+import { SafeImage as Image } from "@/components/SafeImage";
 import { SongActions } from "@/components/SongActions";
 
 interface HistoryRow {

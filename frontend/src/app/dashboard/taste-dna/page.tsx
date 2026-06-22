@@ -1,50 +1,81 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { motion } from "framer-motion";
-import { Activity, Disc3, Layers, Zap, Heart, Sparkles, Compass, Music, Mic2, Loader2, Play, Pause, Shuffle, RefreshCw, ListMusic } from "lucide-react";
+import { useEffect, useState, useCallback, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Activity, Sparkles, Compass, Music, Mic2, Loader2, Play, Pause, Shuffle, RefreshCw, Layers } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { usePlayer } from "@/context/PlayerContext";
 import { searchMusic, getRadioQueue } from "@/lib/api";
-import Image from "next/image";
+import { SafeImage as Image } from "@/components/SafeImage";
 import { SongActions } from "@/components/SongActions";
 
 const COLORS = [
-  "bg-indigo-500", "bg-blue-500", "bg-pink-500",
-  "bg-orange-400", "bg-green-500", "bg-purple-500"
+  "from-indigo-500 to-purple-500", 
+  "from-blue-500 to-cyan-500", 
+  "from-pink-500 to-rose-500",
+  "from-orange-400 to-amber-500", 
+  "from-emerald-400 to-teal-500", 
+  "from-violet-500 to-fuchsia-500"
 ];
 
 export default function TasteDNAPage() {
   const supabase = createClient();
   const { playTrack, currentTrack, isPlaying } = usePlayer();
   const [loading, setLoading] = useState(true);
-  const [dna, setDna] = useState<any>(null);
+  
+  // Data State
+  const [baseDna, setBaseDna] = useState<any>(null);
+  const [historyTracks, setHistoryTracks] = useState<any[]>([]);
   const [vibePlaylist, setVibePlaylist] = useState<any[]>([]);
   const [playlistLoading, setPlaylistLoading] = useState(false);
 
-  const buildPersonalizedPlaylist = useCallback(async (dnaData: any, historyTracks: any[]) => {
+  // Evolved DNA State
+  const evolvedArtists = useMemo(() => {
+    if (!baseDna) return [];
+    const base = baseDna.top_artists ?? [];
+    
+    // Extract recent top artists from history
+    const artistCounts: Record<string, number> = {};
+    historyTracks.forEach(t => {
+      if (t.artist) {
+        artistCounts[t.artist] = (artistCounts[t.artist] || 0) + 1;
+      }
+    });
+    
+    const recentArtists = Object.entries(artistCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(entry => entry[0])
+      .slice(0, 5);
+
+    // Merge and deduplicate
+    return Array.from(new Set([...recentArtists, ...base])).slice(0, 8);
+  }, [baseDna, historyTracks]);
+
+  const evolvedGenres = useMemo(() => {
+    if (!baseDna) return [];
+    return baseDna.top_genres ?? [];
+  }, [baseDna]);
+
+  const buildPersonalizedPlaylist = useCallback(async (dnaData: any, hTracks: any[], eArtists: string[], eGenres: string[]) => {
     setPlaylistLoading(true);
     try {
       const sources: Promise<any[]>[] = [];
 
       // 1. From listening history (most personal)
-      if (historyTracks.length > 0) {
-        // Pick top 3 from history as seeds for radio
-        const seeds = historyTracks.slice(0, 3);
+      if (hTracks.length > 0) {
+        const seeds = hTracks.slice(0, 3);
         for (const seed of seeds) {
           sources.push(getRadioQueue(seed.id).catch(() => []));
         }
       }
 
-      // 2. From favorite artists
-      const artists: string[] = dnaData?.top_artists ?? [];
-      for (const artist of artists.slice(0, 3)) {
+      // 2. From evolved artists
+      for (const artist of eArtists.slice(0, 3)) {
         sources.push(searchMusic(`${artist} best songs`).catch(() => []));
       }
 
-      // 3. From favorite genres
-      const genres: string[] = dnaData?.top_genres ?? [];
-      for (const genre of genres.slice(0, 2)) {
+      // 3. From evolved genres
+      for (const genre of eGenres.slice(0, 2)) {
         sources.push(searchMusic(`${genre} hits 2024`).catch(() => []));
       }
 
@@ -86,24 +117,23 @@ export default function TasteDNAPage() {
 
         const [dnaRes, historyRes] = await Promise.all([
           supabase.from("taste_dna").select("*").eq("user_id", session.user.id).single(),
-          supabase.from("listening_history").select("*").eq("user_id", session.user.id).order("played_at", { ascending: false }).limit(30),
+          supabase.from("listening_history").select("*").eq("user_id", session.user.id).order("played_at", { ascending: false }).limit(50),
         ]);
 
         const dnaData = dnaRes.data;
-        setDna(dnaData);
+        setBaseDna(dnaData);
 
-        // Build history tracks array
         const history = historyRes.data ?? [];
         const seen = new Set<string>();
-        const historyTracks: any[] = [];
+        const hTracks: any[] = [];
         for (const row of history) {
           if (!seen.has(row.track_id)) {
             seen.add(row.track_id);
-            historyTracks.push({ id: row.track_id, title: row.track_title, artist: row.track_artist, thumbnail: row.track_thumbnail });
+            hTracks.push({ id: row.track_id, title: row.track_title, artist: row.track_artist, thumbnail: row.track_thumbnail });
           }
         }
+        setHistoryTracks(hTracks);
 
-        await buildPersonalizedPlaylist(dnaData, historyTracks);
       } catch (err) {
         console.error("Failed to load Taste DNA:", err);
       } finally {
@@ -111,305 +141,243 @@ export default function TasteDNAPage() {
       }
     }
     loadDNA();
-  }, [supabase, buildPersonalizedPlaylist]);
+  }, [supabase]);
+
+  // Trigger playlist build when dependencies are ready
+  useEffect(() => {
+    if (baseDna && evolvedArtists.length > 0 && vibePlaylist.length === 0 && !playlistLoading) {
+      buildPersonalizedPlaylist(baseDna, historyTracks, evolvedArtists, evolvedGenres);
+    }
+  }, [baseDna, evolvedArtists, evolvedGenres, historyTracks, vibePlaylist.length, playlistLoading, buildPersonalizedPlaylist]);
+
 
   if (loading) return (
-    <div className="w-full h-full flex flex-col items-center justify-center gap-4 p-8">
-      <div className="w-12 h-12 border-4 border-[#FFB703]/20 border-t-[#FFB703] rounded-full animate-spin" />
-      <p className="text-gray-400 font-medium animate-pulse">Building your Taste DNA...</p>
+    <div className="w-full h-screen flex flex-col items-center justify-center gap-6 p-8 bg-[#FDFBF7]">
+      <div className="relative">
+        <div className="absolute inset-0 bg-[#FFB703] blur-xl opacity-30 rounded-full animate-pulse" />
+        <div className="w-16 h-16 bg-white shadow-xl rounded-full flex items-center justify-center relative z-10">
+          <Activity size={32} className="text-[#FFB703] animate-pulse" />
+        </div>
+      </div>
+      <p className="text-[#1A1A1A] font-black text-xl tracking-tight">Evolving your Taste DNA...</p>
     </div>
   );
 
-  if (!dna) return (
-    <div className="p-8 pb-32 flex flex-col items-center justify-center gap-6 text-center">
-      <div className="w-24 h-24 bg-[#FFB703]/10 rounded-full flex items-center justify-center">
+  if (!baseDna) return (
+    <div className="p-8 pb-32 flex flex-col items-center justify-center gap-6 text-center h-screen bg-[#FDFBF7]">
+      <div className="w-24 h-24 bg-white shadow-xl rounded-full flex items-center justify-center">
         <Activity size={40} className="text-[#FFB703]" />
       </div>
-      <h2 className="text-3xl font-black text-[#1A1A1A]">No Taste DNA yet</h2>
-      <p className="text-gray-500 max-w-md">Complete the onboarding wizard to generate your sonic identity.</p>
+      <h2 className="text-4xl font-black text-[#1A1A1A]">No Taste DNA yet</h2>
+      <p className="text-gray-500 max-w-md font-medium">Complete the onboarding wizard to generate your sonic identity.</p>
     </div>
   );
 
-  const genres: string[] = dna.top_genres ?? [];
-  const artists: string[] = dna.top_artists ?? [];
-  const totalGenres = genres.length || 1;
-
   return (
-    <div className="pb-32">
-      {/* ── Hero Banner ── */}
-      <div className="relative overflow-hidden bg-[#1A1A1A] px-8 pt-8 pb-10 mb-0">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-[#FFB703] rounded-full blur-[120px] opacity-20" />
-        <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-violet-500 rounded-full blur-[120px] opacity-15" />
+    <div className="pb-32 bg-[#FDFBF7] min-h-screen selection:bg-[#FFB703] selection:text-white">
+      {/* ── Premium Evolving Hero ── */}
+      <div className="relative overflow-hidden bg-[#1A1A1A] px-8 pt-16 pb-20 mb-8 rounded-b-[3rem] shadow-2xl">
+        {/* Animated DNA Blobs */}
+        <motion.div 
+          animate={{ rotate: 360, scale: [1, 1.1, 1] }} 
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-gradient-to-br from-[#FFB703] to-orange-500 rounded-full blur-[140px] opacity-40 mix-blend-screen pointer-events-none" 
+        />
+        <motion.div 
+          animate={{ rotate: -360, scale: [1, 1.2, 1] }} 
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute -bottom-40 -left-40 w-[600px] h-[600px] bg-gradient-to-tr from-violet-600 to-fuchsia-500 rounded-full blur-[140px] opacity-40 mix-blend-screen pointer-events-none" 
+        />
         
-        <div className="relative z-10 max-w-5xl mx-auto">
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <p className="text-[#FFB703] font-bold text-xs tracking-widest uppercase mb-2 flex items-center gap-1.5">
-                <Activity size={12} /> Sonic Blueprint
+        <div className="relative z-10 max-w-6xl mx-auto flex flex-col md:flex-row gap-12 items-center">
+          <div className="flex-1 text-center md:text-left">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+              <p className="text-[#FFB703] font-black text-sm tracking-[0.2em] uppercase mb-4 flex items-center justify-center md:justify-start gap-2">
+                <Sparkles size={16} /> Evolving Sonic Identity
               </p>
-              <h1 className="text-4xl font-black text-white mb-2">
+              <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight tracking-tighter drop-shadow-lg">
                 Your Taste DNA
               </h1>
-              <p className="text-gray-400 max-w-xl">
-                Personalized playlist built from your listening history, favourite genres and artists.
+              <p className="text-xl text-gray-300 max-w-xl font-medium leading-relaxed drop-shadow">
+                Constantly learning and adapting to your vibe. Based on your {historyTracks.length > 0 ? "recent listening history" : "initial choices"}.
               </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-center">
-                <p className="text-2xl font-black text-[#FFB703]">{genres.length}</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Genres</p>
-              </div>
-              <div className="w-px h-10 bg-white/10" />
-              <div className="text-center">
-                <p className="text-2xl font-black text-[#FFB703]">{artists.length}</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Artists</p>
-              </div>
-              <div className="w-px h-10 bg-white/10" />
-              <div className="text-center">
-                <p className="text-2xl font-black text-[#FFB703]">{vibePlaylist.length}</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Songs</p>
-              </div>
-            </div>
+            </motion.div>
           </div>
 
-          {/* Genre pills */}
-          <div className="flex flex-wrap gap-2">
-            {genres.map((g, i) => (
-              <span key={i} className={`px-3 py-1 rounded-full text-white text-xs font-bold ${COLORS[i % COLORS.length]} opacity-90`}>
-                {g}
-              </span>
-            ))}
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }} 
+            animate={{ opacity: 1, scale: 1 }} 
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="flex flex-col gap-6 w-full md:w-auto"
+          >
+            {/* Stats Glass Card */}
+            <div className="bg-white/10 backdrop-blur-2xl border border-white/20 p-8 rounded-[2rem] shadow-2xl flex gap-8 justify-center">
+              <div className="text-center px-4">
+                <p className="text-4xl font-black text-white drop-shadow-md">{evolvedGenres.length}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/60 mt-1">Genres</p>
+              </div>
+              <div className="w-px h-16 bg-white/10" />
+              <div className="text-center px-4">
+                <p className="text-4xl font-black text-white drop-shadow-md">{evolvedArtists.length}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/60 mt-1">Artists</p>
+              </div>
+              <div className="w-px h-16 bg-white/10" />
+              <div className="text-center px-4">
+                <p className="text-4xl font-black text-[#FFB703] drop-shadow-md">{vibePlaylist.length}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/60 mt-1">Mix Size</p>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-8">
+      <div className="max-w-6xl mx-auto px-8">
+        
+        {/* ── Evolved DNA Breakdown ── */}
+        <div className="grid md:grid-cols-2 gap-8 mb-16">
+          {/* Top Artists Evolution */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm relative overflow-hidden group hover:shadow-xl transition-all">
+            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Mic2 size={120} />
+            </div>
+            <h3 className="text-2xl font-black text-[#1A1A1A] mb-6 flex items-center gap-3 relative z-10">
+              <span className="w-10 h-10 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center shrink-0">
+                <Mic2 size={20} />
+              </span>
+              Your Top Artists
+            </h3>
+            <div className="flex flex-wrap gap-3 relative z-10">
+              {evolvedArtists.map((artist, i) => (
+                <span key={i} className="px-4 py-2 rounded-full bg-gray-50 border border-gray-200 text-gray-700 text-sm font-bold shadow-sm hover:border-violet-300 hover:text-violet-700 hover:bg-violet-50 transition-all cursor-default">
+                  {artist}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Top Genres Evolution */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm relative overflow-hidden group hover:shadow-xl transition-all">
+            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Layers size={120} />
+            </div>
+            <h3 className="text-2xl font-black text-[#1A1A1A] mb-6 flex items-center gap-3 relative z-10">
+              <span className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                <Layers size={20} />
+              </span>
+              Core Genres
+            </h3>
+            <div className="flex flex-wrap gap-3 relative z-10">
+              {evolvedGenres.map((g, i) => (
+                <span key={i} className={`px-4 py-2 rounded-full bg-gradient-to-r ${COLORS[i % COLORS.length]} text-white text-sm font-bold shadow-md hover:scale-105 transition-transform cursor-default`}>
+                  {g}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+
         {/* ── Personalized Vibe Playlist ── */}
-        <div className="mt-8 mb-12">
-          <div className="flex items-center justify-between mb-5">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div>
-              <h2 className="text-2xl font-black text-[#1A1A1A] flex items-center gap-2.5">
-                <Sparkles size={22} className="text-[#FFB703]" />
-                Your Vibe Playlist
+              <h2 className="text-4xl font-black text-[#1A1A1A] flex items-center gap-3 tracking-tight">
+                <span className="w-12 h-12 rounded-full bg-[#FFB703]/20 text-[#FFB703] flex items-center justify-center shrink-0">
+                  <Sparkles size={24} className="animate-pulse" />
+                </span>
+                The Vibe Mix
               </h2>
-              <p className="text-sm text-gray-500 mt-1">
-                {vibePlaylist.length} songs · Personalized from your history, artists & genres
+              <p className="text-gray-500 font-medium mt-2 max-w-xl">
+                A hyper-personalized, auto-generated {vibePlaylist.length}-song playlist algorithmically blended from your evolving DNA.
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              {vibePlaylist.length > 0 && (
-                <>
-                  <button
-                    onClick={() => {
-                      const idx = Math.floor(Math.random() * vibePlaylist.length);
-                      playTrack(vibePlaylist[idx], vibePlaylist);
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 bg-white text-gray-600 text-sm font-bold hover:border-[#FFB703] hover:text-[#FFB703] transition-all"
-                  >
-                    <Shuffle size={16} /> Shuffle
-                  </button>
-                  <button
-                    onClick={() => playTrack(vibePlaylist[0], vibePlaylist)}
-                    className="flex items-center gap-2 px-5 py-2 rounded-full bg-[#FFB703] text-[#1A1A1A] text-sm font-black hover:bg-[#ffc124] hover:scale-105 active:scale-95 transition-all shadow-md"
-                  >
-                    <Play size={16} fill="currentColor" /> Play All
-                  </button>
-                </>
-              )}
-              <button
-                onClick={async () => {
-                  const { data: { session } } = await supabase.auth.getSession();
-                  if (!session) return;
-                  const { data: hist } = await supabase.from("listening_history").select("*").eq("user_id", session.user.id).order("played_at", { ascending: false }).limit(30);
-                  const seen = new Set<string>();
-                  const ht: any[] = [];
-                  for (const row of hist ?? []) {
-                    if (!seen.has(row.track_id)) { seen.add(row.track_id); ht.push({ id: row.track_id, title: row.track_title, artist: row.track_artist, thumbnail: row.track_thumbnail }); }
-                  }
-                  buildPersonalizedPlaylist(dna, ht);
-                }}
-                className="p-2.5 rounded-full border border-gray-200 bg-white text-gray-500 hover:border-gray-400 hover:text-[#1A1A1A] transition-all"
-                title="Refresh playlist"
+            
+            <div className="flex items-center gap-4 shrink-0">
+              <button 
+                onClick={() => buildPersonalizedPlaylist(baseDna, historyTracks, evolvedArtists, evolvedGenres)}
+                disabled={playlistLoading}
+                className="w-14 h-14 rounded-full bg-white border border-gray-200 text-gray-600 flex items-center justify-center hover:bg-gray-50 hover:border-gray-300 hover:text-[#1A1A1A] transition-all shadow-sm disabled:opacity-50"
+                title="Regenerate Mix"
               >
-                <RefreshCw size={16} className={playlistLoading ? "animate-spin" : ""} />
+                <RefreshCw size={24} className={playlistLoading ? "animate-spin" : ""} />
+              </button>
+              <button 
+                onClick={() => vibePlaylist.length > 0 && playTrack(vibePlaylist[0], vibePlaylist)}
+                disabled={playlistLoading || vibePlaylist.length === 0}
+                className="px-8 h-14 bg-[#FFB703] text-[#1A1A1A] rounded-full flex items-center gap-3 font-black text-lg shadow-lg hover:shadow-xl hover:-translate-y-1 active:translate-y-0 transition-all disabled:opacity-50 disabled:hover:-translate-y-0"
+              >
+                <Play fill="currentColor" size={24} /> Play Mix
               </button>
             </div>
           </div>
 
-          {/* Track List */}
-          {playlistLoading ? (
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-12 flex flex-col items-center gap-4">
-              <div className="w-10 h-10 border-4 border-[#FFB703]/20 border-t-[#FFB703] rounded-full animate-spin" />
-              <p className="text-gray-400 text-sm font-medium">Building your personalized playlist…</p>
-              <p className="text-gray-300 text-xs text-center max-w-xs">Mixing your listening history, favourite artists and genres into the perfect blend.</p>
-            </div>
-          ) : vibePlaylist.length === 0 ? (
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-12 text-center">
-              <ListMusic size={40} className="text-gray-200 mx-auto mb-3" />
-              <p className="text-gray-500 font-semibold">No songs generated yet.</p>
-              <p className="text-gray-400 text-sm mt-1">Play some songs first to personalize your playlist, then hit refresh.</p>
-            </div>
-          ) : (
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-              {/* Header */}
-              <div className="grid grid-cols-[2.5rem_1fr_auto] gap-4 px-5 py-3 border-b border-gray-50 bg-gray-50/80">
-                <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">#</div>
-                <div className="text-[10px] font-black uppercase tracking-widest text-gray-400">Title</div>
-                <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 pr-2"></div>
+          <div className="bg-white rounded-[2rem] border border-gray-100 shadow-xl overflow-hidden relative min-h-[400px]">
+            {playlistLoading ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm z-20">
+                <div className="w-16 h-16 border-4 border-[#FFB703]/20 border-t-[#FFB703] rounded-full animate-spin mb-4" />
+                <p className="font-bold text-gray-500 animate-pulse">Synthesizing tracks...</p>
               </div>
-              <div className="divide-y divide-gray-50">
+            ) : null}
+
+            <div className="grid grid-cols-[3rem_1fr_1fr_auto_auto] gap-4 px-8 py-4 border-b border-gray-100 text-xs font-black text-gray-400 uppercase tracking-widest bg-gray-50/80 sticky top-0 z-10 backdrop-blur-md">
+              <div className="text-center">#</div>
+              <div>Title</div>
+              <div className="hidden md:block">Artist</div>
+              <div></div>
+            </div>
+
+            <div className="p-2">
+              <AnimatePresence>
                 {vibePlaylist.map((track, idx) => {
-                  const isNowPlaying = currentTrack?.id === track.id && isPlaying;
+                  const isCurrentlyPlaying = currentTrack?.id === track.id && isPlaying;
                   return (
-                    <div
-                      key={`${track.id}-${idx}`}
+                    <motion.div 
+                      initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.03 }}
+                      key={`${track.id}-${idx}`} 
                       onClick={() => playTrack(track, vibePlaylist)}
-                      className="group grid grid-cols-[2.5rem_1fr_auto] gap-4 px-5 py-3 items-center hover:bg-gray-50/80 cursor-pointer transition-colors"
+                      className="group grid grid-cols-[3rem_1fr_1fr_auto_auto] gap-4 px-6 py-3.5 items-center hover:bg-gray-50 rounded-2xl transition-colors cursor-pointer"
                     >
-                      {/* Index / Playing indicator */}
                       <div className="text-center">
-                        {isNowPlaying ? (
+                        {isCurrentlyPlaying ? (
                           <div className="flex items-center justify-center gap-0.5">
-                            {[1,2,3].map(i => (
-                              <div key={i} className="w-0.5 bg-[#FFB703] rounded-full animate-bounce" style={{ height: `${6+i*3}px`, animationDelay: `${i*0.15}s` }} />
+                            {[1, 2, 3].map(i => (
+                              <div key={i} className="w-1 bg-[#FFB703] rounded-full animate-bounce" style={{ height: `${6 + i * 4}px`, animationDelay: `${i * 0.15}s` }} />
                             ))}
                           </div>
                         ) : (
                           <>
                             <span className="text-sm font-bold text-gray-300 group-hover:hidden tabular-nums">{idx + 1}</span>
-                            <Play size={14} fill="#FFB703" className="text-[#FFB703] hidden group-hover:block mx-auto" />
+                            <Play size={16} fill="#FFB703" className="text-[#FFB703] hidden group-hover:block mx-auto" />
                           </>
                         )}
                       </div>
-
-                      {/* Track info */}
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 bg-gray-100">
-                          {track.thumbnail ? (
-                            <Image src={track.thumbnail} alt={track.title} fill className="object-cover" unoptimized />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center"><Music size={16} className="text-gray-300" /></div>
-                          )}
+                      
+                      <div className="flex items-center gap-4 min-w-0">
+                        <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 shadow-sm group-hover:shadow-md transition-shadow">
+                          <Image src={track.thumbnail} alt={track.title} fill className="object-cover" unoptimized />
+                          <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
                         <div className="min-w-0">
-                          <p className={`font-bold text-sm truncate transition-colors ${isNowPlaying ? "text-[#FFB703]" : "text-[#1A1A1A] group-hover:text-[#FFB703]"}`}>
+                          <p className={`font-bold text-base truncate transition-colors ${isCurrentlyPlaying ? "text-[#FFB703]" : "text-[#1A1A1A] group-hover:text-[#FFB703]"}`}>
                             {track.title}
                           </p>
-                          <p className="text-xs text-gray-500 truncate">{track.artist}</p>
+                          <p className="text-xs text-gray-500 font-medium truncate mt-0.5 md:hidden">{track.artist}</p>
                         </div>
                       </div>
 
-                      {/* Actions */}
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0" onClick={e => e.stopPropagation()}>
-                        <SongActions track={track} size="sm" />
+                      <div className="hidden md:block min-w-0">
+                        <p className="text-sm text-gray-600 font-medium truncate group-hover:text-[#1A1A1A] transition-colors">{track.artist}</p>
                       </div>
-                    </div>
+
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+                        <SongActions track={track} />
+                      </div>
+                    </motion.div>
                   );
                 })}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ── Stats Grid ── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
-          {/* Core Vibe */}
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start mb-4">
-              <div className="w-10 h-10 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center">
-                <Zap size={20} />
-              </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Core Vibe</span>
-            </div>
-            <h3 className="text-2xl font-black text-[#1A1A1A] capitalize mb-1">
-              {dna.core_vibe ? dna.core_vibe.replace(/[🌙🧠💪☕💔✨📼🎉🌊🚗📚💕]/g, "").trim() : "Not set"}
-            </h3>
-            <p className="text-gray-400 text-sm">Your primary listening mood.</p>
-          </div>
-
-          {/* Energy */}
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start mb-4">
-              <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center">
-                <Disc3 size={20} />
-              </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Energy Level</span>
-            </div>
-            <h3 className="text-2xl font-black text-[#1A1A1A] mb-2">{dna.energy_level ?? 0}%</h3>
-            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-              <motion.div
-                className="h-full bg-blue-500 rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${dna.energy_level ?? 0}%` }}
-                transition={{ duration: 1 }}
-              />
+              </AnimatePresence>
             </div>
           </div>
-
-          {/* Discovery */}
-          <div className="bg-[#1A1A1A] p-6 rounded-3xl shadow-xl text-white relative overflow-hidden hover:scale-[1.02] transition-transform">
-            <div className="absolute -right-8 -top-8 w-32 h-32 bg-[#FFB703] blur-[50px] opacity-20 rounded-full" />
-            <div className="flex justify-between items-start mb-4 relative z-10">
-              <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center text-[#FFB703]">
-                <Compass size={20} />
-              </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Discovery</span>
-            </div>
-            <h3 className="text-2xl font-black text-[#FFB703] mb-1 relative z-10">{dna.discovery_rate ?? 0}%</h3>
-            <p className="text-gray-400 text-sm relative z-10">Music explorer score.</p>
-          </div>
-        </div>
-
-        {/* ── Genre Bars + Artist Tags ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {/* Genres */}
-          <div>
-            <h2 className="text-xl font-black text-[#1A1A1A] mb-5 flex items-center gap-2">
-              <Layers size={20} className="text-indigo-500" /> Your Genres
-            </h2>
-            {genres.length === 0 ? (
-              <p className="text-gray-400 text-sm">No genres saved yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {genres.map((g, i) => {
-                  const pct = Math.round(100 - (i / totalGenres) * 60);
-                  return (
-                    <div key={g} className="bg-white p-3.5 rounded-2xl border border-gray-100 flex items-center gap-4">
-                      <span className="font-bold text-gray-400 w-10 text-right text-sm tabular-nums">{pct}%</span>
-                      <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${pct}%` }}
-                          transition={{ duration: 0.8, delay: i * 0.1 }}
-                          className={`h-full ${COLORS[i % COLORS.length]} rounded-full`}
-                        />
-                      </div>
-                      <span className="font-bold text-[#1A1A1A] text-sm w-32 truncate">{g}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Artists */}
-          <div>
-            <h2 className="text-xl font-black text-[#1A1A1A] mb-5 flex items-center gap-2">
-              <Mic2 size={20} className="text-pink-500" /> Your Artists
-            </h2>
-            {artists.length === 0 ? (
-              <p className="text-gray-400 text-sm">No artists saved yet.</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {artists.map((a, i) => (
-                  <span key={i} className="bg-white border border-gray-200 text-[#1A1A1A] font-bold text-sm px-4 py-2 rounded-full shadow-sm hover:border-[#FFB703] hover:text-[#FFB703] hover:shadow-md transition-all cursor-default">
-                    {a}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

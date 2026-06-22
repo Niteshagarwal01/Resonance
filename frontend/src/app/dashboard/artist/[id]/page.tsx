@@ -4,7 +4,7 @@ import { usePlayer } from "@/context/PlayerContext";
 import { getArtistProfile } from "@/lib/api";
 import { useEffect, useState, use } from "react";
 import { Play, Heart, MoreHorizontal, CheckCircle2, Clock, Disc3, Music2, ChevronRight } from "lucide-react";
-import Image from "next/image";
+import { SafeImage as Image } from "@/components/SafeImage";
 import Link from "next/link";
 
 export default function ArtistPage({ params }: { params: Promise<{ id: string }> }) {

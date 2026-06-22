@@ -4,7 +4,7 @@ import { usePlayer } from "@/context/PlayerContext";
 import { getPlaylist } from "@/lib/api";
 import { useEffect, useState, use } from "react";
 import { Play, Heart, MoreHorizontal, Clock, Share2, Shuffle, ListMusic } from "lucide-react";
-import Image from "next/image";
+import { SafeImage as Image } from "@/components/SafeImage";
 import Link from "next/link";
 
 export default function PlaylistPage({ params }: { params: Promise<{ id: string }> }) {
