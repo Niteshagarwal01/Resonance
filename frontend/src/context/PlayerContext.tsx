@@ -526,6 +526,14 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setQueue([]);
     queueRef.current = [];
     originalQueueRef.current = [];
+    
+    // Reset toggle states to match user expectations of a completely clear state
+    isShuffleRef.current = false;
+    setIsShuffle(false);
+    isMagicShuffleRef.current = false;
+    setIsMagicShuffle(false);
+    repeatModeRef.current = 'off';
+    setRepeatMode('off');
   }
 
   function moveTrackInQueue(oldIndex: number, newIndex: number) {
