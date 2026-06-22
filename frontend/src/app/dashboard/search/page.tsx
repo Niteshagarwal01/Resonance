@@ -1,98 +1,40 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { searchMusic, searchArtists, Track } from "@/lib/api";
+import { useRef, useEffect } from "react";
 import { usePlayer } from "@/context/PlayerContext";
 import { SafeImage as Image } from "@/components/SafeImage";
 import { Search, Play, Mic2, Music2, X, Clock, TrendingUp, Disc3, Flame, Sparkles } from "lucide-react";
 import { SongActions } from "@/components/SongActions";
 import { ArtistCard } from "@/components/ArtistCard";
 import { useLikedArtists } from "@/hooks/useLikedArtists";
-
-// Get current year for evergreen searches
-const currentYear = new Date().getFullYear();
-
-// Spotify-style category cards with rich gradients
-const CATEGORIES = [
-  { name: "Hip-Hop", query: "hip hop hits", gradient: "from-orange-500 to-amber-600", emoji: "🎤" },
-  { name: "Pop", query: `pop songs ${currentYear}`, gradient: "from-pink-500 to-rose-400", emoji: "🌸" },
-  { name: "Indie", query: "indie alternative music", gradient: "from-emerald-500 to-teal-400", emoji: "🎸" },
-  { name: "Electronic", query: "electronic dance music", gradient: "from-blue-500 to-cyan-400", emoji: "🎛️" },
-  { name: "R&B", query: "rnb soul music", gradient: "from-indigo-500 to-violet-500", emoji: "🎶" },
-  { name: "Rock", query: "rock music best", gradient: "from-red-600 to-orange-500", emoji: "🤘" },
-  { name: "Classical", query: "classical piano music", gradient: "from-slate-600 to-gray-500", emoji: "🎹" },
-  { name: "Jazz", query: "jazz lounge music", gradient: "from-amber-600 to-yellow-500", emoji: "🎷" },
-  { name: "Workout", query: "workout motivation music", gradient: "from-lime-500 to-emerald-500", emoji: "💪" },
-  { name: "Chill", query: "lofi chill beats study", gradient: "from-sky-400 to-blue-500", emoji: "😌" },
-  { name: "Desi", query: "bollywood hindi hits", gradient: "from-orange-400 to-pink-500", emoji: "🪘" },
-  { name: "Party", query: "party hits dance", gradient: "from-fuchsia-500 to-purple-500", emoji: "🎉" },
-];
-
-const TRENDING_QUERIES = [
-  "AP Dhillon latest", `Aditya Rikhari ${currentYear}`, "King hindi songs",
-  "Bollywood top hits", "The Weeknd hits", "Drake best songs",
-];
-
-type SearchTab = "songs" | "artists";
+import { useSearch, SearchTab } from "@/hooks/useSearch";
+import { CATEGORIES, TRENDING_QUERIES } from "@/lib/constants";
+import { Track } from "@/lib/api";
 
 export default function SearchPage() {
   const { playTrack } = usePlayer();
   const { isLiked: isLikedArtist, toggleLikedArtist } = useLikedArtists();
-  const [query, setQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<SearchTab>("songs");
-  const [songResults, setSongResults] = useState<Track[]>([]);
-  const [artistResults, setArtistResults] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [categoryTracks, setCategoryTracks] = useState<Track[]>([]);
-  const [categoryName, setCategoryName] = useState<string | null>(null);
-  const [categoryLoading, setCategoryLoading] = useState(false);
+  
+  const {
+    query,
+    setQuery,
+    debouncedQuery,
+    activeTab,
+    setActiveTab,
+    searchResults,
+    artistResults,
+    loading,
+    categoryTracks,
+    categoryName,
+    setCategoryName,
+    categoryLoading,
+    browseCategory
+  } = useSearch();
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Auto-focus on mount
   useEffect(() => { inputRef.current?.focus(); }, []);
-
-  // Debounce search
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedQuery(query), 350);
-    return () => clearTimeout(t);
-  }, [query]);
-
-  // Execute search
-  useEffect(() => {
-    if (!debouncedQuery.trim()) {
-      setSongResults([]);
-      setArtistResults([]);
-      return;
-    }
-    const run = async () => {
-      setLoading(true);
-      try {
-        const [songs, artists] = await Promise.all([
-          searchMusic(debouncedQuery),
-          searchArtists(debouncedQuery),
-        ]);
-        setSongResults(songs);
-        setArtistResults(artists);
-      } finally {
-        setLoading(false);
-      }
-    };
-    run();
-  }, [debouncedQuery]);
-
-  const browseCategory = async (cat: typeof CATEGORIES[0]) => {
-    setCategoryName(cat.name);
-    setCategoryLoading(true);
-    setCategoryTracks([]);
-    setQuery("");
-    try {
-      const tracks = await searchMusic(cat.query);
-      setCategoryTracks(tracks);
-    } finally {
-      setCategoryLoading(false);
-    }
-  };
 
   const isSearching = !!debouncedQuery.trim();
   const showCategory = !isSearching && categoryName;
@@ -135,7 +77,7 @@ export default function SearchPage() {
           <div>
             {/* Tab switcher */}
             <div className="flex gap-2 mb-8 border-b border-gray-100 pb-2">
-              {(["songs", "artists"] as SearchTab[]).map(tab => (
+              {(["songs", "artists", "releases"] as SearchTab[]).map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -156,51 +98,56 @@ export default function SearchPage() {
               </div>
             ) : activeTab === "songs" ? (
               <div>
-                {songResults.length === 0 ? (
+                {!searchResults?.songs?.length ? (
                   <div className="py-24 text-center">
                     <Music2 size={64} className="text-gray-200 mx-auto mb-6" />
-                    <p className="text-xl font-black text-[#1A1A1A]">No results found</p>
+                    <p className="text-xl font-black text-[#1A1A1A]">No songs found</p>
                     <p className="text-gray-500 mt-2">Try searching for something else.</p>
                   </div>
                 ) : (
                   <div>
                     {/* Top Result Spotlight */}
-                    {songResults[0] && (
+                    {searchResults?.topResult && (
                       <div className="mb-10 grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-8">
                         <div>
                           <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-1.5"><Sparkles size={14}/> Top Result</p>
                           <div
-                            onClick={() => playTrack(songResults[0], songResults)}
-                            className="group bg-white rounded-[2rem] p-8 cursor-pointer shadow-sm hover:shadow-2xl transition-all duration-300 relative overflow-hidden"
+                            onClick={() => {
+                              if (searchResults.topResult.type === "song") {
+                                playTrack(searchResults.topResult, searchResults.songs);
+                              }
+                            }}
+                            className="group bg-white rounded-[2rem] p-8 cursor-pointer shadow-sm hover:shadow-2xl transition-all duration-300 relative overflow-hidden border border-gray-50"
                           >
-                            {/* Hover background blob */}
                             <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-[#FFB703] rounded-full mix-blend-multiply filter blur-[80px] opacity-0 group-hover:opacity-20 transition-opacity duration-700" />
                             
-                            <div className="relative w-32 h-32 rounded-2xl overflow-hidden mb-6 shadow-xl group-hover:scale-105 transition-transform duration-500">
-                              {songResults[0].thumbnail ? (
-                                <Image src={songResults[0].thumbnail} alt="" fill className="object-cover" unoptimized />
+                            <div className={`relative w-32 h-32 overflow-hidden mb-6 shadow-xl group-hover:scale-105 transition-transform duration-500 ${searchResults.topResult.type === 'artist' ? 'rounded-full' : 'rounded-2xl'}`}>
+                              {searchResults.topResult.thumbnail ? (
+                                <Image src={searchResults.topResult.thumbnail} alt="" fill className="object-cover" unoptimized />
                               ) : (
                                 <div className="w-full h-full bg-gray-100 flex items-center justify-center"><Music2 className="text-gray-300" size={40}/></div>
                               )}
                             </div>
-                            <h3 className="text-3xl font-black text-[#1A1A1A] group-hover:text-[#FFB703] transition-colors truncate">{songResults[0].title}</h3>
-                            <p className="text-gray-500 font-medium text-lg mt-1">{songResults[0].artist}</p>
+                            <h3 className="text-3xl font-black text-[#1A1A1A] group-hover:text-[#FFB703] transition-colors truncate">{searchResults.topResult.title || searchResults.topResult.name}</h3>
+                            <p className="text-gray-500 font-medium text-lg mt-1 capitalize">{searchResults.topResult.type}</p>
                             
-                            <div className="absolute bottom-8 right-8">
-                              <div className="w-16 h-16 rounded-full bg-[#FFB703] flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300">
-                                <Play size={28} fill="#1A1A1A" className="text-[#1A1A1A] ml-1.5" />
+                            {searchResults.topResult.type === "song" && (
+                              <div className="absolute bottom-8 right-8">
+                                <div className="w-16 h-16 rounded-full bg-[#FFB703] flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                                  <Play size={28} fill="#1A1A1A" className="text-[#1A1A1A] ml-1.5" />
+                                </div>
                               </div>
-                            </div>
+                            )}
                           </div>
                         </div>
 
                         <div>
                           <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">Songs</p>
                           <div className="space-y-1">
-                            {songResults.slice(0, 6).map((track, idx) => (
+                            {searchResults.songs.slice(0, 6).map((track: Track, idx: number) => (
                               <div
                                 key={track.id + idx}
-                                onClick={() => playTrack(track, songResults)}
+                                onClick={() => playTrack(track, searchResults.songs)}
                                 className="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white hover:shadow-sm transition-all cursor-pointer border border-transparent hover:border-gray-100"
                               >
                                 <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-gray-100 shadow-sm">
@@ -214,7 +161,7 @@ export default function SearchPage() {
                                   <p className="text-[13px] text-gray-500 truncate">{track.artist}</p>
                                 </div>
                                 <div className="flex items-center gap-3 shrink-0" onClick={e => e.stopPropagation()}>
-                                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <div>
                                     <SongActions track={track} size="sm" />
                                   </div>
                                   <span className="text-xs text-gray-400 font-medium tabular-nums w-10 text-right">{track.duration || "—"}</span>
@@ -227,14 +174,14 @@ export default function SearchPage() {
                     )}
 
                     {/* Full results list */}
-                    {songResults.length > 6 && (
+                    {(!searchResults?.topResult || searchResults.songs.length > 6) && (
                       <div>
                         <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4 border-t border-gray-100 pt-6">More Songs</p>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                          {songResults.slice(6).map((track, idx) => (
+                          {searchResults.songs.slice(searchResults?.topResult ? 6 : 0).map((track: Track, idx: number) => (
                             <div
                               key={track.id + idx}
-                              onClick={() => playTrack(track, songResults)}
+                              onClick={() => playTrack(track, searchResults.songs)}
                               className="group flex items-center gap-3 p-3 rounded-2xl bg-white border border-gray-50 hover:border-[#FFB703]/30 hover:shadow-md transition-all cursor-pointer"
                             >
                               <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-gray-100">
@@ -247,7 +194,7 @@ export default function SearchPage() {
                                 <p className="font-bold text-[#1A1A1A] text-sm truncate group-hover:text-[#FFB703] transition-colors">{track.title}</p>
                                 <p className="text-xs text-gray-500 truncate">{track.artist}</p>
                               </div>
-                              <div className="flex items-center gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+                              <div className="flex items-center gap-2 shrink-0 transition-opacity" onClick={e => e.stopPropagation()}>
                                 <SongActions track={track} size="sm" />
                               </div>
                             </div>
@@ -258,10 +205,10 @@ export default function SearchPage() {
                   </div>
                 )}
               </div>
-            ) : (
+            ) : activeTab === "artists" ? (
               // Artists tab
               <div>
-                {artistResults.length === 0 ? (
+                {artistResults.length === 0 && (!searchResults?.artists || searchResults.artists.length === 0) ? (
                   <div className="py-24 text-center">
                     <Mic2 size={64} className="text-gray-200 mx-auto mb-6" />
                     <p className="text-xl font-black text-[#1A1A1A]">No artists found</p>
@@ -269,7 +216,8 @@ export default function SearchPage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8">
-                    {artistResults.map((artist) => {
+                    {/* Combine artistResults and searchResults.artists, deduplicate by ID */}
+                    {Array.from(new Map([...artistResults, ...(searchResults?.artists || [])].map(a => [a.id, a])).values()).map((artist: any) => {
                       const isLiked = isLikedArtist(artist.id);
                       return (
                         <ArtistCard 
@@ -280,6 +228,33 @@ export default function SearchPage() {
                         />
                       );
                     })}
+                  </div>
+                )}
+              </div>
+            ) : (
+              // Releases Tab
+              <div>
+                {!searchResults?.albums?.length ? (
+                  <div className="py-24 text-center">
+                    <Disc3 size={64} className="text-gray-200 mx-auto mb-6" />
+                    <p className="text-xl font-black text-[#1A1A1A]">No releases found</p>
+                    <p className="text-gray-500 mt-2">Try searching for a different album or single.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                    {searchResults.albums.map((album: any) => (
+                      <div key={album.id} className="group flex flex-col">
+                        <div className="relative aspect-square rounded-[2rem] overflow-hidden mb-4 bg-gray-100 shadow-sm border border-gray-50">
+                          {album.thumbnail ? (
+                            <Image src={album.thumbnail} alt={album.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
+                          ) : (
+                            <div className="w-full h-full bg-gray-100 flex items-center justify-center"><Disc3 className="text-gray-300" size={32}/></div>
+                          )}
+                        </div>
+                        <h3 className="font-bold text-[#1A1A1A] text-[15px] truncate group-hover:text-[#FFB703] transition-colors">{album.title}</h3>
+                        <p className="text-[13px] text-gray-500 truncate mt-0.5">{album.year ? `${album.year} • ` : ""}{album.artist}</p>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

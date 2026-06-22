@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { searchMusic, getHomeMixes, getCharts, Track, searchArtists } from "@/lib/api";
+import { useEffect, useState } from "react";
 import { usePlayer } from "@/context/PlayerContext";
 import { SafeImage as Image } from "@/components/SafeImage";
-import { Play, TrendingUp, Music2, Radio, Users, ChevronRight, Flame, Sparkles, Loader2 } from "lucide-react";
-import { createClient } from "@/utils/supabase/client";
+import { Play, TrendingUp, Music2, Radio, Flame, Sparkles, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useDashboardFeeds } from "@/hooks/useDashboardFeeds";
+import { ShelfRow } from "@/components/ShelfRow";
+import { PopularArtistsRow } from "@/components/PopularArtistsRow";
+import { SongActions } from "@/components/SongActions";
+
 const PX = "px-6 md:px-12 lg:px-20";
-const supabase = createClient();
 
 const getGreeting = () => {
   const h = new Date().getHours();
@@ -20,118 +22,27 @@ const getGreetingEmoji = () => {
   return h < 12 ? "🌅" : h < 17 ? "☀️" : "🌙";
 };
 
-// Helper Component for Section Headers
-function SectionHeader({ title, icon, showMoreUrl }: { title: string, icon: React.ReactNode, showMoreUrl?: string }) {
-  return (
-    <div className={`flex items-center justify-between mb-4 ${PX}`}>
-      <h2 className="text-xl font-black text-[#1A1A1A] tracking-tight flex items-center gap-2">
-        {icon}
-        {title}
-      </h2>
-      {showMoreUrl && (
-        <Link href={showMoreUrl} className="text-xs font-bold text-gray-400 hover:text-[#1A1A1A] transition-colors flex items-center uppercase tracking-wider">
-          View All <ChevronRight size={14} className="ml-0.5" />
-        </Link>
-      )}
-    </div>
-  );
-}
-
-// Helper Component for Track Shelf
-function ShelfRow({ title, icon, tracks, showMoreUrl }: { title: string, icon: React.ReactNode, tracks: Track[], showMoreUrl?: string }) {
-  const { playTrack } = usePlayer();
-  if (!tracks || tracks.length === 0) return null;
-
-  return (
-    <section className="mb-10">
-      <SectionHeader title={title} icon={icon} showMoreUrl={showMoreUrl} />
-      <div className="relative">
-        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4" style={{ scrollSnapType: "x mandatory", paddingLeft: "32px", paddingRight: "32px" }}>
-          {tracks.map((track, idx) => (
-            <div
-              key={track.id + idx}
-              onClick={() => playTrack(track, tracks)}
-              className="group flex-shrink-0 w-[140px] md:w-[160px] flex flex-col cursor-pointer"
-              style={{ scrollSnapAlign: "start" }}
-            >
-              <div className="relative w-full aspect-square bg-gray-100 rounded-2xl overflow-hidden mb-3 shadow-sm group-hover:shadow-xl transition-all duration-300 border border-gray-100">
-                {track.thumbnail ? (
-                  <Image src={track.thumbnail} alt={track.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                    <Music2 size={32} className="text-gray-400" />
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 flex items-center justify-center transition-colors">
-                  <div className="w-12 h-12 bg-[#FFB703] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-xl">
-                    <Play size={20} fill="#1A1A1A" className="text-[#1A1A1A] ml-1" />
-                  </div>
-                </div>
-              </div>
-              <p className="font-bold text-[#1A1A1A] text-sm truncate group-hover:text-[#FFB703] transition-colors px-1">{track.title}</p>
-              <p className="text-xs text-gray-500 truncate px-1 mt-0.5">{track.artist}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// Helper Component for Popular Artists
-function PopularArtistsRow({ artists }: { artists: any[] }) {
-  if (!artists || artists.length === 0) return null;
-  return (
-    <section className="mb-10">
-      <SectionHeader title="Iconic Artists" icon={<Users size={20} className="text-pink-500" />} />
-      <div className="relative">
-        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2" style={{ scrollSnapType: "x mandatory", paddingLeft: "32px", paddingRight: "32px" }}>
-          {artists.map((artist, idx) => (
-            <Link
-              href={`/dashboard/search?q=${encodeURIComponent(artist.name)}`}
-              key={`${artist.id || artist.name}-${idx}`}
-              className="group flex-shrink-0 w-36 flex flex-col items-center cursor-pointer"
-              style={{ scrollSnapAlign: "start" }}
-            >
-              <div className="relative w-36 h-36 rounded-full overflow-hidden mb-3 shadow-sm group-hover:shadow-xl transition-all duration-300 border-4 border-white">
-                {artist.image ? (
-                  <Image src={artist.image} alt={artist.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-pink-100 to-pink-200 flex items-center justify-center">
-                    <Users size={40} className="text-pink-300" />
-                  </div>
-                )}
-              </div>
-              <p className="font-bold text-[#1A1A1A] text-sm text-center group-hover:text-[#FFB703] transition-colors line-clamp-1 px-2">{artist.name}</p>
-              <p className="text-xs text-gray-500 text-center mt-0.5">Artist</p>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 export default function HomePage() {
-  const { playTrack } = usePlayer();
-  const [loading, setLoading] = useState(true);
+  const { playTrack, currentTrack } = usePlayer();
+  const {
+    loading,
+    userProfile,
+    userDna,
+    recentlyPlayed,
+    setRecentlyPlayed,
+    jumpBackIn,
+    setJumpBackIn,
+    curatedForYou,
+    yourTopMixes,
+    trendingNow,
+    freshDrops,
+    popularArtists,
+    vibeLoading
+  } = useDashboardFeeds();
 
-  // User State
-  const [userProfile, setUserProfile] = useState<any>(null);
-  const [userDna, setUserDna] = useState<any>(null);
   const [greeting, setGreeting] = useState("Welcome");
   const [greetingEmoji, setGreetingEmoji] = useState("👋");
   const [vibeGreeting, setVibeGreeting] = useState("Your Mix");
-
-  // Feed State
-  const [recentlyPlayed, setRecentlyPlayed] = useState<Track[]>([]);
-  const [jumpBackIn, setJumpBackIn] = useState<Track[]>([]);
-  const [curatedForYou, setCuratedForYou] = useState<Track[]>([]);
-  const [yourTopMixes, setYourTopMixes] = useState<Track[]>([]);
-  const [trendingNow, setTrendingNow] = useState<Track[]>([]);
-  const [freshDrops, setFreshDrops] = useState<Track[]>([]);
-  const [popularArtists, setPopularArtists] = useState<any[]>([]);
-  const [vibeLoading, setVibeLoading] = useState(false);
 
   useEffect(() => {
     setGreeting(getGreeting());
@@ -141,98 +52,15 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        let localUserDna: any = null;
-        let localRecentlyPlayed: Track[] = [];
-
-        // 1. Fetch User Data (Profile, DNA, History)
-        if (session) {
-          const [profileRes, dnaRes, historyRes] = await Promise.allSettled([
-            supabase.from("profiles").select("*").eq("id", session.user.id).single(),
-            supabase.from("taste_dna").select("*").eq("user_id", session.user.id).single(),
-            supabase.from("listening_history").select("track_id, track_title, track_artist, track_thumbnail").eq("user_id", session.user.id).order("played_at", { ascending: false }).limit(30),
-          ]);
-
-          if (profileRes.status === "fulfilled" && profileRes.value.data) {
-            setUserProfile(profileRes.value.data);
-          }
-          
-          if (historyRes.status === "fulfilled" && historyRes.value.data) {
-            const history = historyRes.value.data;
-            // Deduplicate history by track_id
-            const unique = Array.from(new Set(history.map((h: any) => h.track_id))).map(id => {
-              const h = history.find((x: any) => x.track_id === id);
-              if (!h) return null;
-              return { id: h.track_id, title: h.track_title, artist: h.track_artist, thumbnail: h.track_thumbnail || "" };
-            }).filter(Boolean);
-            localRecentlyPlayed = unique as Track[];
-            setRecentlyPlayed(localRecentlyPlayed);
-            setJumpBackIn([...localRecentlyPlayed].reverse()); // slight variation for shelf
-          }
-          
-          if (dnaRes.status === "fulfilled" && dnaRes.value.data) {
-            localUserDna = dnaRes.value.data;
-            setUserDna(localUserDna);
-          }
-        }
-
-        // 2. Fetch DNA Vibe Mix
-        if (localUserDna) {
-          setVibeLoading(true);
-          getHomeMixes().then(vibe => {
-            if (vibe && vibe.length > 0) {
-              setCuratedForYou(vibe);
-              setYourTopMixes(vibe.slice(15, 30));
-            }
-          }).catch(console.error).finally(() => setVibeLoading(false));
-        } else {
-          // If no DNA, just fetch generic home mixes
-          getHomeMixes().then(vibe => {
-            if (vibe && vibe.length > 0) {
-              setCuratedForYou(vibe);
-              setYourTopMixes(vibe.slice(15, 30));
-            }
-          }).catch(console.error);
-        }
-
-        // 3. Fetch Generic Home Feeds (Trending, Fresh Drops, Iconic Artists)
-        const genre2 = localUserDna?.top_genres?.[1] || "desi hip hop";
-        
-        const [trendingRes, newRes] = await Promise.allSettled([
-          getCharts("IN"),
-          searchMusic(`latest ${genre2} new releases`),
-        ]);
-
-        if (trendingRes.status === "fulfilled" && trendingRes.value) {
-          setTrendingNow(trendingRes.value);
-        }
-        if (newRes.status === "fulfilled" && newRes.value) {
-          setFreshDrops(newRes.value);
-        }
-
-        // 4. Fetch Real Data for Iconic Artists
-        const POPULAR_ARTIST_NAMES = ["Arijit Singh", "Shreya Ghoshal", "AR Rahman", "Diljit Dosanjh", "Karan Aujla", "Pritam", "Anirudh Ravichander", "Badshah"];
-        Promise.allSettled(
-          POPULAR_ARTIST_NAMES.map(name => searchArtists(name).then(res => res[0]))
-        ).then(results => {
-          const artists = results
-            .filter((r): r is PromiseFulfilledResult<any> => r.status === 'fulfilled' && !!r.value)
-            .map(r => r.value);
-          setPopularArtists(artists);
-        });
-
-      } catch (err) {
-        console.error("Error loading dashboard data:", err);
-      } finally {
-        setLoading(false);
-      }
+    if (currentTrack) {
+      setRecentlyPlayed(prev => {
+        const filtered = prev.filter(t => t.id !== currentTrack.id);
+        const newHistory = [currentTrack, ...filtered];
+        setJumpBackIn([...newHistory].reverse());
+        return newHistory;
+      });
     }
-
-    loadData();
-  }, [supabase]);
+  }, [currentTrack, setRecentlyPlayed, setJumpBackIn]);
 
   if (loading) {
     return (
@@ -275,13 +103,16 @@ export default function HomePage() {
                     ) : (
                        <Music2 size={20} className="text-gray-400" />
                     )}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 flex items-center justify-center transition-colors">
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center transition-colors">
                       <Play size={18} fill="white" className="text-white opacity-0 group-hover:opacity-100 drop-shadow" />
                     </div>
                   </div>
                   <div className="px-3 flex-1 min-w-0">
-                    <p className="font-bold text-[#1A1A1A] text-xs truncate group-hover:text-white transition-colors">{track.title}</p>
-                    <p className="text-[11px] text-gray-500 truncate group-hover:text-white/60 transition-colors">{track.artist}</p>
+                    <p className="font-bold text-[#1A1A1A] text-xs truncate group-hover:text-black transition-colors">{track.title}</p>
+                    <p className="text-[11px] text-gray-500 truncate group-hover:text-gray-700 transition-colors">{track.artist}</p>
+                  </div>
+                  <div className="pr-3 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+                    <SongActions track={track} size="sm" />
                   </div>
                 </div>
               ))}

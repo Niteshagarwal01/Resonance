@@ -23,7 +23,46 @@ class Formatter:
         if not thumbnails: return None
         if isinstance(thumbnails, list) and len(thumbnails) > 0:
             return thumbnails[-1].get("url")
+        if isinstance(thumbnails, str):
+            return thumbnails
         return None
+
+    @staticmethod
+    def format_track(item: dict, fallback_thumbnail=None, fallback_artist=None, fallback_album=None) -> dict:
+        vid = item.get("videoId")
+        if not vid: return None
+        
+        thumbs = item.get("thumbnail") or item.get("thumbnails")
+        thumbnail = Formatter.get_thumbnail(thumbs) or Formatter.get_thumbnail(fallback_thumbnail)
+        
+        # Parse artist(s)
+        artists = item.get("artists") or item.get("artist")
+        if isinstance(artists, list):
+            artist_str = ", ".join(a.get("name", "") for a in artists if isinstance(a, dict) and a.get("name"))
+        elif artists:
+            artist_str = str(artists)
+        else:
+            artist_str = fallback_artist or ""
+
+        # Parse album
+        album = item.get("album")
+        if isinstance(album, dict):
+            album_str = album.get("name")
+        elif album:
+            album_str = str(album)
+        else:
+            album_str = fallback_album
+
+        duration = item.get("duration") or item.get("length")
+
+        return {
+            "id": vid,
+            "title": item.get("title", ""),
+            "artist": artist_str,
+            "album": album_str,
+            "duration": Formatter.parse_duration(duration),
+            "thumbnail": thumbnail
+        }
 
 class YTMusicService:
     @staticmethod
@@ -41,7 +80,7 @@ class YTMusicService:
             raise HTTPException(status_code=500, detail=f"External API error: {e}")
 
     @staticmethod
-    async def search(query: str, filter_type: str = "songs", limit: int = 20):
+    async def search(query: str, filter_type: str = None, limit: int = 20):
         return await YTMusicService.run_with_cache(f"search:{filter_type}:{query}", ytmusic.search, query=query, filter=filter_type, limit=limit)
 
     @staticmethod
@@ -58,6 +97,12 @@ class YTMusicService:
 
     @staticmethod
     async def get_radio(seed_id: str, limit: int = 50):
+        if seed_id.startswith("UC"):
+            artist_data = await YTMusicService.run_with_cache(f"artist:{seed_id}", ytmusic.get_artist, channelId=seed_id)
+            if "songs" in artist_data and "results" in artist_data["songs"]:
+                return {"tracks": artist_data["songs"]["results"]}
+            return {"tracks": []}
+            
         is_playlist = seed_id.startswith("RD") or seed_id.startswith("PL") or seed_id.startswith("VL")
         if is_playlist:
             return await YTMusicService.run_with_cache(f"radio:{seed_id}", ytmusic.get_watch_playlist, playlistId=seed_id, limit=limit)

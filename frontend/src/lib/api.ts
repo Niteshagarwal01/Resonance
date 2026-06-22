@@ -50,10 +50,10 @@ class ApiClient {
     }
   }
 
-  async searchMusic(query: string): Promise<Track[]> {
-    if (!query) return [];
+  async searchMusic(query: string): Promise<any> {
+    if (!query) return null;
     const data = await this.request<any>(`/search?q=${encodeURIComponent(query)}`, { cache: 'no-store' });
-    return data.results || [];
+    return data;
   }
 
   async searchArtists(query: string): Promise<any[]> {

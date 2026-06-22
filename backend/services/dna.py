@@ -19,8 +19,8 @@ class DNAEvolutionEngine:
             dna_res, artists_res, songs_res, history_res = await asyncio.gather(
                 asyncio.to_thread(supabase.table("taste_dna").select("top_artists, top_songs").eq("user_id", user_id).single().execute),
                 asyncio.to_thread(supabase.table("liked_artists").select("artist_name").eq("user_id", user_id).order("created_at", desc=True).limit(10).execute),
-                asyncio.to_thread(supabase.table("liked_songs").select("video_id").eq("user_id", user_id).order("created_at", desc=True).limit(10).execute),
-                asyncio.to_thread(supabase.table("listening_history").select("video_id, percentage_played").eq("user_id", user_id).order("created_at", desc=True).limit(50).execute)
+                asyncio.to_thread(supabase.table("liked_songs").select("track_id").eq("user_id", user_id).order("created_at", desc=True).limit(10).execute),
+                asyncio.to_thread(supabase.table("listening_history").select("track_id, percentage_played").eq("user_id", user_id).order("created_at", desc=True).limit(50).execute)
             )
 
             seeds = {}
@@ -39,12 +39,12 @@ class DNAEvolutionEngine:
             # 3. Liked Songs (Weight: 10)
             if songs_res.data:
                 for row in songs_res.data:
-                    seeds[row["video_id"]] = seeds.get(row["video_id"], 0) + 10
+                    seeds[row["track_id"]] = seeds.get(row["track_id"], 0) + 10
 
             # 4. Listening History (Weight: +4 for >50%, -2 for <10%)
             if history_res.data:
                 for row in history_res.data:
-                    vid = row["video_id"]
+                    vid = row["track_id"]
                     pct = row.get("percentage_played", 0)
                     if pct > 0.5:
                         seeds[vid] = seeds.get(vid, 0) + 4

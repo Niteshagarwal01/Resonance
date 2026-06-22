@@ -5,6 +5,7 @@ import { getAlbum } from "@/lib/api";
 import { useEffect, useState, use } from "react";
 import { Play, Heart, MoreHorizontal, Clock, Share2, Disc3, Shuffle } from "lucide-react";
 import { SafeImage as Image } from "@/components/SafeImage";
+import { TrackList } from "@/components/TrackList";
 import Link from "next/link";
 
 export default function AlbumPage({ params }: { params: Promise<{ id: string }> }) {
@@ -151,61 +152,7 @@ export default function AlbumPage({ params }: { params: Promise<{ id: string }> 
 
       {/* ── Tracklist ── */}
       <div className="px-8 max-w-5xl">
-        {/* Header row */}
-        <div className="grid grid-cols-[2rem_1fr_auto] gap-4 px-3 pb-3 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-          <div className="text-center">#</div>
-          <div>Title</div>
-          <div className="pr-2"><Clock size={12} /></div>
-        </div>
-
-        <div className="mt-2 space-y-0.5">
-          {tracks.map((track: any, idx: number) => {
-            const isCurrentlyPlaying = currentTrack?.id === track.id && isPlaying;
-            return (
-              <div
-                key={track.id + idx}
-                onClick={() => playTrack(track, tracks)}
-                className="group grid grid-cols-[2rem_1fr_auto] gap-4 px-3 py-3 items-center hover:bg-white rounded-xl transition-all cursor-pointer border border-transparent hover:border-gray-100 hover:shadow-sm"
-              >
-                <div className="text-center">
-                  {isCurrentlyPlaying ? (
-                    <div className="flex items-center justify-center gap-0.5">
-                      {[1, 2, 3].map(i => (
-                        <div key={i} className="w-0.5 bg-[#FFB703] rounded-full animate-bounce" style={{ height: `${5 + i * 3}px`, animationDelay: `${i * 0.15}s` }} />
-                      ))}
-                    </div>
-                  ) : (
-                    <>
-                      <span className="text-sm font-bold text-gray-300 group-hover:hidden tabular-nums">{track.trackNumber || idx + 1}</span>
-                      <Play size={14} fill="#FFB703" className="text-[#FFB703] hidden group-hover:block mx-auto" />
-                    </>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-3 min-w-0">
-                  {track.thumbnail && (
-                    <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0">
-                      <Image src={track.thumbnail} alt={track.title} fill className="object-cover" unoptimized />
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <p className={`font-bold text-sm truncate transition-colors ${isCurrentlyPlaying ? "text-[#FFB703]" : "text-[#1A1A1A] group-hover:text-[#FFB703]"}`}>
-                      {track.title}
-                    </p>
-                    {track.artist && track.artist !== album.artist && (
-                      <p className="text-xs text-gray-500 truncate">{track.artist}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 pr-2 shrink-0">
-                  <Heart size={14} className="text-gray-300 hover:text-pink-500 opacity-0 group-hover:opacity-100 transition-all" />
-                  <span className="text-xs text-gray-400 tabular-nums">{track.duration || "—"}</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <TrackList tracks={tracks} showAlbum={false} showArtist={true} showThumbnail={false} />
 
         {/* Footer */}
         {album.year && (

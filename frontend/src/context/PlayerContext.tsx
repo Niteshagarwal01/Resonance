@@ -4,6 +4,9 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import { Track, getRadioQueue } from "@/lib/api";
 import { createClient } from "@/utils/supabase/client";
 
+import { usePlayerTelemetry } from "@/hooks/usePlayerTelemetry";
+import { useYouTubeIframe } from "@/hooks/useYouTubeIframe";
+
 // Fisher-Yates shuffle
 function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -61,10 +64,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const isMagicShuffleRef = useRef(true);
   const magicInFlightRef = useRef(false); // prevent concurrent fetches
 
-  const supabase = createClient();
-  const ytPlayerRef = useRef<any>(null);
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
   // Initialize from localStorage
   useEffect(() => {
     try {
@@ -118,100 +117,32 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         repeatMode: repeatModeRef.current,
         isMagicShuffle: isMagicShuffleRef.current,
       }));
-    } catch (e) {}
-    
-    // Sync volume to player in case it changed or initialized from localstorage
-    if (ytPlayerRef.current?.setVolume) {
-      ytPlayerRef.current.setVolume(volume);
+    } catch (e) {
+      console.error("Failed to save player state", e);
     }
   }, [queue, currentTrack, volume, isShuffle, repeatMode, isMagicShuffle]);
 
-  useEffect(() => {
-    let playerDiv = document.getElementById("youtube-hidden-player");
-    if (!playerDiv) {
-      playerDiv = document.createElement("div");
-      playerDiv.id = "youtube-hidden-player";
-      playerDiv.style.display = "none";
-      document.body.appendChild(playerDiv);
-    }
+  const { startTracking, flushTracking, logTrackStart } = usePlayerTelemetry();
 
-    const tag = document.createElement("script");
-    tag.src = "https://www.youtube.com/iframe_api";
-    const firstScriptTag = document.getElementsByTagName("script")[0];
-    if (firstScriptTag?.parentNode) {
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    } else {
-      document.head.appendChild(tag);
-    }
-
-    (window as any).onYouTubeIframeAPIReady = () => {
-      ytPlayerRef.current = new (window as any).YT.Player("youtube-hidden-player", {
-        height: "0",
-        width: "0",
-        playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, rel: 0, modestbranding: 1 },
-        events: {
-          onReady: (event: any) => { 
-            // set volume to whatever the current state is (loaded from localStorage)
-            event.target.setVolume(volume); 
-            if (currentTrackRef.current?.id) {
-              event.target.cueVideoById(currentTrackRef.current.id);
-            }
-          },
-          onStateChange: (event: any) => {
-            const YT = (window as any).YT;
-            if (event.data === YT.PlayerState.PLAYING) {
-              setIsPlaying(true);
-              playStartTimeRef.current = Date.now();
-              const initialD = event.target.getDuration();
-              if (initialD > 0) setDuration(initialD);
-              
-              if (!progressIntervalRef.current) {
-                progressIntervalRef.current = setInterval(() => {
-                  const t = event.target.getCurrentTime();
-                  const d = event.target.getDuration();
-                  if (d > 0) {
-                    setProgress((t / d) * 100);
-                    setDuration(d); // continually update duration in case it was 0 initially
-                  }
-                }, 1000);
-              }
-            } else {
-              if (event.data === YT.PlayerState.ENDED) {
-                handleTrackEnd();
-              }
-              setIsPlaying(false);
-              if (playStartTimeRef.current > 0) {
-                accumulatedPlayTimeRef.current += (Date.now() - playStartTimeRef.current) / 1000;
-                playStartTimeRef.current = 0;
-              }
-              if (progressIntervalRef.current) {
-                clearInterval(progressIntervalRef.current);
-                progressIntervalRef.current = null;
-              }
-            }
-          },
-        },
-      });
-    };
-
-    return () => { if (progressIntervalRef.current) clearInterval(progressIntervalRef.current); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Telemetry refs for Taste Evolution Engine
-  const playStartTimeRef = useRef(0);
-  const accumulatedPlayTimeRef = useRef(0);
+  // Forward declare handleTrackEnd since useYouTubeIframe needs it
+  const handleTrackEndRef = useRef<() => void>(() => {});
+  
+  const { ytPlayerRef } = useYouTubeIframe({
+    volume,
+    currentTrackRef,
+    setIsPlaying,
+    setDuration,
+    setProgress,
+    handleTrackEnd: () => handleTrackEndRef.current(),
+    startTracking,
+    flushTracking
+  });
 
   // Core play function (internal, not exposed directly for queue management)
   const _play = useCallback(async (track: Track, q: Track[]) => {
     // 1. Flush telemetry for the outgoing track (if it exists)
-    const outgoingTrack = currentTrackRef.current;
-    if (outgoingTrack) {
-      if (playStartTimeRef.current > 0) {
-        accumulatedPlayTimeRef.current += (Date.now() - playStartTimeRef.current) / 1000;
-        playStartTimeRef.current = 0;
-      }
-      // We no longer insert here, we insert when the song starts playing instead.
+    if (currentTrackRef.current) {
+      flushTracking();
     }
 
     // 2. Setup the new track
@@ -221,8 +152,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     queueRef.current = q;
     setIsPlaying(true);
     setProgress(0);
-    accumulatedPlayTimeRef.current = 0;
-    playStartTimeRef.current = Date.now(); // Start tracking immediately
+    startTracking();
 
     // Pre-parse duration from string (e.g. "3:45" -> 225) to prevent initial 0:00 glitch
     let parsedDuration = 0;
@@ -237,38 +167,26 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setDuration(parsedDuration);
 
     // Fire and forget history logging for the newly started track
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        supabase.from("listening_history").insert({
-          user_id: session.user.id,
-          track_id: track.id,
-          track_title: track.title,
-          track_artist: track.artist,
-          track_thumbnail: track.thumbnail || null,
-          duration_played: 0,
-          total_duration: parsedDuration > 0 ? parsedDuration : 1
-        }).then(({error}) => { if (error) console.error("Telemetry error:", error) });
-      }
-    });
+    logTrackStart(track, parsedDuration);
 
     if (ytPlayerRef.current?.loadVideoById) {
       ytPlayerRef.current.loadVideoById(track.id);
     }
-  }, [supabase]);
+  }, [logTrackStart, flushTracking, startTracking, ytPlayerRef]);
 
   // Public playTrack: sets up the queue (with shuffle if on) and plays
   const playTrack = useCallback((track: Track, newQueue?: Track[]) => {
     if (newQueue && newQueue.length > 0) {
+      // Auto-reset modes when explicitly starting a new queue context
+      isShuffleRef.current = false;
+      setIsShuffle(false);
+      repeatModeRef.current = 'off';
+      setRepeatMode('off');
+      isMagicShuffleRef.current = true; // Default to Spotify's Autoplay behavior
+      setIsMagicShuffle(true);
+
       originalQueueRef.current = newQueue;
-      if (isShuffleRef.current) {
-        // Shuffle all tracks except the one being played; put played track first
-        const rest = newQueue.filter(t => t.id !== track.id);
-        const shuffled = shuffleArray(rest);
-        const finalQueue = [track, ...shuffled];
-        _play(track, finalQueue);
-      } else {
-        _play(track, newQueue);
-      }
+      _play(track, newQueue);
     } else {
       _play(track, queueRef.current);
     }
@@ -340,7 +258,12 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       // Loop back to start (repeatMode === 'all')
       await _play(updatedQ[0], updatedQ);
     }
-  }, [_play]);
+  }, [_play, ytPlayerRef]);
+
+  // Hook up the ref so the effect can use it
+  useEffect(() => {
+    handleTrackEndRef.current = handleTrackEnd;
+  }, [handleTrackEnd]);
 
   async function nextTrack() {
     const q = queueRef.current;
@@ -382,10 +305,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const pauseTrack = () => {
     if (ytPlayerRef.current?.pauseVideo) ytPlayerRef.current.pauseVideo();
     setIsPlaying(false);
-    if (playStartTimeRef.current > 0) {
-      accumulatedPlayTimeRef.current += (Date.now() - playStartTimeRef.current) / 1000;
-      playStartTimeRef.current = 0;
-    }
+    flushTracking();
   };
 
   const resumeTrack = () => {
@@ -405,7 +325,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     setIsPlaying(true);
-    playStartTimeRef.current = Date.now();
+    startTracking();
   };
 
   const setVolume = (vol: number) => {

@@ -9,20 +9,63 @@ router = APIRouter()
 @router.get("/search")
 @limiter.limit("60/minute")
 async def search_music(request: Request, q: str = Query(..., min_length=1)):
-    raw_results = await YTMusicService.search(q, filter_type="songs", limit=20)
-    formatted = []
+    raw_results = await YTMusicService.search(q, filter_type=None, limit=30)
+    
+    top_result = None
+    songs = []
+    artists = []
+    albums = []
+    
     for item in raw_results:
-        video_id = item.get("videoId")
-        if not video_id: continue
-        formatted.append({
-            "id": video_id,
-            "title": item.get("title", ""),
-            "artist": ", ".join(a.get("name", "") for a in item.get("artists", [])),
-            "album": item.get("album", {}).get("name") if item.get("album") else None,
-            "duration": Formatter.parse_duration(item.get("duration")),
+        r_type = item.get("resultType")
+        cat = item.get("category")
+        
+        entry = {
+            "title": item.get("title", item.get("artist", "")),
             "thumbnail": Formatter.get_thumbnail(item.get("thumbnails"))
-        })
-    return {"results": formatted}
+        }
+        
+        if r_type in ["song", "video"]:
+            entry["id"] = item.get("videoId")
+            entry["artist"] = ", ".join(a.get("name", "") for a in item.get("artists", [])) if item.get("artists") else item.get("artist", "")
+            entry["duration"] = Formatter.parse_duration(item.get("duration", item.get("length")))
+            entry["album"] = item.get("album", {}).get("name") if item.get("album") else None
+            entry["type"] = "song"
+            
+            if entry.get("id") and cat != "Top result":
+                songs.append(entry)
+                
+        elif r_type == "artist":
+            entry["id"] = item.get("browseId") or item.get("id")
+            if not entry.get("id") and item.get("artists"):
+                entry["id"] = item["artists"][0].get("id")
+                
+            entry["name"] = item.get("artist", item.get("title", ""))
+            if not entry.get("name") and item.get("artists"):
+                entry["name"] = item["artists"][0].get("name")
+            entry["type"] = "artist"
+            
+            if entry.get("id") and cat != "Top result":
+                artists.append(entry)
+                
+        elif r_type in ["album", "single", "ep"]:
+            entry["id"] = item.get("browseId")
+            entry["artist"] = ", ".join(a.get("name", "") for a in item.get("artists", [])) if item.get("artists") else item.get("artist", "")
+            entry["year"] = item.get("year", "")
+            entry["type"] = "album"
+            
+            if entry.get("id") and cat != "Top result":
+                albums.append(entry)
+                
+        if cat == "Top result" and not top_result and entry.get("id"):
+            top_result = entry
+            
+    return {
+        "topResult": top_result,
+        "songs": songs,
+        "artists": artists,
+        "albums": albums
+    }
 
 @router.get("/search/artists")
 async def search_artists(q: str = Query(..., min_length=1)):
@@ -89,40 +132,38 @@ async def get_home_mixes(request: Request, user: dict = Depends(verify_token)):
         radio_queue = await YTMusicService.get_radio(main_seed, limit=40)
     except Exception as e:
         print(f"Failed to fetch radio for seed {main_seed}, falling back to default: {e}")
-        # Fallback to Top 100 Music Videos Global
-        radio_queue = await YTMusicService.get_radio("PL4fGSI1pccsot-gAIV_q5E04SjT-HwL_0", limit=40)
+        # Fallback to Top Weekly Videos Hindi to avoid generic English tracks
+        radio_queue = await YTMusicService.get_radio("PL4fGSI1pDJn5RgLW0Sb_zECecWdH_4zOX", limit=40)
     
     tracks = []
     for item in radio_queue.get("tracks", []):
-        vid = item.get("videoId")
-        if not vid: continue
-        tracks.append({
-            "id": vid,
-            "title": item.get("title", ""),
-            "artist": ", ".join(a.get("name", "") for a in item.get("artists", [])),
-            "album": item.get("album", {}).get("name") if item.get("album") else None,
-            "duration": item.get("length"),
-            "thumbnail": Formatter.get_thumbnail(item.get("thumbnails"))
-        })
+        track = Formatter.format_track(item)
+        if track: tracks.append(track)
     return {"tracks": tracks, "evolved_seeds": top_seeds}
 
 @router.get("/charts")
 @limiter.limit("60/minute")
 async def get_charts(request: Request, country: str = Query(default="IN")):
     data = await YTMusicService.get_charts(country=country)
+    
+    # ytmusicapi 1.8+ returns ['countries', 'daily', 'weekly', 'artists']
+    # We grab the first daily playlist or fallback
+    daily = data.get("daily", [])
+    if not daily:
+        daily = data.get("weekly", [])
+        
+    if daily and daily[0].get("playlistId"):
+        playlist_id = daily[0]["playlistId"]
+        playlist_data = await YTMusicService.get_playlist(playlist_id, limit=20)
+        trending = playlist_data.get("tracks", [])
+    else:
+        # Fallback if structure is missing
+        trending = data.get("songs", {}).get("items", [])
+
     tracks = []
-    trending = data.get("songs", {}).get("items", [])
     for item in trending:
-        vid = item.get("videoId")
-        if not vid: continue
-        tracks.append({
-            "id": vid,
-            "title": item.get("title", ""),
-            "artist": ", ".join(a.get("name", "") for a in item.get("artists", [])),
-            "album": item.get("album", {}).get("name") if item.get("album") else None,
-            "duration": None,
-            "thumbnail": Formatter.get_thumbnail(item.get("thumbnails"))
-        })
+        track = Formatter.format_track(item)
+        if track: tracks.append(track)
     return {"tracks": tracks}
 
 @router.get("/moods")
@@ -136,20 +177,8 @@ async def get_radio(request: Request, seed_id: str = Query(..., min_length=1)):
     radio_queue = await YTMusicService.get_radio(seed_id, limit=50)
     tracks = []
     for item in radio_queue.get("tracks", []):
-        vid = item.get("videoId")
-        if not vid: continue
-        
-        # ytmusicapi get_watch_playlist sometimes returns 'thumbnail' instead of 'thumbnails'
-        thumbs = item.get("thumbnail") or item.get("thumbnails")
-        
-        tracks.append({
-            "id": vid,
-            "title": item.get("title", ""),
-            "artist": ", ".join(a.get("name", "") for a in item.get("artists", [])),
-            "album": item.get("album", {}).get("name") if item.get("album") else None,
-            "duration": item.get("length"),
-            "thumbnail": Formatter.get_thumbnail(thumbs)
-        })
+        track = Formatter.format_track(item)
+        if track: tracks.append(track)
     return {"queue": tracks}
 
 @router.get("/artist/{artist_id}")
@@ -158,15 +187,8 @@ async def get_artist(artist_id: str):
     top_songs = []
     if "songs" in data and "results" in data["songs"]:
         for item in data["songs"]["results"]:
-            vid = item.get("videoId")
-            if vid:
-                top_songs.append({
-                    "id": vid,
-                    "title": item.get("title", ""),
-                    "artist": data.get("name", ""),
-                    "album": item.get("album", {}).get("name") if item.get("album") else None,
-                    "thumbnail": Formatter.get_thumbnail(item.get("thumbnails"))
-                })
+            track = Formatter.format_track(item, fallback_artist=data.get("name"))
+            if track: top_songs.append(track)
                 
     albums = []
     if "albums" in data and "results" in data["albums"]:
@@ -208,16 +230,9 @@ async def get_album(album_id: str):
     data = await YTMusicService.get_album(album_id)
     tracks = []
     for item in data.get("tracks", []):
-        vid = item.get("videoId")
-        if not vid: continue
-        tracks.append({
-            "id": vid,
-            "title": item.get("title", ""),
-            "artist": data.get("artist", "") if isinstance(data.get("artist"), str) else ", ".join(a.get("name", "") for a in data.get("artist", [])),
-            "album": data.get("title", ""),
-            "duration": Formatter.parse_duration(item.get("duration")),
-            "thumbnail": Formatter.get_thumbnail(data.get("thumbnails"))
-        })
+        artist_name = data.get("artist", "") if isinstance(data.get("artist"), str) else ", ".join(a.get("name", "") for a in data.get("artist", []) if isinstance(a, dict))
+        track = Formatter.format_track(item, fallback_thumbnail=data.get("thumbnails"), fallback_artist=artist_name, fallback_album=data.get("title"))
+        if track: tracks.append(track)
     return {
         "id": album_id,
         "title": data.get("title"),
@@ -232,16 +247,8 @@ async def get_playlist(playlist_id: str):
     data = await YTMusicService.get_playlist(playlist_id)
     tracks = []
     for item in data.get("tracks", []):
-        vid = item.get("videoId")
-        if not vid: continue
-        tracks.append({
-            "id": vid,
-            "title": item.get("title", ""),
-            "artist": ", ".join(a.get("name", "") for a in item.get("artists", [])),
-            "album": item.get("album", {}).get("name") if item.get("album") else None,
-            "duration": Formatter.parse_duration(item.get("duration")),
-            "thumbnail": Formatter.get_thumbnail(item.get("thumbnails"))
-        })
+        track = Formatter.format_track(item)
+        if track: tracks.append(track)
     return {
         "id": playlist_id,
         "title": data.get("title"),

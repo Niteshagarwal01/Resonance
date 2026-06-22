@@ -61,24 +61,6 @@ export default function DashboardLayout({
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#8ECAE6] rounded-full mix-blend-multiply filter blur-[100px] opacity-20"></div>
           </div>
 
-          {/* Mobile Blocker */}
-          <div className="md:hidden absolute inset-0 z-50 bg-[#FDFBF7] flex flex-col items-center justify-center p-8 text-center">
-            <Monitor size={64} className="text-[#FFB703] mb-6" />
-            <h1 className="text-3xl font-black text-[#1A1A1A] mb-4 tracking-tight">Laptop Only</h1>
-            <p className="text-gray-500 font-medium mb-8 max-w-sm">
-              Resonance is currently optimized for larger screens. An official mobile app is coming soon! Please switch to a laptop or tablet for the full experience.
-            </p>
-            <button 
-              onClick={async () => {
-                await supabase.auth.signOut();
-                router.push("/");
-              }}
-              className="flex items-center gap-2 bg-white border border-gray-200 text-[#1A1A1A] px-6 py-3 rounded-full font-bold shadow-sm hover:border-gray-300 hover:shadow-md transition-all"
-            >
-              <LogOut size={18} /> Log Out
-            </button>
-          </div>
-
           <Sidebar />
 
           <main className="flex-1 overflow-y-auto scrollbar-hide relative z-10 bg-white ml-2 mt-2 mb-2 mr-2 rounded-3xl shadow-sm border border-gray-100">
@@ -88,6 +70,34 @@ export default function DashboardLayout({
 
         {/* Persistent Bottom Player */}
         <BottomPlayer />
+
+        {/* Mobile Blocker - Redesigned & Fixed */}
+        <div className="md:hidden fixed inset-0 z-[9999] bg-[#1A1A1A] flex flex-col items-center justify-center p-6 text-center overflow-hidden">
+          {/* Animated Background Blobs */}
+          <div className="absolute top-[-10%] left-[-10%] w-72 h-72 bg-[#FFB703] rounded-full mix-blend-screen filter blur-[80px] opacity-30 animate-pulse"></div>
+          <div className="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-[#8ECAE6] rounded-full mix-blend-screen filter blur-[80px] opacity-30 animate-pulse" style={{ animationDelay: "1s" }}></div>
+          
+          <div className="relative z-10 flex flex-col items-center bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-2xl max-w-sm w-full">
+            <div className="w-20 h-20 bg-gradient-to-br from-[#FFB703] to-orange-500 rounded-2xl rotate-3 flex items-center justify-center mb-6 shadow-lg shadow-[#FFB703]/20">
+              <div className="-rotate-3">
+                <Monitor size={40} className="text-white" />
+              </div>
+            </div>
+            <h1 className="text-3xl font-black text-white mb-3 tracking-tight">Desktop Only</h1>
+            <p className="text-gray-300 font-medium mb-8 leading-relaxed text-sm">
+              Resonance is built for the big screen. Switch to a laptop or tablet for the full, immersive music experience. Mobile app coming soon!
+            </p>
+            <button 
+              onClick={async () => {
+                await supabase.auth.signOut();
+                router.push("/");
+              }}
+              className="flex w-full justify-center items-center gap-2 bg-white text-[#1A1A1A] px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <LogOut size={18} /> Log Out
+            </button>
+          </div>
+        </div>
       </div>
     </PlayerProvider>
   );
