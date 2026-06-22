@@ -50,7 +50,7 @@ export function SongActions({ track, size = "sm", showLabel = false, hideQueueBu
       if (!session) return;
       const { data } = await supabase
         .from("liked_songs")
-        .select("id")
+        .select("track_id")
         .eq("user_id", session.user.id)
         .eq("track_id", track.id)
         .single();
