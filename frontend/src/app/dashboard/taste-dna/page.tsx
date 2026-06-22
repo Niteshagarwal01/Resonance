@@ -247,12 +247,17 @@ export default function TasteDNAPage() {
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
               <Mic2 size={120} />
             </div>
-            <h3 className="text-2xl font-black text-[#1A1A1A] mb-6 flex items-center gap-3 relative z-10">
-              <span className="w-10 h-10 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center shrink-0">
-                <Mic2 size={20} />
-              </span>
-              Your Top Artists
-            </h3>
+            <div className="flex items-center justify-between mb-6 relative z-10">
+              <h3 className="text-2xl font-black text-[#1A1A1A] flex items-center gap-3">
+                <span className="w-10 h-10 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center shrink-0">
+                  <Mic2 size={20} />
+                </span>
+                Your Top Artists
+              </h3>
+              <a href="/dashboard/profile" className="text-xs font-bold text-violet-600 bg-violet-50 hover:bg-violet-100 px-3 py-1.5 rounded-full transition-colors flex items-center gap-1">
+                Edit DNA
+              </a>
+            </div>
             <div className="flex flex-wrap gap-3 relative z-10">
               {evolvedArtists.map((artist, i) => (
                 <span key={i} className="px-4 py-2 rounded-full bg-gray-50 border border-gray-200 text-gray-700 text-sm font-bold shadow-sm hover:border-violet-300 hover:text-violet-700 hover:bg-violet-50 transition-all cursor-default">
@@ -267,12 +272,17 @@ export default function TasteDNAPage() {
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
               <Layers size={120} />
             </div>
-            <h3 className="text-2xl font-black text-[#1A1A1A] mb-6 flex items-center gap-3 relative z-10">
-              <span className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                <Layers size={20} />
-              </span>
-              Core Genres
-            </h3>
+            <div className="flex items-center justify-between mb-6 relative z-10">
+              <h3 className="text-2xl font-black text-[#1A1A1A] flex items-center gap-3">
+                <span className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                  <Layers size={20} />
+                </span>
+                Core Genres
+              </h3>
+              <a href="/dashboard/profile" className="text-xs font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-full transition-colors flex items-center gap-1">
+                Edit DNA
+              </a>
+            </div>
             <div className="flex flex-wrap gap-3 relative z-10">
               {evolvedGenres.map((g: string, i: number) => (
                 <span key={i} className={`px-4 py-2 rounded-full bg-gradient-to-r ${COLORS[i % COLORS.length]} text-white text-sm font-bold shadow-md hover:scale-105 transition-transform cursor-default`}>
