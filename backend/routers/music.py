@@ -2,11 +2,13 @@ from fastapi import APIRouter, Query, Request, Depends
 from services.ytmusic import YTMusicService, Formatter
 from services.dna import DNAEvolutionEngine
 from db import supabase, verify_token
+from rate_limiter import limiter
 
 router = APIRouter()
 
 @router.get("/search")
-async def search_music(q: str = Query(..., min_length=1)):
+@limiter.limit("60/minute")
+async def search_music(request: Request, q: str = Query(..., min_length=1)):
     raw_results = await YTMusicService.search(q, filter_type="songs", limit=20)
     formatted = []
     for item in raw_results:
@@ -72,7 +74,8 @@ async def get_home_shelves():
     return {"shelves": shelves}
 
 @router.get("/home")
-async def get_home_mixes(user: dict = Depends(verify_token)):
+@limiter.limit("60/minute")
+async def get_home_mixes(request: Request, user: dict = Depends(verify_token)):
     user_id = user.user.id
     
     # 1. Fetch evolved DNA seeds
@@ -99,7 +102,8 @@ async def get_home_mixes(user: dict = Depends(verify_token)):
     return {"tracks": tracks, "evolved_seeds": top_seeds}
 
 @router.get("/charts")
-async def get_charts(country: str = Query(default="IN")):
+@limiter.limit("60/minute")
+async def get_charts(request: Request, country: str = Query(default="IN")):
     data = await YTMusicService.get_charts(country=country)
     tracks = []
     trending = data.get("songs", {}).get("items", [])
@@ -122,7 +126,8 @@ async def get_moods():
     return categories
 
 @router.get("/radio")
-async def get_radio(seed_id: str = Query(..., min_length=1)):
+@limiter.limit("60/minute")
+async def get_radio(request: Request, seed_id: str = Query(..., min_length=1)):
     radio_queue = await YTMusicService.get_radio(seed_id, limit=50)
     tracks = []
     for item in radio_queue.get("tracks", []):

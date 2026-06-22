@@ -4,14 +4,16 @@ from cachetools import TTLCache
 from fastapi import HTTPException
 
 # Global YTMusic instance and cache
-ytmusic = YTMusic()
+ytmusic = YTMusic(location="IN", language="en")
 cache = TTLCache(maxsize=1000, ttl=600)  # 10 minute cache
+cache_lock = asyncio.Lock()
 
 class Formatter:
     @staticmethod
     def parse_duration(text):
         if not text: return None
         parts = text.split(":")
+        if len(parts) == 1: return f"00:00:{parts[0].zfill(2)}"
         if len(parts) == 2: return f"00:{parts[0].zfill(2)}:{parts[1].zfill(2)}"
         if len(parts) == 3: return f"{parts[0].zfill(2)}:{parts[1].zfill(2)}:{parts[2].zfill(2)}"
         return text
@@ -26,11 +28,13 @@ class Formatter:
 class YTMusicService:
     @staticmethod
     async def run_with_cache(cache_key: str, func, *args, **kwargs):
-        if cache_key in cache:
-            return cache[cache_key]
+        async with cache_lock:
+            if cache_key in cache:
+                return cache[cache_key]
         try:
             result = await asyncio.to_thread(func, *args, **kwargs)
-            cache[cache_key] = result
+            async with cache_lock:
+                cache[cache_key] = result
             return result
         except Exception as e:
             print(f"YTMusic Error ({func.__name__}): {e}")

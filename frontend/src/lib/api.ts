@@ -119,5 +119,6 @@ export const getRadioQueue = (id: string) => api.getRadioQueue(id);
 export const getCharts = (country?: string) => api.getCharts(country);
 export const getMoods = () => api.getMoods();
 export const getHomeShelves = () => api.getHomeShelves();
+export const getHomeMixes = () => api.getHomeMixes();
 export const getAlbum = (id: string) => api.getAlbum(id);
 export const getPlaylist = (id: string) => api.getPlaylist(id);

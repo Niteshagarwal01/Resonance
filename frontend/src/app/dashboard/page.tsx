@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { searchMusic, Track } from "@/lib/api";
+import { searchMusic, getHomeMixes, Track } from "@/lib/api";
 import { usePlayer } from "@/context/PlayerContext";
 import { SafeImage as Image } from "@/components/SafeImage";
 import { Play, TrendingUp, Music2, Clock, Zap, Star, Radio, Disc3, Mic2, Users, ChevronRight, Flame, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import { SongActions } from "@/components/SongActions";
-import { generateLiveVibe, computeEvolvedDNA } from "@/lib/vibeGenerator";
 import { Loader2 } from "lucide-react";
 
 function getGreeting() {
@@ -116,11 +115,10 @@ export default function HomePage() {
   const [madeForYou, setMadeForYou] = useState<Track[]>([]);
   const [jumpBackIn, setJumpBackIn] = useState<Track[]>([]);
   const [topMixes, setTopMixes] = useState<Track[]>([]);
-  const [recommendedStations, setRecommendedStations] = useState<Track[]>([]);
+  const [artist1Shelf, setArtist1Shelf] = useState<{name: string, tracks: Track[]}>({name: "", tracks: []});
+  const [artist2Shelf, setArtist2Shelf] = useState<{name: string, tracks: Track[]}>({name: "", tracks: []});
   const [trendingNow, setTrendingNow] = useState<Track[]>([]);
   const [newReleases, setNewReleases] = useState<Track[]>([]);
-  const [popularAlbums, setPopularAlbums] = useState<Track[]>([]);
-  const [trendingInNetwork, setTrendingInNetwork] = useState<Track[]>([]);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [userDna, setUserDna] = useState<any>(null);
   const [vibeLoading, setVibeLoading] = useState(false);
@@ -156,13 +154,11 @@ export default function HomePage() {
             localUserDna = dna;
             setUserDna(dna);
             
-            // Auto-generate Vibe asynchronously
-            // Auto-generate Vibe asynchronously
+            // Fetch Exact 40 Song DNA Mix from backend
             setVibeLoading(true);
-            const { evolvedArtists, evolvedGenres } = computeEvolvedDNA(dna, historyData);
-            generateLiveVibe(dna, historyData, evolvedArtists, evolvedGenres).then(vibe => {
-              if (vibe.length > 0) {
-                setMadeForYou(vibe.slice(0, 15));
+            getHomeMixes().then(vibe => {
+              if (vibe && vibe.length > 0) {
+                setMadeForYou(vibe); // Holds the full 40 song playlist
                 setTopMixes(vibe.slice(15, 30));
               }
             }).catch(err => console.error(err))
@@ -172,20 +168,20 @@ export default function HomePage() {
 
         const genre1 = localUserDna?.top_genres?.[0] || "chill";
         const genre2 = localUserDna?.top_genres?.[1] || "pop";
+        const topArtist1 = localUserDna?.top_artists?.[0] || "The Weeknd";
+        const topArtist2 = localUserDna?.top_artists?.[1] || "A.R. Rahman";
 
-        const [stationsReq, trendingReq, newReq, albumsReq, networkReq] = await Promise.allSettled([
-          searchMusic(`best ${genre1} radio stations`),
+        const [artist1Req, artist2Req, trendingReq, newReq] = await Promise.allSettled([
+          searchMusic(`${topArtist1} essential hits`),
+          searchMusic(`more like ${topArtist2}`),
           searchMusic(`trending ${genre1} songs`),
           searchMusic(`latest ${genre2} new releases`),
-          searchMusic(`popular ${genre2} albums`),
-          searchMusic(`viral trending songs today`),
         ]);
 
-        if (stationsReq.status === "fulfilled") setRecommendedStations(stationsReq.value.slice(0, 10));
+        if (artist1Req.status === "fulfilled") setArtist1Shelf({ name: `Because you listened to ${topArtist1}`, tracks: artist1Req.value.slice(0, 10) });
+        if (artist2Req.status === "fulfilled") setArtist2Shelf({ name: `Similar to ${topArtist2}`, tracks: artist2Req.value.slice(0, 10) });
         if (trendingReq.status === "fulfilled") setTrendingNow(trendingReq.value.slice(0, 12));
         if (newReq.status === "fulfilled") setNewReleases(newReq.value.slice(0, 10));
-        if (albumsReq.status === "fulfilled") setPopularAlbums(albumsReq.value.slice(0, 10));
-        if (networkReq.status === "fulfilled") setTrendingInNetwork(networkReq.value.slice(0, 10));
       } catch (e) {
         console.error(e);
       } finally {
@@ -256,9 +252,9 @@ export default function HomePage() {
       {/* ── Vibe DNA Hero ── */}
       {userDna && userProfile && userDna.top_songs && (
         <div className={`${PX} mb-10`}>
-          <div className="relative overflow-hidden rounded-3xl bg-[#1A1A1A] p-7 shadow-2xl flex flex-col md:flex-row md:items-center items-start justify-start gap-7 group">
-            <div className="absolute -top-24 -right-24 w-72 h-72 bg-[#FFB703] rounded-full mix-blend-screen filter blur-[80px] opacity-25 group-hover:opacity-50 transition-opacity duration-700" />
-            <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-violet-500 rounded-full mix-blend-screen filter blur-[80px] opacity-20 group-hover:opacity-40 transition-opacity duration-700" />
+          <div className="relative overflow-hidden rounded-3xl bg-[#1A1A1A]/80 backdrop-blur-xl border border-white/10 p-7 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] flex flex-col md:flex-row md:items-center items-start justify-start gap-7 group">
+            <div className="absolute -top-24 -right-24 w-72 h-72 bg-[#FFB703] rounded-full mix-blend-overlay filter blur-[60px] opacity-40 group-hover:opacity-60 transition-opacity duration-700 animate-pulse" />
+            <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-violet-500 rounded-full mix-blend-overlay filter blur-[60px] opacity-40 group-hover:opacity-60 transition-opacity duration-700 animate-pulse" />
 
             <div className="relative w-36 h-36 shrink-0 shadow-2xl rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-500">
               <Image src={userDna.top_songs[0]?.thumbnail || "/icon.png"} alt="Vibe" fill className="object-cover" unoptimized />
@@ -272,11 +268,11 @@ export default function HomePage() {
               <p className="text-[#FFB703] font-bold text-xs tracking-widest uppercase mb-1.5 flex items-center gap-1.5 justify-center md:justify-start">
                 <Sparkles size={12} /> Taste DNA Playlist
               </p>
-              <h2 className="text-2xl md:text-3xl font-black text-white mb-2">
-                Your {userDna.core_vibe?.replace(/[^\w\s]/gi, '') || "Daily"} Mix
+              <h2 className="text-2xl md:text-3xl font-black text-white mb-2 drop-shadow-lg">
+                {new Date().getHours() < 12 ? "Morning Energy" : new Date().getHours() < 17 ? "Afternoon Vibes" : "Late Night Focus"}
               </h2>
-              <p className="text-gray-400 text-sm max-w-md mb-5">
-                Curated from {userDna.favorite_genres?.slice(0, 2).join(" & ") || "your listening habits"} — always fresh.
+              <p className="text-white/80 text-sm max-w-md mb-5 drop-shadow-md">
+                Your {userDna.core_vibe?.replace(/[^\w\s]/gi, '') || "Daily"} mix, curated from {userDna.top_artists?.[0] || "your favorites"} & {userDna.top_artists?.[1] || "recent history"}.
               </p>
               <div className="flex items-center gap-3 justify-center md:justify-start">
                 <button
@@ -345,18 +341,30 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ── Trending In Your Network ── */}
-      <ShelfRow 
-        title="Trending In Your Network" 
-        icon={<Users size={20} className="text-indigo-500" />} 
-        tracks={trendingInNetwork} 
-        onPlay={playTrack} 
-      />
+      {/* ── Artist 1 Shelf ── */}
+      {artist1Shelf.tracks.length > 0 && (
+        <ShelfRow 
+          title={artist1Shelf.name} 
+          icon={<Star size={20} className="text-pink-500" />} 
+          tracks={artist1Shelf.tracks} 
+          onPlay={playTrack} 
+        />
+      )}
+
+      {/* ── Artist 2 Shelf ── */}
+      {artist2Shelf.tracks.length > 0 && (
+        <ShelfRow 
+          title={artist2Shelf.name} 
+          icon={<Radio size={20} className="text-indigo-500" />} 
+          tracks={artist2Shelf.tracks} 
+          onPlay={playTrack} 
+        />
+      )}
 
       {/* ── Your Top Mixes ── */}
       <ShelfRow 
         title="Your Top Mixes" 
-        icon={<Star size={20} className="text-pink-500" />} 
+        icon={<Zap size={20} className="text-violet-500" />} 
         tracks={topMixes} 
         onPlay={playTrack} 
       />
@@ -364,24 +372,8 @@ export default function HomePage() {
       {/* ── New Releases ── */}
       <ShelfRow 
         title="New Releases" 
-        icon={<Sparkles size={20} className="text-violet-500" />} 
+        icon={<Sparkles size={20} className="text-emerald-500" />} 
         tracks={newReleases} 
-        onPlay={playTrack} 
-      />
-
-      {/* ── Popular Albums ── */}
-      <ShelfRow 
-        title="Popular Albums" 
-        icon={<Disc3 size={20} className="text-purple-500" />} 
-        tracks={popularAlbums} 
-        onPlay={playTrack} 
-      />
-
-      {/* ── Recommended Stations ── */}
-      <ShelfRow 
-        title="Recommended Stations" 
-        icon={<Radio size={20} className="text-emerald-500" />} 
-        tracks={recommendedStations} 
         onPlay={playTrack} 
       />
     </div>
