@@ -32,8 +32,14 @@ export default function ArtistsPage() {
         const normalizedDna = await Promise.all(
           dnaArtists.map(async (a: any) => {
             if (typeof a === "string") {
-              const res = await searchArtists(a);
-              return { id: res?.[0]?.id, name: a, image: res?.[0]?.image };
+              try {
+                const res = await searchArtists(a);
+                const validArtist = res?.find((r: any) => r.id);
+                if (validArtist) {
+                  return { id: validArtist.id, name: a, image: validArtist.image };
+                }
+              } catch (e) {}
+              return { id: `legacy-${a}`, name: a, image: null };
             }
             return { id: a.id, name: a.name, image: a.image };
           })
@@ -60,8 +66,9 @@ export default function ArtistsPage() {
           const results = await Promise.all(
             mergedArtists.map(async (artist: any) => {
               let realSubscribers = "";
+              const isLegacy = typeof artist.id === "string" && artist.id.startsWith("legacy-");
               try {
-                if (artist.id) {
+                if (artist.id && !isLegacy) {
                   const details = await getArtist(artist.id);
                   if (details?.subscribers) realSubscribers = details.subscribers;
                   if (!artist.image && details?.image) artist.image = details.image;
@@ -69,7 +76,7 @@ export default function ArtistsPage() {
               } catch(e) {}
 
               return {
-                id: artist.id,
+                id: isLegacy ? "" : artist.id,
                 name: artist.name,
                 image: artist.image || null,
                 followers: realSubscribers,
