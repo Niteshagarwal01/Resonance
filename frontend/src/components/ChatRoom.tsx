@@ -64,6 +64,13 @@ export function ChatRoom({ roomName, onLeave }: { roomName: string, onLeave: () 
       if (history) setMessages(history);
       setLoading(false);
 
+      // Clean up any existing channel with this name
+      supabase.getChannels().forEach(c => {
+        if (c.topic === `realtime:room:${roomName}`) {
+          supabase.removeChannel(c);
+        }
+      });
+
       // Create a Supabase Realtime channel for this specific room
       const channel = supabase.channel(`room:${roomName}`, {
         config: { broadcast: { self: true }, presence: { key: session.user.id } }

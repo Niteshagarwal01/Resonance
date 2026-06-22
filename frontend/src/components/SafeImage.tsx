@@ -12,8 +12,9 @@ export function SafeImage({ src, alt = "Image", fallbackIconSize = 24, className
   const [error, setError] = useState(false);
 
   if (!src || error) {
+    const { fill, unoptimized, priority, ...divProps } = props as any;
     return (
-      <div className={`flex items-center justify-center bg-gray-100 ${className}`} {...props as any}>
+      <div className={`flex items-center justify-center bg-gray-100 ${className}`} {...divProps}>
         <Music size={fallbackIconSize} className="text-gray-300" />
       </div>
     );
