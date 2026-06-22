@@ -167,12 +167,15 @@ export default function HomePage() {
           }
         }
 
+        const genre1 = dnaRes.status === "fulfilled" && dnaRes.value.data?.top_genres?.[0] ? dnaRes.value.data.top_genres[0] : "chill";
+        const genre2 = dnaRes.status === "fulfilled" && dnaRes.value.data?.top_genres?.[1] ? dnaRes.value.data.top_genres[1] : "pop";
+
         const [stationsReq, trendingReq, newReq, albumsReq, networkReq] = await Promise.allSettled([
-          searchMusic("lofi hip hop radio"),
-          searchMusic("global trending charts today"),
-          searchMusic("latest new releases"),
-          searchMusic("popular new albums"),
-          searchMusic("viral trending songs today"),
+          searchMusic(`best ${genre1} radio stations`),
+          searchMusic(`trending ${genre1} songs`),
+          searchMusic(`latest ${genre2} new releases`),
+          searchMusic(`popular ${genre2} albums`),
+          searchMusic(`viral trending songs today`),
         ]);
 
         if (stationsReq.status === "fulfilled") setRecommendedStations(stationsReq.value.slice(0, 10));
