@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export function BottomPlayer() {
-  const { currentTrack, isPlaying, pauseTrack, resumeTrack, nextTrack, prevTrack, progress, duration, seekTo, isShuffle, repeatMode, isMagicShuffle, toggleShuffle, toggleRepeat, toggleMagicShuffle } = usePlayer();
+  const { currentTrack, isPlaying, pauseTrack, resumeTrack, nextTrack, prevTrack, progress, duration, seekTo, isShuffle, repeatMode, isMagicShuffle, toggleShuffle, toggleRepeat, toggleMagicShuffle, volume, setVolume } = usePlayer();
 
   if (!currentTrack) {
     return (
@@ -90,14 +90,35 @@ export function BottomPlayer() {
 
       {/* Right Controls */}
       <div className="flex items-center justify-end gap-4 w-1/3 min-w-[150px] text-gray-500">
-        <Volume2 size={18} />
-        <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-          <div className="w-1/2 h-full bg-[#1A1A1A]"></div>
+        <Volume2 
+          size={18} 
+          onClick={() => setVolume(volume === 0 ? 50 : 0)} 
+          className="cursor-pointer hover:text-[#1A1A1A] transition-colors" 
+        />
+        <div 
+          className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden cursor-pointer group"
+          onClick={(e) => {
+            const bounds = e.currentTarget.getBoundingClientRect();
+            const percent = ((e.clientX - bounds.left) / bounds.width) * 100;
+            setVolume(Math.max(0, Math.min(100, percent)));
+          }}
+        >
+          <div className="h-full bg-[#1A1A1A] group-hover:bg-[#FFB703] transition-colors" style={{ width: `${volume}%` }}></div>
         </div>
         <Link href="/dashboard/queue" className="hover:text-[#FFB703] transition-colors" title="View Queue">
           <ListMusic size={18} />
         </Link>
-        <Maximize2 size={18} className="hover:text-[#1A1A1A] cursor-pointer transition-colors" />
+        <Maximize2 
+          size={18} 
+          className="hover:text-[#1A1A1A] cursor-pointer transition-colors" 
+          onClick={() => {
+            if (!document.fullscreenElement) {
+              document.documentElement.requestFullscreen().catch(err => console.error(err));
+            } else {
+              if (document.exitFullscreen) document.exitFullscreen();
+            }
+          }}
+        />
       </div>
 
     </div>

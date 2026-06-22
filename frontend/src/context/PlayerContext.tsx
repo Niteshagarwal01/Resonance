@@ -110,6 +110,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         isMagicShuffle: isMagicShuffleRef.current,
       }));
     } catch (e) {}
+    
+    // Sync volume to player in case it changed or initialized from localstorage
+    if (ytPlayerRef.current?.setVolume) {
+      ytPlayerRef.current.setVolume(volume);
+    }
   }, [queue, currentTrack, volume, isShuffle, repeatMode, isMagicShuffle]);
 
   useEffect(() => {
@@ -136,7 +141,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         width: "0",
         playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, rel: 0, modestbranding: 1 },
         events: {
-          onReady: (event: any) => { event.target.setVolume(50); },
+          onReady: (event: any) => { 
+            // set volume to whatever the current state is (loaded from localStorage)
+            event.target.setVolume(volume); 
+          },
           onStateChange: (event: any) => {
             const YT = (window as any).YT;
             if (event.data === YT.PlayerState.PLAYING) {
@@ -366,19 +374,42 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         const moreTracks = await getRadioQueue(curr.id);
         if (moreTracks && moreTracks.length > 0) {
           const existingIds = new Set(q.map(t => t.id));
-          const newTracks = moreTracks
+          let newTracks = moreTracks
             .filter(t => !existingIds.has(t.id))
             .map(t => ({ ...t, isMagic: true }))
             .slice(0, 10);
           
+          newTracks = shuffleArray(newTracks);
+          
           if (newTracks.length > 0) {
             const currIdx = q.findIndex(t => t.id === curr.id);
-            const insertAt = currIdx >= 0 ? currIdx + 1 : q.length;
-            const newQ = [
-              ...q.slice(0, insertAt),
-              ...newTracks,
-              ...q.slice(insertAt),
-            ];
+            const keepIdx = currIdx >= 0 ? currIdx : -1;
+            
+            const pastAndCurrent = q.slice(0, keepIdx + 1);
+            const remainingUserTracks = q.slice(keepIdx + 1);
+            
+            const interleaved = [];
+            let userPtr = 0;
+            let magicPtr = 0;
+            
+            while (userPtr < remainingUserTracks.length || magicPtr < newTracks.length) {
+              // Add up to 3 user tracks
+              let uAdded = 0;
+              while (uAdded < 3 && userPtr < remainingUserTracks.length) {
+                interleaved.push(remainingUserTracks[userPtr]);
+                userPtr++;
+                uAdded++;
+              }
+              // Add up to 2 magic tracks
+              let mAdded = 0;
+              while (mAdded < 2 && magicPtr < newTracks.length) {
+                interleaved.push(newTracks[magicPtr]);
+                magicPtr++;
+                mAdded++;
+              }
+            }
+            
+            const newQ = [...pastAndCurrent, ...interleaved];
             queueRef.current = newQ;
             setQueue(newQ);
           }
