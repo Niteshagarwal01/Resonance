@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Play, TrendingUp, Music2, Clock, Zap, Star, Radio, Disc3, Mic2, Users } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
+import { SongActions } from "@/components/SongActions";
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -50,6 +51,9 @@ function ShelfRow({ title, icon, tracks, onPlay }: { title: string, icon?: React
               </div>
               <p className="font-bold text-[#1A1A1A] text-sm truncate group-hover:text-[#FFB703] transition-colors">{item.title}</p>
               <p className="text-xs text-gray-500 truncate mt-0.5">{item.artist}</p>
+              <div className="flex items-center justify-between mt-1" onClick={e => e.stopPropagation()}>
+                <SongActions track={item} size="sm" />
+              </div>
             </div>
           ))}
           <div className="w-4 shrink-0" />
