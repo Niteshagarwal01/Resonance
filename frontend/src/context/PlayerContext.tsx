@@ -211,27 +211,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         accumulatedPlayTimeRef.current += (Date.now() - playStartTimeRef.current) / 1000;
         playStartTimeRef.current = 0;
       }
-      const durationPlayed = Math.floor(accumulatedPlayTimeRef.current);
-      let totalDuration = 0;
-      if (outgoingTrack.duration) {
-        const parts = outgoingTrack.duration.split(':').map(Number);
-        if (parts.length === 2) totalDuration = parts[0] * 60 + parts[1];
-        if (parts.length === 3) totalDuration = parts[0] * 3600 + parts[1] * 60 + parts[2];
-      }
-
-      // Fire and forget history logging
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          supabase.from("listening_history").insert({
-            user_id: session.user.id,
-            video_id: outgoingTrack.id,
-            title: outgoingTrack.title,
-            artist: outgoingTrack.artist,
-            duration_played: durationPlayed,
-            total_duration: totalDuration > 0 ? totalDuration : Math.max(durationPlayed, 1) // prevent div/0
-          }).then(({error}) => { if (error) console.error("Telemetry error:", error) });
-        }
-      });
+      // We no longer insert here, we insert when the song starts playing instead.
     }
 
     // 2. Setup the new track
@@ -245,16 +225,31 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     playStartTimeRef.current = Date.now(); // Start tracking immediately
 
     // Pre-parse duration from string (e.g. "3:45" -> 225) to prevent initial 0:00 glitch
+    let parsedDuration = 0;
     if (track.duration) {
       const parts = track.duration.split(':').map(Number);
       if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-        setDuration(parts[0] * 60 + parts[1]);
-      } else {
-        setDuration(0);
+        parsedDuration = parts[0] * 60 + parts[1];
+      } else if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
+        parsedDuration = parts[0] * 3600 + parts[1] * 60 + parts[2];
       }
-    } else {
-      setDuration(0);
     }
+    setDuration(parsedDuration);
+
+    // Fire and forget history logging for the newly started track
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        supabase.from("listening_history").insert({
+          user_id: session.user.id,
+          track_id: track.id,
+          track_title: track.title,
+          track_artist: track.artist,
+          track_thumbnail: track.thumbnail || null,
+          duration_played: 0,
+          total_duration: parsedDuration > 0 ? parsedDuration : 1
+        }).then(({error}) => { if (error) console.error("Telemetry error:", error) });
+      }
+    });
 
     if (ytPlayerRef.current?.loadVideoById) {
       ytPlayerRef.current.loadVideoById(track.id);

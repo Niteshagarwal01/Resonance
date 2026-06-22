@@ -19,12 +19,11 @@ export function useLikedSongs() {
       if (error) throw error;
       
       const tracks: Track[] = (data || []).map(row => ({
-        id: row.video_id,
-        title: row.title,
-        artist: row.artist,
-        album: row.album,
-        thumbnail: row.thumbnail,
-        duration: row.duration
+        id: row.track_id,
+        title: row.track_title,
+        artist: row.track_artist,
+        thumbnail: row.track_thumbnail,
+        duration: row.track_duration
       }));
       
       setLikedSongs(tracks);
@@ -57,7 +56,7 @@ export function useLikedSongs() {
           .from("liked_songs")
           .delete()
           .eq("user_id", session.user.id)
-          .eq("video_id", track.id);
+          .eq("track_id", track.id);
       } else {
         // Optimistic update
         setLikedSongs((prev) => [...prev, track]);
@@ -65,12 +64,11 @@ export function useLikedSongs() {
           .from("liked_songs")
           .insert({
             user_id: session.user.id,
-            video_id: track.id,
-            title: track.title,
-            artist: track.artist,
-            album: track.album || null,
-            thumbnail: track.thumbnail || null,
-            duration: track.duration || null
+            track_id: track.id,
+            track_title: track.title,
+            track_artist: track.artist,
+            track_thumbnail: track.thumbnail || null,
+            track_duration: track.duration || null
           });
       }
     } catch (err) {
