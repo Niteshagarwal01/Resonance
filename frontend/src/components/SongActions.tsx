@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Heart, Plus, ListPlus, Check, Loader2, X } from "lucide-react";
+import { Heart, Plus, ListPlus, Check, Loader2, X, ListEnd } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
+import { usePlayer } from "@/context/PlayerContext";
 
 interface Track {
   id: string;
@@ -34,8 +35,10 @@ export function SongActions({ track, size = "sm", showLabel = false }: SongActio
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [creating, setCreating] = useState(false);
+  const [justQueued, setJustQueued] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
+  const { addToQueue } = usePlayer();
   const iconSize = size === "sm" ? 14 : 18;
 
   // Check if liked on mount
@@ -168,6 +171,13 @@ export function SongActions({ track, size = "sm", showLabel = false }: SongActio
     setCreating(false);
   };
 
+  const handleAddToQueue = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    addToQueue(track as any);
+    setJustQueued(true);
+    setTimeout(() => setJustQueued(false), 2000);
+  };
+
   return (
     <div className="flex items-center gap-1 relative" ref={menuRef}>
       {/* Like Button */}
@@ -186,6 +196,18 @@ export function SongActions({ track, size = "sm", showLabel = false }: SongActio
           <Heart size={iconSize} fill={isLiked ? "currentColor" : "none"} />
         )}
         {showLabel && <span className="text-xs font-bold">{isLiked ? "Liked" : "Like"}</span>}
+      </button>
+
+      {/* Add to Queue */}
+      <button
+        onClick={handleAddToQueue}
+        className={`flex items-center gap-1 rounded-full p-1.5 transition-all duration-200 hover:scale-110 active:scale-95 ${
+          justQueued ? "text-[#FFB703]" : "text-gray-400 hover:text-[#1A1A1A]"
+        }`}
+        title="Add to queue"
+      >
+        {justQueued ? <Check size={iconSize} /> : <ListEnd size={iconSize} />}
+        {showLabel && <span className="text-xs font-bold">{justQueued ? "Queued" : "Queue"}</span>}
       </button>
 
       {/* Add to Playlist */}

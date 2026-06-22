@@ -36,6 +36,7 @@ interface PlayerContextType {
   toggleMagicShuffle: () => void;
   clearQueue: () => void;
   moveTrackInQueue: (oldIndex: number, newIndex: number) => void;
+  addToQueue: (track: Track) => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -538,6 +539,32 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     originalQueueRef.current = newQueue;
   }
 
+  const addToQueue = useCallback((track: Track) => {
+    const q = queueRef.current;
+    const curr = currentTrackRef.current;
+    const newQ = [...q];
+    
+    if (curr) {
+      const idx = q.findIndex(t => t.id === curr.id);
+      if (idx >= 0) {
+        newQ.splice(idx + 1, 0, track); // Insert right after current track
+      } else {
+        newQ.push(track);
+      }
+    } else {
+      newQ.push(track);
+    }
+    
+    setQueue(newQ);
+    queueRef.current = newQ;
+    originalQueueRef.current = [...originalQueueRef.current, track];
+    
+    // If player is idle/empty, start playing immediately
+    if (!curr) {
+      _play(track, newQ);
+    }
+  }, [_play]);
+
   return (
     <PlayerContext.Provider
       value={{
@@ -562,6 +589,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         toggleMagicShuffle,
         clearQueue,
         moveTrackInQueue,
+        addToQueue,
       }}
     >  {children}
     </PlayerContext.Provider>
