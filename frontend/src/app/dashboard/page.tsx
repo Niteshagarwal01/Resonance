@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { searchMusic, getHomeMixes, Track } from "@/lib/api";
+import { searchMusic, getHomeMixes, getRadioQueue, Track } from "@/lib/api";
 import { usePlayer } from "@/context/PlayerContext";
 import { SafeImage as Image } from "@/components/SafeImage";
 import { Play, TrendingUp, Music2, Clock, Zap, Star, Radio, Disc3, Mic2, Users, ChevronRight, Flame, Sparkles } from "lucide-react";
@@ -185,8 +185,8 @@ export default function HomePage() {
         const topArtist2 = (typeof topArtist2Obj === 'object' ? topArtist2Obj?.name : topArtist2Obj) || "A.R. Rahman";
 
         const [artist1Req, artist2Req, trendingReq, newReq] = await Promise.allSettled([
-          searchMusic(`${topArtist1} essential hits`),
-          searchMusic(`more like ${topArtist2}`),
+          (topArtist1Obj && typeof topArtist1Obj === 'object' && topArtist1Obj.id) ? getRadioQueue(topArtist1Obj.id) : searchMusic(`songs by ${topArtist1}`),
+          (topArtist2Obj && typeof topArtist2Obj === 'object' && topArtist2Obj.id) ? getRadioQueue(topArtist2Obj.id) : searchMusic(`songs by ${topArtist2}`),
           searchMusic(`trending ${genre1} songs`),
           searchMusic(`latest ${genre2} new releases`),
         ]);

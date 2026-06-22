@@ -1,7 +1,7 @@
 "use client";
 
 import { usePlayer } from "@/context/PlayerContext";
-import { searchMusic, getCharts, Track } from "@/lib/api";
+import { searchMusic, getCharts, getRadioQueue, Track } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { Play, Compass, Globe, Zap, Flame, Radio, Sparkles } from "lucide-react";
 import { SafeImage as Image } from "@/components/SafeImage";
@@ -98,7 +98,7 @@ export default function DiscoverPage() {
 
         // Run all fetches in parallel, fail gracefully
         const fetches = [
-          searchMusic(`fresh new releases ${(typeof topArtists[0] === 'object' ? topArtists[0].name : topArtists[0]) || 'trending'}`), // Fresh Finds
+          (typeof topArtists[0] === 'object' && topArtists[0]?.id) ? getRadioQueue(topArtists[0].id) : searchMusic(`songs by ${(typeof topArtists[0] === 'object' ? topArtists[0].name : topArtists[0]) || 'trending'}`), // Fresh Finds
           getCharts("ZZ"),
           getCharts("IN"),
           ...dynamicSections.map(s => searchMusic(s.query))
