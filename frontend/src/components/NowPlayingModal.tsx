@@ -12,7 +12,7 @@ interface NowPlayingModalProps {
   onClose: () => void;
 }
 
-type ActiveTab = "about" | "up-next" | "artist";
+type ActiveTab = "up-next" | "artist" | "about";
 
 export function NowPlayingModal({ onClose }: NowPlayingModalProps) {
   const {
@@ -22,20 +22,19 @@ export function NowPlayingModal({ onClose }: NowPlayingModalProps) {
     volume, setVolume, queue
   } = usePlayer();
 
-  const [activeTab, setActiveTab] = useState<ActiveTab>("about");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("up-next");
   const [radioTracks, setRadioTracks] = useState<any[]>([]);
   const [radioLoading, setRadioLoading] = useState(false);
-  const [dominantColor, setDominantColor] = useState("#1A1A1A");
 
   const currentIndex = queue.findIndex(t => t.id === currentTrack?.id);
-  const upNext = currentIndex >= 0 ? queue.slice(currentIndex + 1, currentIndex + 6) : [];
+  const upNext = currentIndex >= 0 ? queue.slice(currentIndex + 1, currentIndex + 20) : [];
 
   // Fetch related tracks for "Artist" tab
   useEffect(() => {
     if (!currentTrack) return;
     setRadioLoading(true);
     getRadioQueue(currentTrack.id)
-      .then(tracks => setRadioTracks(tracks.slice(0, 8)))
+      .then(tracks => setRadioTracks(tracks.slice(0, 10)))
       .catch(() => {})
       .finally(() => setRadioLoading(false));
   }, [currentTrack?.id]);
@@ -57,225 +56,207 @@ export function NowPlayingModal({ onClose }: NowPlayingModalProps) {
   if (!currentTrack) return null;
 
   const artistName = currentTrack.artist?.split(",")[0]?.trim() || "Unknown Artist";
-  const genres = ["Pop", "Indie", "Soul"];
 
   return (
-    <div
-      className="fixed inset-0 z-[9999] flex items-end justify-center"
-      style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(20px)" }}
-    >
-      {/* Main Panel — slides up */}
-      <div
-        className="w-full max-w-2xl bg-white rounded-t-3xl shadow-2xl overflow-hidden flex flex-col"
-        style={{ maxHeight: "94vh" }}
-        onClick={e => e.stopPropagation()}
+    <div className="fixed inset-0 z-[9999] bg-[#0a0a0a] overflow-hidden flex flex-col md:flex-row text-white animate-in fade-in duration-300">
+      {/* Blurred immersive background */}
+      {currentTrack.thumbnail && (
+        <div 
+          className="absolute inset-0 opacity-40 mix-blend-screen scale-110 pointer-events-none"
+          style={{ 
+            backgroundImage: `url(${currentTrack.thumbnail})`, 
+            backgroundSize: 'cover', 
+            backgroundPosition: 'center',
+            filter: 'blur(100px)' 
+          }}
+        />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/80 to-[#0a0a0a] pointer-events-none" />
+
+      {/* Top Header - Close Button (Absolute) */}
+      <button 
+        onClick={onClose} 
+        className="absolute top-8 left-8 z-50 p-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md text-white transition-all shadow-lg"
       >
-        {/* Drag handle */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 bg-gray-200 rounded-full" />
-        </div>
+        <ChevronDown size={28} />
+      </button>
 
-        {/* Close button */}
-        <div className="flex items-center justify-between px-6 pb-2">
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors">
-            <ChevronDown size={22} />
-          </button>
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Now Playing</p>
-          <div className="w-9" />
-        </div>
-
+      {/* LEFT PANEL: Massive Player */}
+      <div className="relative z-10 w-full md:w-[55%] lg:w-[60%] h-full flex flex-col items-center justify-center p-8 md:p-12 lg:p-20 border-r border-white/5">
+        
         {/* Album Art */}
-        <div className="flex justify-center px-10 mb-5">
-          <div className="relative w-full aspect-square max-h-60 rounded-3xl overflow-hidden shadow-2xl">
-            {currentTrack.thumbnail ? (
-              <Image
-                src={currentTrack.thumbnail}
-                alt={currentTrack.title}
-                fill
-                className={`object-cover transition-all duration-700 ${isPlaying ? "scale-105" : "scale-100"}`}
-                unoptimized
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                <Music2 size={64} className="text-gray-400" />
-              </div>
-            )}
-            {/* Animated playing shimmer */}
-            {isPlaying && (
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-            )}
-          </div>
-        </div>
-
-        {/* Track Info + Actions */}
-        <div className="px-8 flex items-start justify-between mb-4">
-          <div className="flex-1 min-w-0 mr-3">
-            <h2 className="text-xl font-black text-[#1A1A1A] truncate leading-tight">{currentTrack.title}</h2>
-            <p className="text-gray-500 font-semibold text-sm truncate mt-0.5">{currentTrack.artist}</p>
-          </div>
-          <div className="shrink-0">
-            <SongActions track={currentTrack} size="md" />
-          </div>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="px-8 mb-4">
-          <div
-            className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden cursor-pointer group"
-            onClick={e => {
-              const bounds = e.currentTarget.getBoundingClientRect();
-              const pct = ((e.clientX - bounds.left) / bounds.width) * 100;
-              seekTo(Math.max(0, Math.min(100, pct)));
-            }}
-          >
-            <div
-              className="h-full bg-[#1A1A1A] group-hover:bg-[#FFB703] transition-colors rounded-full"
-              style={{ width: `${progress}%` }}
+        <div className="w-full max-w-lg aspect-square rounded-[2rem] overflow-hidden shadow-2xl shadow-black/50 mb-10 relative group">
+          {currentTrack.thumbnail ? (
+            <Image
+              src={currentTrack.thumbnail}
+              alt={currentTrack.title}
+              fill
+              className={`object-cover transition-transform duration-[20s] ease-linear ${isPlaying ? "scale-110" : "scale-100"}`}
+              unoptimized
             />
-          </div>
-          <div className="flex justify-between mt-1">
-            <span className="text-[11px] text-gray-400 tabular-nums">{formatTime(progress, duration)}</span>
-            <span className="text-[11px] text-gray-400 tabular-nums">{Math.floor(duration / 60)}:{(Math.floor(duration % 60)).toString().padStart(2, "0")}</span>
-          </div>
+          ) : (
+            <div className="w-full h-full bg-white/5 flex items-center justify-center">
+              <Music2 size={100} className="text-white/20" />
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
 
-        {/* Controls */}
-        <div className="px-8 mb-5">
-          <div className="flex items-center justify-between">
-            <button onClick={toggleShuffle} className={`p-2 rounded-full transition-colors ${isShuffle ? "text-[#FFB703]" : "text-gray-400 hover:text-[#1A1A1A]"}`}>
-              <Shuffle size={20} />
-            </button>
-            <button onClick={prevTrack} className="p-2 text-gray-600 hover:text-[#1A1A1A] transition-colors">
-              <SkipBack size={24} fill="currentColor" />
-            </button>
-            <button
-              onClick={isPlaying ? pauseTrack : resumeTrack}
-              className="w-14 h-14 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-all"
+        <div className="w-full max-w-lg">
+          {/* Info + Actions */}
+          <div className="flex items-start justify-between mb-8">
+            <div className="flex-1 min-w-0 mr-4">
+              <h1 className="text-3xl md:text-4xl font-black text-white truncate leading-tight tracking-tight drop-shadow-md">
+                {currentTrack.title}
+              </h1>
+              <p className="text-lg md:text-xl text-white/60 font-medium truncate mt-1">
+                {currentTrack.artist}
+              </p>
+            </div>
+            <div className="shrink-0 bg-white/5 p-2 rounded-2xl backdrop-blur-md flex items-center gap-2">
+              <SongActions track={currentTrack} size="lg" />
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="mb-8">
+            <div
+              className="w-full h-2.5 bg-white/10 rounded-full overflow-hidden cursor-pointer group mb-3 shadow-inner"
+              onClick={e => {
+                const bounds = e.currentTarget.getBoundingClientRect();
+                const pct = ((e.clientX - bounds.left) / bounds.width) * 100;
+                seekTo(Math.max(0, Math.min(100, pct)));
+              }}
             >
-              {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
+              <div
+                className="h-full bg-white group-hover:bg-[#FFB703] transition-colors rounded-full"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <div className="flex justify-between">
+              <span className="text-xs font-bold text-white/50 tabular-nums">{formatTime(progress, duration)}</span>
+              <span className="text-xs font-bold text-white/50 tabular-nums">{Math.floor(duration / 60)}:{(Math.floor(duration % 60)).toString().padStart(2, "0")}</span>
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="flex items-center justify-between">
+            <button onClick={toggleShuffle} className={`p-3 rounded-full transition-all hover:bg-white/10 ${isShuffle ? "text-[#FFB703]" : "text-white/50"}`}>
+              <Shuffle size={24} />
             </button>
-            <button onClick={nextTrack} className="p-2 text-gray-600 hover:text-[#1A1A1A] transition-colors">
-              <SkipForward size={24} fill="currentColor" />
-            </button>
-            <button onClick={toggleRepeat} className={`p-2 rounded-full transition-colors relative ${repeatMode !== "off" ? "text-[#FFB703]" : "text-gray-400 hover:text-[#1A1A1A]"}`}>
-              <Repeat size={20} />
+            
+            <div className="flex items-center gap-6">
+              <button onClick={prevTrack} className="p-3 text-white hover:text-[#FFB703] transition-colors hover:scale-110 active:scale-95">
+                <SkipBack size={36} fill="currentColor" />
+              </button>
+              
+              <button
+                onClick={isPlaying ? pauseTrack : resumeTrack}
+                className="w-24 h-24 rounded-full bg-[#FFB703] text-black flex items-center justify-center shadow-[0_0_40px_rgba(255,183,3,0.3)] hover:shadow-[0_0_60px_rgba(255,183,3,0.5)] hover:scale-105 active:scale-95 transition-all"
+              >
+                {isPlaying ? <Pause size={40} fill="currentColor" /> : <Play size={40} fill="currentColor" className="ml-2" />}
+              </button>
+              
+              <button onClick={nextTrack} className="p-3 text-white hover:text-[#FFB703] transition-colors hover:scale-110 active:scale-95">
+                <SkipForward size={36} fill="currentColor" />
+              </button>
+            </div>
+
+            <button onClick={toggleRepeat} className={`p-3 rounded-full transition-all hover:bg-white/10 relative ${repeatMode !== "off" ? "text-[#FFB703]" : "text-white/50"}`}>
+              <Repeat size={24} />
               {repeatMode === "one" && (
-                <span className="absolute top-0.5 right-0.5 w-3 h-3 bg-[#FFB703] rounded-full flex items-center justify-center">
-                  <span className="text-[7px] font-black text-[#1A1A1A]">1</span>
+                <span className="absolute top-2 right-2 w-3.5 h-3.5 bg-[#FFB703] rounded-full flex items-center justify-center">
+                  <span className="text-[8px] font-black text-black">1</span>
                 </span>
               )}
             </button>
           </div>
 
-          {/* Volume */}
-          <div className="flex items-center gap-3 mt-4">
-            <Volume2 size={16} className="text-gray-400 shrink-0 cursor-pointer" onClick={() => setVolume(volume === 0 ? 60 : 0)} />
+          {/* Volume + Magic */}
+          <div className="flex items-center gap-4 mt-10 bg-white/5 p-4 rounded-2xl backdrop-blur-md">
+            <Volume2 size={20} className="text-white/50 shrink-0 cursor-pointer hover:text-white" onClick={() => setVolume(volume === 0 ? 60 : 0)} />
             <div
-              className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden cursor-pointer group"
+              className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden cursor-pointer group"
               onClick={e => {
                 const bounds = e.currentTarget.getBoundingClientRect();
                 const pct = ((e.clientX - bounds.left) / bounds.width) * 100;
                 setVolume(Math.max(0, Math.min(100, pct)));
               }}
             >
-              <div className="h-full bg-gray-400 group-hover:bg-[#FFB703] transition-colors rounded-full" style={{ width: `${volume}%` }} />
+              <div className="h-full bg-white/50 group-hover:bg-[#FFB703] transition-colors rounded-full" style={{ width: `${volume}%` }} />
             </div>
-            <button onClick={toggleMagicShuffle} className={`p-1.5 rounded-full transition-colors ${isMagicShuffle ? "text-[#FFB703]" : "text-gray-300 hover:text-gray-500"}`} title="Magic Shuffle">
-              <Sparkles size={16} />
+            <button 
+              onClick={toggleMagicShuffle} 
+              className={`p-2 rounded-full transition-colors flex items-center gap-2 text-sm font-bold ${isMagicShuffle ? "bg-[#FFB703]/20 text-[#FFB703]" : "text-white/50 hover:bg-white/10"}`} 
+            >
+              <Sparkles size={18} className={isMagicShuffle ? "animate-pulse" : ""} />
             </button>
           </div>
-        </div>
 
-        {/* Tabs */}
-        <div className="flex border-t border-gray-100 shrink-0">
-          {(["about", "up-next", "artist"] as ActiveTab[]).map(tab => (
+        </div>
+      </div>
+
+      {/* RIGHT PANEL: Tabs & Lists */}
+      <div className="relative z-10 w-full md:w-[45%] lg:w-[40%] h-full flex flex-col bg-black/40 backdrop-blur-3xl">
+        {/* Tabs Header */}
+        <div className="flex px-6 pt-10 pb-4 shrink-0 gap-6 border-b border-white/5">
+          {(["up-next", "artist", "about"] as ActiveTab[]).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-3 text-xs font-black uppercase tracking-widest transition-colors ${
+              className={`pb-4 text-sm font-black uppercase tracking-widest transition-all relative ${
                 activeTab === tab
-                  ? "text-[#1A1A1A] border-b-2 border-[#FFB703]"
-                  : "text-gray-400 hover:text-gray-600"
+                  ? "text-white"
+                  : "text-white/40 hover:text-white/80"
               }`}
             >
               {tab === "about" ? "About" : tab === "up-next" ? "Up Next" : "Artist"}
+              {activeTab === tab && (
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#FFB703] rounded-t-full shadow-[0_0_10px_#FFB703]" />
+              )}
             </button>
           ))}
         </div>
 
-        {/* Tab Content */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide">
-          {/* About Tab */}
-          {activeTab === "about" && (
-            <div className="p-6 space-y-5">
-              <div className="bg-gray-50 rounded-2xl p-5">
-                <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-1.5">
-                  <Disc3 size={12} /> Track
-                </p>
-                <p className="font-black text-[#1A1A1A] text-lg">{currentTrack.title}</p>
-                {currentTrack.album && (
-                  <p className="text-sm text-gray-500 mt-1">Album: {currentTrack.album}</p>
-                )}
-                <p className="text-sm text-gray-500">Artist: {currentTrack.artist}</p>
-                {currentTrack.duration && (
-                  <p className="text-sm text-gray-500">Duration: {currentTrack.duration}</p>
-                )}
-              </div>
-
-              <div className="bg-gray-50 rounded-2xl p-5">
-                <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 flex items-center gap-1.5">
-                  <Mic2 size={12} /> Main Artist
-                </p>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FFB703]/30 to-purple-400/30 flex items-center justify-center">
-                    <Mic2 size={20} className="text-gray-500" />
-                  </div>
-                  <div>
-                    <p className="font-black text-[#1A1A1A]">{artistName}</p>
-                    <p className="text-xs text-gray-500">Artist</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-[#FFB703]/10 to-transparent rounded-2xl p-5 border border-[#FFB703]/20">
-                <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Open in YouTube Music</p>
-                <a
-                  href={`https://music.youtube.com/watch?v=${currentTrack.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm font-bold text-[#FFB703] hover:text-[#ffc124] transition-colors"
-                >
-                  <ExternalLink size={14} /> View on YouTube Music
-                </a>
-              </div>
-            </div>
-          )}
-
+        {/* Tab Content Area */}
+        <div className="flex-1 overflow-y-auto scrollbar-hide p-6">
+          
           {/* Up Next Tab */}
           {activeTab === "up-next" && (
-            <div className="p-4">
+            <div>
               {upNext.length === 0 ? (
-                <div className="text-center py-10">
-                  <p className="text-gray-400 font-medium text-sm">Nothing else in your queue.</p>
-                  <p className="text-gray-300 text-xs mt-1">Enable Magic Shuffle ✨ to keep the music going!</p>
+                <div className="text-center py-20">
+                  <ListPlus size={48} className="mx-auto text-white/20 mb-4" />
+                  <p className="text-white/60 font-medium">Nothing else in your queue.</p>
+                  <button onClick={toggleMagicShuffle} className="mt-6 px-6 py-2.5 rounded-full bg-white/10 hover:bg-[#FFB703] hover:text-black transition-all text-sm font-bold flex items-center gap-2 mx-auto">
+                    <Sparkles size={16}/> Auto-play Magic Mix
+                  </button>
                 </div>
               ) : (
-                <div className="space-y-1">
+                <div className="space-y-2">
+                  <p className="text-xs font-black uppercase tracking-widest text-[#FFB703] mb-4 pl-2">Playing Next</p>
                   {upNext.map((track, idx) => (
-                    <div key={`${track.id}-${idx}`} className="flex items-center gap-3 p-3 rounded-2xl hover:bg-gray-50 transition-colors">
-                      <span className="text-sm font-bold text-gray-200 w-5 text-center tabular-nums">{idx + 1}</span>
-                      {track.thumbnail && (
-                        <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0">
+                    <div key={`${track.id}-${idx}`} className="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-white/5">
+                      <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-white/5">
+                        {track.thumbnail ? (
                           <Image src={track.thumbnail} alt={track.title} fill className="object-cover" unoptimized />
+                        ) : (
+                          <Music2 className="text-white/20 m-auto mt-3" size={24}/>
+                        )}
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                          <Play size={16} fill="white" />
                         </div>
-                      )}
+                      </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-[#1A1A1A] text-sm truncate">{track.title}</p>
-                        <p className="text-xs text-gray-500 truncate">{track.artist}</p>
+                        <p className="font-bold text-white text-[15px] truncate group-hover:text-[#FFB703] transition-colors">{track.title}</p>
+                        <p className="text-sm text-white/50 truncate">{track.artist}</p>
                       </div>
                       {(track as any).isMagic && (
-                        <span className="text-[10px] font-bold text-pink-500 bg-pink-50 px-1.5 py-0.5 rounded-md shrink-0">✨</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-black bg-[#FFB703] px-2 py-1 rounded-md shrink-0 shadow-[0_0_10px_rgba(255,183,3,0.5)]">Magic</span>
                       )}
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+                        <SongActions track={track} size="sm" />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -285,45 +266,46 @@ export function NowPlayingModal({ onClose }: NowPlayingModalProps) {
 
           {/* Artist Discovery Tab */}
           {activeTab === "artist" && (
-            <div className="p-5 space-y-5">
-              <div className="flex items-center gap-4 bg-[#1A1A1A] rounded-2xl p-5">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#FFB703]/40 to-purple-400/40 flex items-center justify-center shrink-0">
-                  <Mic2 size={28} className="text-[#FFB703]" />
+            <div className="space-y-8">
+              <div className="flex items-center gap-5 bg-white/5 rounded-[2rem] p-6 border border-white/5 backdrop-blur-md">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#FFB703] to-pink-500 flex items-center justify-center shrink-0 shadow-lg">
+                  <Mic2 size={32} className="text-white" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1">Artist</p>
-                  <p className="text-xl font-black text-white">{artistName}</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-[#FFB703] mb-1">Main Artist</p>
+                  <p className="text-2xl font-black text-white">{artistName}</p>
                   <a
                     href={`https://music.youtube.com/search?q=${encodeURIComponent(artistName)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-[#FFB703] font-bold flex items-center gap-1 mt-1 hover:underline"
+                    className="text-sm text-white/60 font-bold flex items-center gap-1.5 mt-2 hover:text-white transition-colors"
                   >
-                    <ExternalLink size={10} /> View on YouTube Music
+                    <ExternalLink size={14} /> Open in YouTube Music
                   </a>
                 </div>
               </div>
 
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 px-1">More Like This</p>
+                <p className="text-xs font-black uppercase tracking-widest text-[#FFB703] mb-4 pl-2">More Like This</p>
                 {radioLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="w-6 h-6 border-2 border-[#FFB703]/30 border-t-[#FFB703] rounded-full animate-spin" />
+                  <div className="flex items-center justify-center py-12">
+                    <div className="w-8 h-8 border-4 border-[#FFB703]/20 border-t-[#FFB703] rounded-full animate-spin" />
                   </div>
                 ) : (
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     {radioTracks.map((track, idx) => (
-                      <div key={`${track.id}-${idx}`} className="flex items-center gap-3 p-3 rounded-2xl hover:bg-gray-50 transition-colors group cursor-pointer">
-                        {track.thumbnail && (
-                          <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0">
-                            <Image src={track.thumbnail} alt={track.title} fill className="object-cover" unoptimized />
+                      <div key={`${track.id}-${idx}`} className="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-white/5">
+                        <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-white/5">
+                          {track.thumbnail && <Image src={track.thumbnail} alt={track.title} fill className="object-cover" unoptimized />}
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                            <Play size={16} fill="white" />
                           </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-[#1A1A1A] text-sm truncate group-hover:text-[#FFB703] transition-colors">{track.title}</p>
-                          <p className="text-xs text-gray-500 truncate">{track.artist}</p>
                         </div>
-                        <div onClick={e => e.stopPropagation()}>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-white text-[15px] truncate group-hover:text-[#FFB703] transition-colors">{track.title}</p>
+                          <p className="text-sm text-white/50 truncate">{track.artist}</p>
+                        </div>
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
                           <SongActions track={track} size="sm" />
                         </div>
                       </div>
@@ -333,6 +315,55 @@ export function NowPlayingModal({ onClose }: NowPlayingModalProps) {
               </div>
             </div>
           )}
+
+          {/* About Tab */}
+          {activeTab === "about" && (
+            <div className="space-y-6">
+              <div className="bg-white/5 border border-white/5 rounded-[2rem] p-8 backdrop-blur-md">
+                <p className="text-xs font-black uppercase tracking-widest text-[#FFB703] mb-4 flex items-center gap-2">
+                  <Disc3 size={16} /> Track Details
+                </p>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-xs text-white/40 uppercase font-bold tracking-wider mb-1">Title</p>
+                    <p className="font-black text-white text-xl">{currentTrack.title}</p>
+                  </div>
+                  {currentTrack.album && (
+                    <div>
+                      <p className="text-xs text-white/40 uppercase font-bold tracking-wider mb-1">Album</p>
+                      <p className="font-bold text-white/90 text-lg">{currentTrack.album}</p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-xs text-white/40 uppercase font-bold tracking-wider mb-1">Artist</p>
+                    <p className="font-bold text-white/90 text-lg">{currentTrack.artist}</p>
+                  </div>
+                  {currentTrack.duration && (
+                    <div>
+                      <p className="text-xs text-white/40 uppercase font-bold tracking-wider mb-1">Duration</p>
+                      <p className="font-bold text-white/90 text-lg">{currentTrack.duration}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <a
+                href={`https://music.youtube.com/watch?v=${currentTrack.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center justify-between p-6 bg-gradient-to-br from-[#FF0000]/20 to-black border border-[#FF0000]/30 rounded-[2rem] hover:from-[#FF0000]/40 transition-all cursor-pointer"
+              >
+                <div>
+                  <p className="text-white font-black text-lg mb-1">YouTube Music</p>
+                  <p className="text-white/60 text-sm font-medium">Watch the official video or lyrics</p>
+                </div>
+                <div className="w-12 h-12 rounded-full bg-white/10 group-hover:bg-white/20 flex items-center justify-center transition-colors">
+                  <ExternalLink size={20} className="text-white" />
+                </div>
+              </a>
+            </div>
+          )}
+
         </div>
       </div>
     </div>
