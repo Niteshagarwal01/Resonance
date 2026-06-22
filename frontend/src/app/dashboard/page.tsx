@@ -129,6 +129,7 @@ export default function HomePage() {
     async function load() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        let localUserDna: any = null;
         if (session) {
           const [profileRes, dnaRes, historyRes] = await Promise.allSettled([
             supabase.from("profiles").select("*").eq("id", session.user.id).single(),
@@ -152,8 +153,10 @@ export default function HomePage() {
           
           if (dnaRes.status === "fulfilled" && dnaRes.value.data) {
             const dna = dnaRes.value.data;
+            localUserDna = dna;
             setUserDna(dna);
             
+            // Auto-generate Vibe asynchronously
             // Auto-generate Vibe asynchronously
             setVibeLoading(true);
             const { evolvedArtists, evolvedGenres } = computeEvolvedDNA(dna, historyData);
@@ -167,8 +170,8 @@ export default function HomePage() {
           }
         }
 
-        const genre1 = dnaRes.status === "fulfilled" && dnaRes.value.data?.top_genres?.[0] ? dnaRes.value.data.top_genres[0] : "chill";
-        const genre2 = dnaRes.status === "fulfilled" && dnaRes.value.data?.top_genres?.[1] ? dnaRes.value.data.top_genres[1] : "pop";
+        const genre1 = localUserDna?.top_genres?.[0] || "chill";
+        const genre2 = localUserDna?.top_genres?.[1] || "pop";
 
         const [stationsReq, trendingReq, newReq, albumsReq, networkReq] = await Promise.allSettled([
           searchMusic(`best ${genre1} radio stations`),
