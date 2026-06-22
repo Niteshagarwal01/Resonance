@@ -3,12 +3,14 @@
 import { Mic2, Star, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { searchArtists } from "@/lib/api";
+import { searchArtists, getArtist } from "@/lib/api";
 import Link from "next/link";
+import { useLikedArtists } from "@/hooks/useLikedArtists";
 
 export default function ArtistsPage() {
   const [artists, setArtists] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isLiked: isLikedArtist, toggleLikedArtist } = useLikedArtists();
   const supabase = createClient();
 
   useEffect(() => {
@@ -17,23 +19,63 @@ export default function ArtistsPage() {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
 
-        const { data: dna } = await supabase.from("taste_dna").select("top_artists").eq("user_id", session.user.id).single();
+        // Fetch Taste DNA and Liked Artists in parallel
+        const [dnaRes, likedRes] = await Promise.all([
+          supabase.from("taste_dna").select("top_artists").eq("user_id", session.user.id).single(),
+          supabase.from("liked_artists").select("*").eq("user_id", session.user.id)
+        ]);
         
-        if (dna && dna.top_artists && dna.top_artists.length > 0) {
+        const dnaArtists = dnaRes.data?.top_artists || [];
+        const likedArtists = likedRes.data || [];
+
+        // Normalize DNA artists
+        const normalizedDna = await Promise.all(
+          dnaArtists.map(async (a: any) => {
+            if (typeof a === "string") {
+              const res = await searchArtists(a);
+              return { id: res?.[0]?.id, name: a, image: res?.[0]?.image };
+            }
+            return { id: a.id, name: a.name, image: a.image };
+          })
+        );
+
+        // Normalize Liked Artists
+        const normalizedLiked = likedArtists.map(a => ({
+          id: a.artist_id,
+          name: a.artist_name,
+          image: a.artist_image
+        }));
+
+        // Merge and Deduplicate by ID
+        const allArtistsMap = new Map();
+        [...normalizedDna, ...normalizedLiked].forEach(a => {
+          if (a.id && !allArtistsMap.has(a.id)) {
+            allArtistsMap.set(a.id, a);
+          }
+        });
+
+        const mergedArtists = Array.from(allArtistsMap.values());
+
+        if (mergedArtists.length > 0) {
           const results = await Promise.all(
-            dna.top_artists.map(async (name: string) => {
-              const res = await searchArtists(name);
-              const artistData = res?.[0];
+            mergedArtists.map(async (artist: any) => {
+              let realSubscribers = "1M+";
+              try {
+                const details = await getArtist(artist.id);
+                if (details?.subscribers) realSubscribers = details.subscribers;
+                if (!artist.image && details?.image) artist.image = details.image;
+              } catch(e) {}
+
               return {
-                id: artistData?.id,
-                name: name,
-                image: artistData?.image || "https://i.ytimg.com/vi/4NRXx6U8ABQ/hqdefault.jpg",
-                followers: artistData?.subscribers || "1M+",
+                id: artist.id,
+                name: artist.name,
+                image: artist.image || "https://i.ytimg.com/vi/4NRXx6U8ABQ/hqdefault.jpg",
+                followers: realSubscribers,
                 following: true
               };
             })
           );
-          setArtists(results.filter(Boolean));
+          setArtists(results);
         }
       } catch (error) {
         console.error(error);
@@ -74,7 +116,7 @@ export default function ArtistsPage() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
             {artists.map((artist) => (
-              <div key={artist.name} className="flex flex-col items-center group cursor-pointer">
+              <div key={artist.id || artist.name} className="flex flex-col items-center group cursor-pointer">
                 {artist.id ? (
                   <Link href={`/dashboard/artist/${artist.id}`} className="relative w-full aspect-square rounded-full overflow-hidden mb-4 shadow-md group-hover:shadow-2xl group-hover:scale-105 transition-all duration-300 block">
                     <img src={artist.image} alt={artist.name} className="w-full h-full object-cover" />
@@ -90,17 +132,17 @@ export default function ArtistsPage() {
                   </div>
                 )}
                 <h3 className="font-bold text-[#1A1A1A] text-center w-full truncate">{artist.name}</h3>
-                <p className="text-sm text-gray-500">{artist.followers} Followers</p>
+                <p className="text-sm text-gray-500">{artist.followers} Subscribers</p>
                 
                 <button 
+                  onClick={() => toggleLikedArtist(artist)}
                   className={`mt-3 px-4 py-1.5 rounded-full text-xs font-bold border transition-colors ${
-                    artist.following 
-                      ? 'border-gray-200 text-gray-500 hover:text-red-500 hover:border-red-200' 
+                    isLikedArtist(artist.id)
+                      ? 'border-[#FFB703] bg-[#FFB703]/10 text-[#FFB703] hover:bg-[#FFB703] hover:text-white' 
                       : 'border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white'
                   }`}
-                  onClick={() => setArtists(prev => prev.map(a => a.name === artist.name ? {...a, following: !a.following} : a))}
                 >
-                  {artist.following ? 'Following' : 'Follow'}
+                  {isLikedArtist(artist.id) ? "Following" : "Follow"}
                 </button>
               </div>
             ))}

@@ -7,12 +7,14 @@ import { Play, Heart, MoreHorizontal, CheckCircle2, Clock, Disc3, Music2, Chevro
 import { SafeImage as Image } from "@/components/SafeImage";
 import Link from "next/link";
 
+import { useLikedArtists } from "@/hooks/useLikedArtists";
+
 export default function ArtistPage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
   const { playTrack, currentTrack, isPlaying } = usePlayer();
   const [loading, setLoading] = useState(true);
   const [artistData, setArtistData] = useState<any>(null);
-  const [followed, setFollowed] = useState(false);
+  const { isLiked, toggleLikedArtist } = useLikedArtists();
 
   useEffect(() => {
     async function load() {
@@ -64,6 +66,14 @@ export default function ArtistPage({ params }: { params: Promise<{ id: string }>
   const topTracks: any[] = artistData.top_tracks || [];
   const albums: any[] = artistData.albums || [];
   const singles: any[] = artistData.singles || [];
+  
+  // Format for the hook
+  const artistObj = {
+    id: unwrappedParams.id,
+    name: artistData.name,
+    image: artistData.image
+  };
+  const currentlyLiked = isLiked(unwrappedParams.id);
 
   return (
     <div className="pb-32">
@@ -108,14 +118,14 @@ export default function ArtistPage({ params }: { params: Promise<{ id: string }>
           <Play size={28} fill="currentColor" className="ml-1" />
         </button>
         <button
-          onClick={() => setFollowed(!followed)}
+          onClick={() => toggleLikedArtist(artistObj)}
           className={`px-6 py-2.5 rounded-full border font-bold text-sm transition-all ${
-            followed
+            currentlyLiked
               ? "border-[#FFB703] text-[#FFB703] bg-[#FFB703]/10"
               : "border-gray-300 text-[#1A1A1A] hover:border-[#1A1A1A]"
           }`}
         >
-          {followed ? "Following" : "Follow"}
+          {currentlyLiked ? "Following" : "Follow"}
         </button>
         <button className="text-gray-400 hover:text-[#1A1A1A] transition-colors ml-2">
           <MoreHorizontal size={24} />

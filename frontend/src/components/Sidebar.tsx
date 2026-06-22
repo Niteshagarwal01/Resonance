@@ -12,12 +12,13 @@ const navLinks = [
   { name: "Search", href: "/dashboard/search", icon: Search },
   { name: "Library", href: "/dashboard/library", icon: Library },
   { name: "Queue", href: "/dashboard/queue", icon: ListMusic },
+  { name: "Fav Songs", href: "/dashboard/liked-songs", icon: Heart },
 ];
 
 const secondaryLinks = [
   { name: "Discover", href: "/dashboard/discover", icon: Compass },
   { name: "Taste DNA", href: "/dashboard/taste-dna", icon: Dna },
-  { name: "Artists", href: "/dashboard/artists", icon: Mic2 },
+  { name: "Fav Artists", href: "/dashboard/artists", icon: Mic2 },
   { name: "Community", href: "/dashboard/community", icon: Users },
   { name: "Profile", href: "/dashboard/profile", icon: User },
 ];
@@ -59,18 +60,7 @@ export function Sidebar() {
           })}
         </nav>
 
-        {/* Liked Songs shortcut */}
-        <div className="px-3 mb-4 shrink-0">
-          <Link
-            href="/dashboard/library"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-sm font-bold hover:opacity-90 transition-opacity"
-          >
-            <div className="w-6 h-6 bg-white/20 rounded flex items-center justify-center">
-              <Heart size={14} fill="currentColor" />
-            </div>
-            Liked Songs
-          </Link>
-        </div>
+        {/* Removed duplicate Liked Songs shortcut */}
 
         <div className="mx-4 border-t border-gray-100 mb-4" />
 

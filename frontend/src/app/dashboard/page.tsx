@@ -146,30 +146,41 @@ export default function HomePage() {
           }
         }
 
-        let dna = null;
-        if (session) {
-          const dnaRes = await supabase.from("taste_dna").select("*").eq("user_id", session.user.id).single();
-          if (dnaRes.data) dna = dnaRes.data;
+        // Use the new Taste Evolution Engine via /api/home
+        let homeMixes: Track[] = [];
+        try {
+          // Since getHomeMixes is an authenticated endpoint, we use the custom fetcher or api client
+          // Wait, api client (searchMusic) uses standard fetch, let's use the api class if available.
+          // For now, let's just use fetch manually to ensure token is passed.
+          if (session) {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"}/api/home`, {
+              headers: { "Authorization": `Bearer ${session.access_token}` }
+            });
+            if (res.ok) {
+              const data = await res.json();
+              homeMixes = data.tracks || [];
+            }
+          }
+        } catch (err) {
+          console.error("Failed to load evolved home mixes", err);
         }
 
-        const topArtist = dna?.top_artists?.[0] || "top pop";
-        const artistMix = dna?.top_artists?.slice(0, 3).join(" ") || "top pop";
-        const topGenre = dna?.top_genres?.[0] || "hits";
-        const genreMix = dna?.top_genres?.slice(0, 2).join(" ") || "hits";
-        const coreVibe = dna?.core_vibe ? dna.core_vibe.replace(/[^\w\s]/gi, '').trim() : "viral";
-
-        const [mfyReq, topMixesReq, stationsReq, trendingReq, newReq, albumsReq, networkReq] = await Promise.allSettled([
-          searchMusic(`${artistMix} best tracks`),
-          searchMusic(`${genreMix} trending mixes today`),
-          searchMusic(`${coreVibe} radio stations`),
+        const [stationsReq, trendingReq, newReq, albumsReq, networkReq] = await Promise.allSettled([
+          searchMusic("lofi hip hop radio"),
           searchMusic("global trending charts today"),
           searchMusic("latest new releases"),
           searchMusic("popular new albums"),
           searchMusic("viral trending songs today"),
         ]);
 
-        if (mfyReq.status === "fulfilled") setMadeForYou(mfyReq.value.slice(0, 10));
-        if (topMixesReq.status === "fulfilled") setTopMixes(topMixesReq.value.slice(0, 10));
+        if (homeMixes.length > 0) {
+          setMadeForYou(homeMixes.slice(0, 10));
+          setTopMixes(homeMixes.slice(10, 20));
+        } else {
+          setMadeForYou([]);
+          setTopMixes([]);
+        }
+
         if (stationsReq.status === "fulfilled") setRecommendedStations(stationsReq.value.slice(0, 10));
         if (trendingReq.status === "fulfilled") setTrendingNow(trendingReq.value.slice(0, 12));
         if (newReq.status === "fulfilled") setNewReleases(newReq.value.slice(0, 10));

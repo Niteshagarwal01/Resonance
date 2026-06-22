@@ -160,6 +160,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
             const YT = (window as any).YT;
             if (event.data === YT.PlayerState.PLAYING) {
               setIsPlaying(true);
+              playStartTimeRef.current = Date.now();
               const initialD = event.target.getDuration();
               if (initialD > 0) setDuration(initialD);
               
@@ -178,6 +179,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
                 handleTrackEnd();
               }
               setIsPlaying(false);
+              if (playStartTimeRef.current > 0) {
+                accumulatedPlayTimeRef.current += (Date.now() - playStartTimeRef.current) / 1000;
+                playStartTimeRef.current = 0;
+              }
               if (progressIntervalRef.current) {
                 clearInterval(progressIntervalRef.current);
                 progressIntervalRef.current = null;
@@ -192,14 +197,51 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Telemetry refs for Taste Evolution Engine
+  const playStartTimeRef = useRef(0);
+  const accumulatedPlayTimeRef = useRef(0);
+
   // Core play function (internal, not exposed directly for queue management)
   const _play = useCallback(async (track: Track, q: Track[]) => {
+    // 1. Flush telemetry for the outgoing track (if it exists)
+    const outgoingTrack = currentTrackRef.current;
+    if (outgoingTrack) {
+      if (playStartTimeRef.current > 0) {
+        accumulatedPlayTimeRef.current += (Date.now() - playStartTimeRef.current) / 1000;
+        playStartTimeRef.current = 0;
+      }
+      const durationPlayed = Math.floor(accumulatedPlayTimeRef.current);
+      let totalDuration = 0;
+      if (outgoingTrack.duration) {
+        const parts = outgoingTrack.duration.split(':').map(Number);
+        if (parts.length === 2) totalDuration = parts[0] * 60 + parts[1];
+        if (parts.length === 3) totalDuration = parts[0] * 3600 + parts[1] * 60 + parts[2];
+      }
+
+      // Fire and forget history logging
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          supabase.from("listening_history").insert({
+            user_id: session.user.id,
+            video_id: outgoingTrack.id,
+            title: outgoingTrack.title,
+            artist: outgoingTrack.artist,
+            duration_played: durationPlayed,
+            total_duration: totalDuration > 0 ? totalDuration : Math.max(durationPlayed, 1) // prevent div/0
+          }).then(({error}) => { if (error) console.error("Telemetry error:", error) });
+        }
+      });
+    }
+
+    // 2. Setup the new track
     setCurrentTrack(track);
     currentTrackRef.current = track;
     setQueue(q);
     queueRef.current = q;
     setIsPlaying(true);
     setProgress(0);
+    accumulatedPlayTimeRef.current = 0;
+    playStartTimeRef.current = Date.now(); // Start tracking immediately
 
     // Pre-parse duration from string (e.g. "3:45" -> 225) to prevent initial 0:00 glitch
     if (track.duration) {
@@ -215,21 +257,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
     if (ytPlayerRef.current?.loadVideoById) {
       ytPlayerRef.current.loadVideoById(track.id);
-    }
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        await supabase.from("listening_history").insert({
-          user_id: session.user.id,
-          track_id: track.id,
-          track_title: track.title,
-          track_artist: track.artist,
-          track_thumbnail: track.thumbnail,
-        });
-      }
-    } catch (e) {
-      console.error("Failed to log listening history", e);
     }
   }, [supabase]);
 
@@ -359,6 +386,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const pauseTrack = () => {
     if (ytPlayerRef.current?.pauseVideo) ytPlayerRef.current.pauseVideo();
     setIsPlaying(false);
+    if (playStartTimeRef.current > 0) {
+      accumulatedPlayTimeRef.current += (Date.now() - playStartTimeRef.current) / 1000;
+      playStartTimeRef.current = 0;
+    }
   };
 
   const resumeTrack = () => {
@@ -378,6 +409,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     setIsPlaying(true);
+    playStartTimeRef.current = Date.now();
   };
 
   const setVolume = (vol: number) => {

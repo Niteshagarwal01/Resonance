@@ -5,8 +5,9 @@ import { searchMusic, searchArtists, Track } from "@/lib/api";
 import { usePlayer } from "@/context/PlayerContext";
 import { SafeImage as Image } from "@/components/SafeImage";
 import { Search, Play, Mic2, Music2, X, Clock, TrendingUp, Disc3, Flame, Sparkles } from "lucide-react";
-import Link from "next/link";
 import { SongActions } from "@/components/SongActions";
+import { ArtistCard } from "@/components/ArtistCard";
+import { useLikedArtists } from "@/hooks/useLikedArtists";
 
 // Get current year for evergreen searches
 const currentYear = new Date().getFullYear();
@@ -36,6 +37,7 @@ type SearchTab = "songs" | "artists";
 
 export default function SearchPage() {
   const { playTrack } = usePlayer();
+  const { isLiked: isLikedArtist, toggleLikedArtist } = useLikedArtists();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeTab, setActiveTab] = useState<SearchTab>("songs");
@@ -267,26 +269,17 @@ export default function SearchPage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8">
-                    {artistResults.map((artist) => (
-                      <Link
-                        key={artist.id}
-                        href={`/dashboard/artist/${artist.id}`}
-                        className="group flex flex-col items-center text-center cursor-pointer"
-                      >
-                        <div className="relative w-full aspect-square rounded-full overflow-hidden mb-4 bg-gray-100 shadow-lg group-hover:shadow-2xl transition-all duration-300">
-                          {artist.image ? (
-                            <Image src={artist.image} alt={artist.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                              <Mic2 size={48} className="text-gray-300" />
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-                        </div>
-                        <p className="font-black text-[#1A1A1A] text-base truncate w-full group-hover:text-[#FFB703] transition-colors">{artist.name}</p>
-                        <p className="text-xs font-bold text-gray-400 mt-0.5">Artist</p>
-                      </Link>
-                    ))}
+                    {artistResults.map((artist) => {
+                      const isLiked = isLikedArtist(artist.id);
+                      return (
+                        <ArtistCard 
+                          key={artist.id}
+                          artist={artist}
+                          isLiked={isLiked}
+                          onToggleLike={() => toggleLikedArtist(artist)}
+                        />
+                      );
+                    })}
                   </div>
                 )}
               </div>

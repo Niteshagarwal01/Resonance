@@ -1,18 +1,6 @@
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000/api";
+import { createClient } from "@/utils/supabase/client";
 
-const fetchWithTimeout = async (url: string, options: RequestInit = {}) => {
-  const timeout = 30000;
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-  try {
-    const response = await fetch(url, { ...options, signal: controller.signal });
-    clearTimeout(id);
-    return response;
-  } catch (error) {
-    clearTimeout(id);
-    throw error;
-  }
-};
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000/api";
 
 export interface Track {
   id: string;
@@ -24,130 +12,113 @@ export interface Track {
   isMagic?: boolean;
 }
 
-export const searchMusic = async (query: string): Promise<Track[]> => {
-  if (!query) return [];
-  try {
-    const res = await fetchWithTimeout(`${API_BASE}/search?q=${encodeURIComponent(query)}`, { cache: 'no-store' });
-    if (!res.ok) throw new Error("Search failed");
-    const data = await res.json();
-    return data.results || [];
-  } catch (err) {
-    console.error("Search API Error:", err);
-    return [];
-  }
-};
-
-export const searchArtists = async (query: string): Promise<any[]> => {
-  if (!query) return [];
-  try {
-    const res = await fetchWithTimeout(`${API_BASE}/search/artists?q=${encodeURIComponent(query)}`, { cache: 'no-store' });
-    if (!res.ok) throw new Error("Artist Search failed");
-    const data = await res.json();
-    return data.results || [];
-  } catch (err) {
-    console.error("Artist Search API Error:", err);
-    return [];
-  }
-};
-
-export const getRadioQueue = async (seedId: string): Promise<Track[]> => {
-  if (!seedId) return [];
-  try {
-    const res = await fetchWithTimeout(`${API_BASE}/radio?seed_id=${encodeURIComponent(seedId)}`);
-    if (!res.ok) throw new Error("Radio failed");
-    const data = await res.json();
-    return data.queue || [];
-  } catch (err) {
-    console.error("Radio API Error:", err);
-    return [];
-  }
-};
-
-export const getArtistProfile = async (artistId: string): Promise<any> => {
-  if (!artistId) return null;
-  try {
-    const res = await fetchWithTimeout(`${API_BASE}/artist/${encodeURIComponent(artistId)}`);
-    if (!res.ok) throw new Error("Artist Profile failed");
-    return await res.json();
-  } catch (err) {
-    console.error("Artist Profile API Error:", err);
-    return null;
-  }
-};
-
-export const getHomeFeed = async (seedIds: string): Promise<Track[]> => {
-  if (!seedIds) return [];
-  try {
-    const res = await fetchWithTimeout(`${API_BASE}/home?seed_ids=${encodeURIComponent(seedIds)}`);
-    if (!res.ok) throw new Error("Home feed failed");
-    const data = await res.json();
-    return data.tracks || [];
-  } catch (err) {
-    console.error("Home API Error:", err);
-    return [];
-  }
-};
-
-export const getCharts = async (country: string = "ZZ"): Promise<Track[]> => {
-  try {
-    const res = await fetchWithTimeout(`${API_BASE}/charts?country=${country}`);
-    if (!res.ok) throw new Error("Charts failed");
-    const data = await res.json();
-    return data.tracks || [];
-  } catch (err) {
-    console.error("Charts API Error:", err);
-    return [];
-  }
-};
-
-export const getMoods = async (): Promise<any> => {
-  try {
-    const res = await fetchWithTimeout(`${API_BASE}/moods`);
-    if (!res.ok) throw new Error("Moods failed");
-    return await res.json();
-  } catch (err) {
-    console.error("Moods API Error:", err);
-    return null;
-  }
-};
-
 export interface HomeShelf {
   title: string;
   items: Track[];
 }
 
-export const getHomeShelves = async (): Promise<HomeShelf[]> => {
-  try {
-    const res = await fetchWithTimeout(`${API_BASE}/home/shelves`);
-    if (!res.ok) throw new Error("Home shelves failed");
-    const data = await res.json();
+const supabase = createClient();
+
+class ApiClient {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const { data: { session } } = await supabase.auth.getSession();
+    const headers: HeadersInit = {
+      ...options.headers,
+      ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {})
+    };
+
+    const timeout = 30000;
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      const response = await fetch(`${API_BASE}${endpoint}`, {
+        ...options,
+        headers,
+        signal: controller.signal
+      });
+      clearTimeout(id);
+      
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      }
+      return await response.json();
+    } catch (error) {
+      clearTimeout(id);
+      console.error(`Fetch error for ${endpoint}:`, error);
+      throw error;
+    }
+  }
+
+  async searchMusic(query: string): Promise<Track[]> {
+    if (!query) return [];
+    const data = await this.request<any>(`/search?q=${encodeURIComponent(query)}`, { cache: 'no-store' });
+    return data.results || [];
+  }
+
+  async searchArtists(query: string): Promise<any[]> {
+    if (!query) return [];
+    const data = await this.request<any>(`/search/artists?q=${encodeURIComponent(query)}`, { cache: 'no-store' });
+    return data.results || [];
+  }
+
+  async getArtist(id: string): Promise<any> {
+    if (!id) return null;
+    return await this.request<any>(`/artist/${encodeURIComponent(id)}`, { cache: 'no-store' });
+  }
+
+  async getArtistProfile(artistId: string): Promise<any> {
+    if (!artistId) return null;
+    return await this.request<any>(`/artist/${encodeURIComponent(artistId)}`);
+  }
+
+  async getRadioQueue(seedId: string): Promise<Track[]> {
+    if (!seedId) return [];
+    const data = await this.request<any>(`/radio?seed_id=${encodeURIComponent(seedId)}`);
+    return data.queue || [];
+  }
+
+  async getHomeMixes(): Promise<Track[]> {
+    const data = await this.request<any>(`/home`);
+    return data.tracks || [];
+  }
+
+  async getCharts(country: string = "ZZ"): Promise<Track[]> {
+    const data = await this.request<any>(`/charts?country=${country}`);
+    return data.tracks || [];
+  }
+
+  async getMoods(): Promise<any> {
+    return await this.request<any>(`/moods`);
+  }
+
+  async getHomeShelves(): Promise<HomeShelf[]> {
+    const data = await this.request<any>(`/home/shelves`);
     return data.shelves || [];
-  } catch (err) {
-    console.error("Home Shelves API Error:", err);
-    return [];
   }
-};
 
-export const getAlbum = async (albumId: string): Promise<any> => {
-  if (!albumId) return null;
-  try {
-    const res = await fetchWithTimeout(`${API_BASE}/album/${encodeURIComponent(albumId)}`);
-    if (!res.ok) throw new Error("Album fetch failed");
-    return await res.json();
-  } catch (err) {
-    console.error("Album API Error:", err);
-    return null;
+  async getAlbum(albumId: string): Promise<any> {
+    if (!albumId) return null;
+    return await this.request<any>(`/album/${encodeURIComponent(albumId)}`);
   }
-};
 
-export const getPlaylist = async (playlistId: string): Promise<any> => {
-  if (!playlistId) return null;
-  try {
-    const res = await fetchWithTimeout(`${API_BASE}/playlist/${encodeURIComponent(playlistId)}`);
-    if (!res.ok) throw new Error("Playlist fetch failed");
-    return await res.json();
-  } catch (err) {
-    console.error("Playlist API Error:", err);
-    return null;
+  async getPlaylist(playlistId: string): Promise<any> {
+    if (!playlistId) return null;
+    return await this.request<any>(`/playlist/${encodeURIComponent(playlistId)}`);
   }
-};
+}
+
+const api = new ApiClient();
+
+// Export the functions to maintain backwards compatibility with existing imports
+export const searchMusic = (q: string) => api.searchMusic(q);
+export const searchArtists = (q: string) => api.searchArtists(q);
+export const getArtist = (id: string) => api.getArtist(id);
+export const getArtistProfile = (id: string) => api.getArtistProfile(id);
+export const getRadioQueue = (id: string) => api.getRadioQueue(id);
+export const getHomeFeed = (ids: string) => api.getHomeFeed(ids);
+export const getCharts = (country?: string) => api.getCharts(country);
+export const getMoods = () => api.getMoods();
+export const getHomeShelves = () => api.getHomeShelves();
+export const getAlbum = (id: string) => api.getAlbum(id);
+export const getPlaylist = (id: string) => api.getPlaylist(id);

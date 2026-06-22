@@ -137,7 +137,7 @@ export default function OnboardingWizard() {
       await supabase.from("taste_dna").upsert({
         user_id: session.user.id,
         top_genres: selectedGenres,
-        top_artists: selectedArtists.map(a => a.name),
+        top_artists: selectedArtists.map(a => ({ id: a.id, name: a.name, image: a.image })),
         top_songs: selectedSongs.map(s => ({ id: s.id, title: s.title, artist: s.artist })),
         core_vibe: selectedVibes[0] ?? null,
         energy_level: Math.floor(Math.random() * 40) + 60,
