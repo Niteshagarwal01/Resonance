@@ -65,7 +65,15 @@ export async function generateLiveVibe(
     // 2. From evolved artists directly
     if (eArtists && eArtists.length > 0) {
       for (const artist of eArtists.slice(0, 4)) {
-        sources.push(searchMusic(`best of ${artist.name}`).catch(() => []));
+        if (artist.id && !artist.id.startsWith("legacy-")) {
+          sources.push(
+            getArtistProfile(artist.id)
+              .then((res) => res?.songs?.results || [])
+              .catch(() => [])
+          );
+        } else {
+          sources.push(searchMusic(`${artist.name} songs`).catch(() => []));
+        }
       }
     }
 
