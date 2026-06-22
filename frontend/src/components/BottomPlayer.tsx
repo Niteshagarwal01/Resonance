@@ -53,8 +53,8 @@ export function BottomPlayer() {
           </div>
 
           {/* Like + Add to playlist inline in player */}
-          <div className="shrink-0" onClick={e => e.stopPropagation()}>
-            <SongActions track={currentTrack} size="sm" />
+          <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity pr-2" onClick={e => e.stopPropagation()}>
+            <SongActions track={currentTrack} size="sm" hideQueueButton={true} />
           </div>
         </div>
 

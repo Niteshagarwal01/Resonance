@@ -114,7 +114,7 @@ export function NowPlayingModal({ onClose }: NowPlayingModalProps) {
               </p>
             </div>
             <div className="shrink-0 bg-white/60 border border-gray-100 p-2 rounded-2xl backdrop-blur-md flex items-center gap-2 shadow-sm">
-              <SongActions track={currentTrack} size="lg" />
+              <SongActions track={currentTrack} size="lg" hideQueueButton={true} />
             </div>
           </div>
 
@@ -255,7 +255,7 @@ export function NowPlayingModal({ onClose }: NowPlayingModalProps) {
                         <span className="text-[10px] font-black uppercase tracking-widest text-[#1A1A1A] bg-[#FFB703] px-2 py-1 rounded-md shrink-0 shadow-sm">Magic</span>
                       )}
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
-                        <SongActions track={track} size="sm" />
+                        <SongActions track={track} size="sm" hideQueueButton={true} />
                       </div>
                     </div>
                   ))}
@@ -306,7 +306,7 @@ export function NowPlayingModal({ onClose }: NowPlayingModalProps) {
                           <p className="text-sm text-gray-500 truncate">{track.artist}</p>
                         </div>
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
-                          <SongActions track={track} size="sm" />
+                          <SongActions track={track} size="sm" hideQueueButton={true} />
                         </div>
                       </div>
                     ))}

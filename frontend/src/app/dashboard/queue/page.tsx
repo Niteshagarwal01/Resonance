@@ -228,7 +228,7 @@ export default function QueuePage() {
                         </button>
                       </div>
                       <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
-                        <SongActions track={track} size="sm" />
+                        <SongActions track={track} size="sm" hideQueueButton={true} />
                         <span className="text-xs text-gray-400 font-medium tabular-nums w-8 text-right">{track.duration || "—"}</span>
                       </div>
                     </div>

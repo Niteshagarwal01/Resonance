@@ -23,9 +23,10 @@ interface SongActionsProps {
   track: Track;
   size?: "sm" | "md" | "lg";
   showLabel?: boolean;
+  hideQueueButton?: boolean;
 }
 
-export function SongActions({ track, size = "sm", showLabel = false }: SongActionsProps) {
+export function SongActions({ track, size = "sm", showLabel = false, hideQueueButton = false }: SongActionsProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [likeLoading, setLikeLoading] = useState(false);
   const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
@@ -199,16 +200,18 @@ export function SongActions({ track, size = "sm", showLabel = false }: SongActio
       </button>
 
       {/* Add to Queue */}
-      <button
-        onClick={handleAddToQueue}
-        className={`flex items-center gap-1 rounded-full p-1.5 transition-all duration-200 hover:scale-110 active:scale-95 ${
-          justQueued ? "text-[#FFB703]" : "text-gray-400 hover:text-[#1A1A1A]"
-        }`}
-        title="Add to queue"
-      >
-        {justQueued ? <Check size={iconSize} /> : <ListEnd size={iconSize} />}
-        {showLabel && <span className="text-xs font-bold">{justQueued ? "Queued" : "Queue"}</span>}
-      </button>
+      {!hideQueueButton && (
+        <button
+          onClick={handleAddToQueue}
+          className={`flex items-center gap-1 rounded-full p-1.5 transition-all duration-200 hover:scale-110 active:scale-95 ${
+            justQueued ? "text-[#FFB703]" : "text-gray-400 hover:text-[#1A1A1A]"
+          }`}
+          title="Add to queue"
+        >
+          {justQueued ? <Check size={iconSize} /> : <ListEnd size={iconSize} />}
+          {showLabel && <span className="text-xs font-bold">{justQueued ? "Queued" : "Queue"}</span>}
+        </button>
+      )}
 
       {/* Add to Playlist */}
       <div className="relative">
