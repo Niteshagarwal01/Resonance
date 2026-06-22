@@ -152,6 +152,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           onReady: (event: any) => { 
             // set volume to whatever the current state is (loaded from localStorage)
             event.target.setVolume(volume); 
+            if (currentTrackRef.current?.id) {
+              event.target.cueVideoById(currentTrackRef.current.id);
+            }
           },
           onStateChange: (event: any) => {
             const YT = (window as any).YT;
@@ -248,6 +251,33 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }
   }, [_play]);
 
+  // Core Magic Shuffle fetcher logic (Anti-Stall & Seed Branching)
+  const _fetchMoreMagicTracks = async (seedTrackId: string, retryCount = 0): Promise<Track[]> => {
+    if (magicInFlightRef.current && retryCount === 0) return [];
+    magicInFlightRef.current = true;
+    try {
+      const moreTracks = await getRadioQueue(seedTrackId);
+      const q = queueRef.current;
+      const existingIds = new Set(q.map(t => t.id));
+      const newTracks = moreTracks
+        .filter(t => !existingIds.has(t.id))
+        .map(t => ({ ...t, isMagic: true }));
+      
+      if (newTracks.length > 0) {
+        magicInFlightRef.current = false;
+        return newTracks;
+      } else if (retryCount < 3 && q.length > 0) {
+        // Anti-Stall: We exhausted this branch. Pick a random track from the queue to branch off
+        const randomSeed = q[Math.floor(Math.random() * q.length)].id;
+        return await _fetchMoreMagicTracks(randomSeed, retryCount + 1);
+      }
+    } catch (e) {
+      console.error("Magic shuffle fetch failed", e);
+    }
+    magicInFlightRef.current = false;
+    return [];
+  };
+
   // Handle track ending — Spotify-like logic
   const handleTrackEnd = useCallback(async () => {
     const q = queueRef.current;
@@ -265,30 +295,16 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const currentIndex = q.findIndex(t => t.id === curr.id);
 
     // 2. Magic Shuffle
-    // If magic is on and we're nearing the end of the queue (less than 3 songs left)
+    // If magic is on and we're nearing the end of the queue (less than 5 songs left)
     // We fetch a batch and keep the music going forever.
-    if (isMagicShuffleRef.current && !magicInFlightRef.current && (q.length - currentIndex <= 3)) {
-      magicInFlightRef.current = true;
-      try {
-        const moreTracks = await getRadioQueue(curr.id);
-        if (moreTracks && moreTracks.length > 0) {
-          const existingIds = new Set(q.map(t => t.id));
-          const newTracks = moreTracks
-            .filter(t => !existingIds.has(t.id))
-            .map(t => ({ ...t, isMagic: true }))
-            .slice(0, 30); // Grab up to 30 tracks
-          
-          if (newTracks.length > 0) {
-            // Append new tracks to the end of the queue to keep it flowing
-            const newQ = [...q, ...newTracks];
-            queueRef.current = newQ;
-            setQueue(newQ);
-          }
-        }
-      } catch (e) {
-        console.error("Magic shuffle fetch failed", e);
+    if (isMagicShuffleRef.current && !magicInFlightRef.current && (q.length - currentIndex <= 5)) {
+      const newTracks = await _fetchMoreMagicTracks(curr.id);
+      if (newTracks.length > 0) {
+        // Append new tracks to the end of the queue to keep it flowing
+        const newQ = [...queueRef.current, ...newTracks];
+        queueRef.current = newQ;
+        setQueue(newQ);
       }
-      magicInFlightRef.current = false;
     }
 
     // 3. Normal next (must use updated queueRef)
@@ -310,27 +326,13 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const i = q.findIndex(t => t.id === curr.id);
 
     // Magic Shuffle Check for nextTrack
-    if (isMagicShuffleRef.current && !magicInFlightRef.current && (q.length - i <= 3)) {
-      magicInFlightRef.current = true;
-      try {
-        const moreTracks = await getRadioQueue(curr.id);
-        if (moreTracks && moreTracks.length > 0) {
-          const existingIds = new Set(q.map(t => t.id));
-          const newTracks = moreTracks
-            .filter(t => !existingIds.has(t.id))
-            .map(t => ({ ...t, isMagic: true }))
-            .slice(0, 30);
-          
-          if (newTracks.length > 0) {
-            const newQ = [...q, ...newTracks];
-            queueRef.current = newQ;
-            setQueue(newQ);
-          }
-        }
-      } catch (e) {
-        console.error("Magic shuffle fetch failed", e);
+    if (isMagicShuffleRef.current && !magicInFlightRef.current && (q.length - i <= 5)) {
+      const newTracks = await _fetchMoreMagicTracks(curr.id);
+      if (newTracks.length > 0) {
+        const newQ = [...queueRef.current, ...newTracks];
+        queueRef.current = newQ;
+        setQueue(newQ);
       }
-      magicInFlightRef.current = false;
     }
     
     // Use the potentially updated queue
@@ -360,7 +362,21 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resumeTrack = () => {
-    if (ytPlayerRef.current?.playVideo) ytPlayerRef.current.playVideo();
+    const yt = ytPlayerRef.current;
+    if (yt && typeof yt.getPlayerState === 'function') {
+      const state = yt.getPlayerState();
+      // If player is Unstarted (-1) or Cued (5) and we have a track, force a hard play.
+      if ((state === -1 || state === 5) && currentTrackRef.current) {
+        _play(currentTrackRef.current, queueRef.current);
+        return;
+      }
+      if (typeof yt.playVideo === 'function') {
+        yt.playVideo();
+      }
+    } else if (currentTrackRef.current) {
+      _play(currentTrackRef.current, queueRef.current);
+      return;
+    }
     setIsPlaying(true);
   };
 
@@ -422,17 +438,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const curr = currentTrackRef.current;
 
     if (newVal && curr && !magicInFlightRef.current) {
-      // Turn ON: inject 10 radio songs immediately after current track (Spotify behavior)
-      magicInFlightRef.current = true;
+      // Turn ON: inject radio songs after current track
       try {
-        const moreTracks = await getRadioQueue(curr.id);
-        if (moreTracks && moreTracks.length > 0) {
-          const existingIds = new Set(q.map(t => t.id));
-          let newTracks = moreTracks
-            .filter(t => !existingIds.has(t.id))
-            .map(t => ({ ...t, isMagic: true }))
-            .slice(0, 10);
-          
+        let newTracks = await _fetchMoreMagicTracks(curr.id);
+        if (newTracks.length > 0) {
           newTracks = shuffleArray(newTracks);
           
           if (newTracks.length > 0) {
