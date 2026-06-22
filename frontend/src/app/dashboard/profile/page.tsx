@@ -34,7 +34,7 @@ export default function ProfilePage() {
   const [tasteDna, setTasteDna] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState('');
+  const [toast, setToast] = useState({ message: '', type: 'success' });
 
   // Taste DNA State
   const [dnaArtists, setDnaArtists] = useState<any[]>([]);
@@ -88,21 +88,34 @@ export default function ProfilePage() {
       if (!session) return;
       
       if (activeTab === 'dna') {
-        // Upsert Taste DNA
-        await supabase.from("taste_dna").upsert({
-          user_id: session.user.id,
-          top_genres: dnaGenres,
-          top_artists: dnaArtists,
-          top_songs: dnaSongs,
-          core_vibe: dnaVibes[0] || null,
-        });
+        if (tasteDna?.id) {
+          // Update existing Taste DNA
+          const { error } = await supabase.from("taste_dna").update({
+            top_genres: dnaGenres,
+            top_artists: dnaArtists,
+            top_songs: dnaSongs,
+            core_vibe: dnaVibes[0] || null,
+          }).eq("id", tasteDna.id);
+          if (error) throw error;
+        } else {
+          // Create new Taste DNA
+          const { error } = await supabase.from("taste_dna").insert({
+            user_id: session.user.id,
+            top_genres: dnaGenres,
+            top_artists: dnaArtists,
+            top_songs: dnaSongs,
+            core_vibe: dnaVibes[0] || null,
+          });
+          if (error) throw error;
+        }
       }
 
-      setToast('Settings saved successfully!');
-      setTimeout(() => setToast(''), 3000);
+      setToast({ message: 'Settings saved successfully!', type: 'success' });
+      setTimeout(() => setToast({ message: '', type: 'success' }), 3000);
     } catch (error) {
       console.error(error);
-      setToast('Failed to save settings.');
+      setToast({ message: 'Failed to save settings.', type: 'error' });
+      setTimeout(() => setToast({ message: '', type: 'success' }), 3000);
     } finally {
       setSaving(false);
     }
@@ -282,7 +295,7 @@ export default function ProfilePage() {
           )}
 
           <div className="mt-10 flex justify-end items-center gap-4 border-t pt-6">
-            {toast && <span className="text-emerald-500 font-bold text-sm">{toast}</span>}
+            {toast.message && <span className={`font-bold text-sm ${toast.type === 'error' ? 'text-red-500' : 'text-emerald-500'}`}>{toast.message}</span>}
             <button onClick={handleSave} disabled={saving} className="bg-[#1A1A1A] text-white px-8 py-3 rounded-full font-bold hover:bg-[#FFB703] hover:text-[#1A1A1A] transition-colors disabled:opacity-50">
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
