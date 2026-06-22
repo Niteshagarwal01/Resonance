@@ -25,7 +25,8 @@ function ShelfRow({ title, icon, tracks, onPlay }: { title: string, icon?: React
         </h2>
       </div>
       <div className="relative">
-        <div className="flex gap-4 overflow-x-auto scrollbar-hide px-8 pb-2" style={{ scrollSnapType: "x mandatory" }}>
+        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4" style={{ scrollSnapType: "x mandatory" }}>
+          <div className="w-4 shrink-0" />
           {tracks.map((item, idx) => (
             <div
               key={`${item.id}-${idx}`}
@@ -51,6 +52,7 @@ function ShelfRow({ title, icon, tracks, onPlay }: { title: string, icon?: React
               <p className="text-xs text-gray-500 truncate mt-0.5">{item.artist}</p>
             </div>
           ))}
+          <div className="w-4 shrink-0" />
         </div>
       </div>
     </section>

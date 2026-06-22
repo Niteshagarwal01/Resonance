@@ -87,9 +87,21 @@
 /* ============================================
    SCROLLBAR
    ============================================ */
-::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar { 
+  width: 6px; 
+  height: 6px; 
+}
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+/* Hide scrollbar completely for elements with this class */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
 /* ============================================
    BASE RESET
