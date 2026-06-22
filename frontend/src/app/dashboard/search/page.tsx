@@ -8,10 +8,13 @@ import { Search, Play, Mic2, Music2, X, Clock, TrendingUp, Disc3, Flame, Sparkle
 import Link from "next/link";
 import { SongActions } from "@/components/SongActions";
 
+// Get current year for evergreen searches
+const currentYear = new Date().getFullYear();
+
 // Spotify-style category cards with rich gradients
 const CATEGORIES = [
   { name: "Hip-Hop", query: "hip hop hits", gradient: "from-orange-500 to-amber-600", emoji: "🎤" },
-  { name: "Pop", query: "pop songs 2024", gradient: "from-pink-500 to-rose-400", emoji: "🌸" },
+  { name: "Pop", query: `pop songs ${currentYear}`, gradient: "from-pink-500 to-rose-400", emoji: "🌸" },
   { name: "Indie", query: "indie alternative music", gradient: "from-emerald-500 to-teal-400", emoji: "🎸" },
   { name: "Electronic", query: "electronic dance music", gradient: "from-blue-500 to-cyan-400", emoji: "🎛️" },
   { name: "R&B", query: "rnb soul music", gradient: "from-indigo-500 to-violet-500", emoji: "🎶" },
@@ -25,7 +28,7 @@ const CATEGORIES = [
 ];
 
 const TRENDING_QUERIES = [
-  "AP Dhillon latest", "Aditya Rikhari 2024", "King hindi songs",
+  "AP Dhillon latest", `Aditya Rikhari ${currentYear}`, "King hindi songs",
   "Bollywood top hits", "The Weeknd hits", "Drake best songs",
 ];
 

@@ -78,6 +78,12 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         if (state.currentTrack) {
           setCurrentTrack(state.currentTrack);
           currentTrackRef.current = state.currentTrack;
+          if (state.currentTrack.duration) {
+            const parts = state.currentTrack.duration.split(':').map(Number);
+            if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+              setDuration(parts[0] * 60 + parts[1]);
+            }
+          }
         }
         if (state.volume !== undefined) {
           setVolumeState(state.volume);
@@ -151,7 +157,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
             const YT = (window as any).YT;
             if (event.data === YT.PlayerState.PLAYING) {
               setIsPlaying(true);
-              setDuration(event.target.getDuration());
+              const initialD = event.target.getDuration();
+              if (initialD > 0) setDuration(initialD);
+              
               if (!progressIntervalRef.current) {
                 progressIntervalRef.current = setInterval(() => {
                   const t = event.target.getCurrentTime();
@@ -189,6 +197,18 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     queueRef.current = q;
     setIsPlaying(true);
     setProgress(0);
+
+    // Pre-parse duration from string (e.g. "3:45" -> 225) to prevent initial 0:00 glitch
+    if (track.duration) {
+      const parts = track.duration.split(':').map(Number);
+      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        setDuration(parts[0] * 60 + parts[1]);
+      } else {
+        setDuration(0);
+      }
+    } else {
+      setDuration(0);
+    }
 
     if (ytPlayerRef.current?.loadVideoById) {
       ytPlayerRef.current.loadVideoById(track.id);
@@ -246,6 +266,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
     // 2. Magic Shuffle
     // If magic is on and we're nearing the end of the queue (less than 3 songs left)
+    // We fetch a batch and keep the music going forever.
     if (isMagicShuffleRef.current && !magicInFlightRef.current && (q.length - currentIndex <= 3)) {
       magicInFlightRef.current = true;
       try {
@@ -255,7 +276,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           const newTracks = moreTracks
             .filter(t => !existingIds.has(t.id))
             .map(t => ({ ...t, isMagic: true }))
-            .slice(0, 30);
+            .slice(0, 30); // Grab up to 30 tracks
           
           if (newTracks.length > 0) {
             // Append new tracks to the end of the queue to keep it flowing
@@ -282,16 +303,44 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }
   }, [_play]);
 
-  function nextTrack() {
+  async function nextTrack() {
     const q = queueRef.current;
     const curr = currentTrackRef.current;
     if (!q.length || !curr) return;
     const i = q.findIndex(t => t.id === curr.id);
+
+    // Magic Shuffle Check for nextTrack
+    if (isMagicShuffleRef.current && !magicInFlightRef.current && (q.length - i <= 3)) {
+      magicInFlightRef.current = true;
+      try {
+        const moreTracks = await getRadioQueue(curr.id);
+        if (moreTracks && moreTracks.length > 0) {
+          const existingIds = new Set(q.map(t => t.id));
+          const newTracks = moreTracks
+            .filter(t => !existingIds.has(t.id))
+            .map(t => ({ ...t, isMagic: true }))
+            .slice(0, 30);
+          
+          if (newTracks.length > 0) {
+            const newQ = [...q, ...newTracks];
+            queueRef.current = newQ;
+            setQueue(newQ);
+          }
+        }
+      } catch (e) {
+        console.error("Magic shuffle fetch failed", e);
+      }
+      magicInFlightRef.current = false;
+    }
     
-    if (i >= 0 && i < q.length - 1) {
-      _play(q[i + 1], q);
-    } else if (q.length > 0 && repeatModeRef.current === 'all') {
-      _play(q[0], q);
+    // Use the potentially updated queue
+    const updatedQ = queueRef.current;
+    const newIndex = updatedQ.findIndex(t => t.id === curr.id);
+    
+    if (newIndex >= 0 && newIndex < updatedQ.length - 1) {
+      _play(updatedQ[newIndex + 1], updatedQ);
+    } else if (updatedQ.length > 0 && repeatModeRef.current === 'all') {
+      _play(updatedQ[0], updatedQ);
     }
   }
 

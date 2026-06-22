@@ -21,26 +21,31 @@ export default function PlaylistPage() {
 
   useEffect(() => {
     async function fetchPlaylist() {
-      if (!params.id) return;
+      if (!params || !params.id) return;
+      const playlistId = Array.isArray(params.id) ? params.id[0] : params.id;
+      
       setLoading(true);
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
 
         // Fetch playlist metadata
-        const { data: plData } = await supabase
+        const { data: plData, error: plError } = await supabase
           .from("playlists")
           .select("*")
-          .eq("id", params.id)
+          .eq("id", playlistId)
+          .eq("user_id", session.user.id)
           .single();
+        
+        if (plError) console.error("Playlist error", plError);
         
         if (plData) setPlaylist(plData);
 
         // Fetch tracks
-        const { data: tracksData } = await supabase
+        const { data: tracksData, error: tracksError } = await supabase
           .from("playlist_tracks")
           .select("*")
-          .eq("playlist_id", params.id)
+          .eq("playlist_id", playlistId)
           .order("added_at", { ascending: true });
 
         if (tracksData) {
