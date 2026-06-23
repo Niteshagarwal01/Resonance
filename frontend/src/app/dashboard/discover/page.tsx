@@ -251,7 +251,7 @@ export default function DiscoverPage() {
 
       {/* TABS NAVIGATION */}
       <div className="px-4 md:px-8 mt-10 mb-12">
-        <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-4">
+        <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-4 pt-4 px-2 -mx-2">
           {TABS.map(tab => (
             <button
               key={tab.id}
