@@ -1,22 +1,38 @@
 <div align="center">
-  <img src="" alt="Resonance Logo" width="400" />
+  <!-- Full-Screen Hero Banner -->
+  <a href="https://resonancebyechostudio.netlify.app/" target="_blank" rel="noopener noreferrer">
+    <img src="https://github.com/Niteshagarwal01/Resonance/blob/main/frontend/public/file_00000000dd687207ad89ca3d3bacb137.png?raw=true" alt="Resonance Banner" width="100%" style="max-width: 100%; display: block;" />
+  </a>
 
-  <h1 align="center">Resonance</h1>
-  <p align="center">
-    <strong>An open-source, beautifully designed social music player powered by YouTube Music & Supabase.</strong>
-  </p>
-
-  <p align="center">
-    <a href="https://resonancebyechostudio.netlify.app/" target="_blank"><strong>🚀 View Live Demo</strong></a>
-  </p>
-
-  <p align="center">
-    <a href="https://github.com/Niteshagarwal01/Resonance"><img src="https://img.shields.io/github/stars/Niteshagarwal01/Resonance?style=for-the-badge&color=FFB703" alt="Stars" /></a>
-    <a href="https://github.com/Niteshagarwal01/Resonance/network/members"><img src="https://img.shields.io/github/forks/Niteshagarwal01/Resonance?style=for-the-badge&color=8ECAE6" alt="Forks" /></a>
-    <a href="https://github.com/Niteshagarwal01/Resonance/issues"><img src="https://img.shields.io/github/issues/Niteshagarwal01/Resonance?style=for-the-badge&color=FB8500" alt="Issues" /></a>
-    <a href="https://github.com/Niteshagarwal01/Resonance/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Niteshagarwal01/Resonance?style=for-the-badge&color=219EBC" alt="License" /></a>
-  </p>
+  <!-- Full-Width Premium Navigation Bar -->
+  <table width="100%" style="width: 100%; border-collapse: collapse; border: none; margin-top: 15px; font-family: system-ui, -apple-system, sans-serif;">
+    <tr bgcolor="#1A1A1A" style="border: none;">
+      <td align="center" style="padding: 14px; border: none; width: 25%;">
+        <a href="https://resonancebyechostudio.netlify.app/" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: #FFB703; font-weight: 800; font-size: 14px; letter-spacing: 0.5px;">
+          🚀 LIVE DEMO
+        </a>
+      </td>
+      <td align="center" style="padding: 14px; border: none; width: 25%;">
+        <a href="https://github.com/Niteshagarwal01/Resonance/stargazers" style="text-decoration: none; color: #8ECAE6; font-weight: 700; font-size: 14px; letter-spacing: 0.5px;">
+          ⭐ STARS
+        </a>
+      </td>
+      <td align="center" style="padding: 14px; border: none; width: 25%;">
+        <a href="https://github.com/Niteshagarwal01/Resonance/issues" style="text-decoration: none; color: #FB8500; font-weight: 700; font-size: 14px; letter-spacing: 0.5px;">
+          🪲 ISSUES
+        </a>
+      </td>
+      <td align="center" style="padding: 14px; border: none; width: 25%;">
+        <a href="https://github.com/Niteshagarwal01/Resonance/blob/main/LICENSE" style="text-decoration: none; color: #219EBC; font-weight: 700; font-size: 14px; letter-spacing: 0.5px;">
+          📄 LICENSE
+        </a>
+      </td>
+    </tr>
+  </table>
 </div>
+
+---
+
 
 > **Note**: Resonance utilizes the `ytmusicapi` to tap into the 100M+ song catalog of YouTube Music. No DRM. No premium subscriptions required. 100% open platform.
 
