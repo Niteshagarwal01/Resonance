@@ -74,6 +74,9 @@ async def search_artists(q: str = Query(..., min_length=1)):
     for item in raw_results:
         browse_id = item.get("browseId")
         if not browse_id: continue
+        # Filter out fake artist profiles (playlist channels) by requiring shuffleId/radioId
+        if not item.get("shuffleId") and not item.get("radioId"): continue
+        
         formatted.append({
             "id": browse_id,
             "name": item.get("artist", ""),

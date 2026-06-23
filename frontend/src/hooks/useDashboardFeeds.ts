@@ -110,7 +110,7 @@ export function useDashboardFeeds() {
         setLoading(false);
 
         // Wait to prevent rate limiting
-        await new Promise(r => setTimeout(r, 400));
+        await new Promise(r => setTimeout(r, 200));
 
         // Setup DNA defaults
         const topGenre = localUserDna?.top_genres?.[0] || "Pop";
@@ -182,7 +182,7 @@ export function useDashboardFeeds() {
         await Promise.allSettled([fetchArtists, fetchTrending]);
 
         // Wait to prevent rate limiting
-        await new Promise(r => setTimeout(r, 400));
+        await new Promise(r => setTimeout(r, 200));
 
         // --- BATCH 3: Genre, Drops, Mixes, Albums ---
         const fetchAlbums = Promise.allSettled([

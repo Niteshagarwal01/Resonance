@@ -64,7 +64,7 @@ export default function DiscoverPage() {
             searchMusic(`top hit songs`),
             searchMusic(`more like ${topArtist}`)
           ]);
-          await new Promise(r => setTimeout(r, 400));
+          await new Promise(r => setTimeout(r, 200));
           const [gems, future] = await Promise.allSettled([
             searchMusic(`underrated indie ${topGenre} hit songs`),
             searchMusic(`more like ${userDna?.top_songs?.[0]?.title || topArtist}`)
@@ -81,7 +81,7 @@ export default function DiscoverPage() {
             searchMusic(`top trending ${topGenre} global hit songs`),
             searchAlbums(`top trending ${topGenre} hit albums`)
           ]);
-          await new Promise(r => setTimeout(r, 400));
+          await new Promise(r => setTimeout(r, 200));
           const [playlists] = await Promise.allSettled([
             searchPlaylists(`top trending ${topGenre} hits`)
           ]);
@@ -106,7 +106,7 @@ export default function DiscoverPage() {
             searchMusic(`emerging indie ${topGenre} hit songs`),
             searchMusic(`underground hip hop indie ${topGenre} songs`)
           ]);
-          await new Promise(r => setTimeout(r, 400));
+          await new Promise(r => setTimeout(r, 200));
           const [listeners, rising] = await Promise.allSettled([
             searchMusic(`obscure hidden gem indie ${topGenre} songs`),
             searchMusic(`rising viral ${topGenre} songs this week`)
@@ -123,12 +123,12 @@ export default function DiscoverPage() {
             searchMusic(`happy upbeat ${topGenre} songs`),
             searchMusic(`deep focus study lofi ${topGenre}`)
           ]);
-          await new Promise(r => setTimeout(r, 400));
+          await new Promise(r => setTimeout(r, 200));
           const [workout, chill] = await Promise.allSettled([
             searchMusic(`hype high energy workout ${topGenre} ${topArtist}`),
             searchMusic(`chill acoustic relaxing ${topArtist}`)
           ]);
-          await new Promise(r => setTimeout(r, 400));
+          await new Promise(r => setTimeout(r, 200));
           const [sleep, party] = await Promise.allSettled([
             searchMusic(`sleep ambient relaxing ${topGenre}`),
             searchMusic(`party dance hits ${topGenre} ${topArtist}`)
@@ -150,12 +150,12 @@ export default function DiscoverPage() {
             searchMusic(`best ${genre1} songs`),
             searchMusic(`best ${genre2} songs`)
           ]);
-          await new Promise(r => setTimeout(r, 400));
+          await new Promise(r => setTimeout(r, 200));
           const [indie, rock] = await Promise.allSettled([
             searchMusic(`best indie ${topGenre} songs`),
             searchMusic(`best rock ${topGenre} songs`)
           ]);
-          await new Promise(r => setTimeout(r, 400));
+          await new Promise(r => setTimeout(r, 200));
           const [edm, regional] = await Promise.allSettled([
             searchMusic(`best edm dance ${topGenre} songs`),
             searchMusic(`best regional folk songs india`)
@@ -174,7 +174,7 @@ export default function DiscoverPage() {
             searchMusic(`more like ${topArtist}`),
             searchMusic(`more ${topGenre} hits`)
           ]);
-          await new Promise(r => setTimeout(r, 400));
+          await new Promise(r => setTimeout(r, 200));
           const [adjacent, outside] = await Promise.allSettled([
             searchMusic(`experimental electronic ${topGenre} fusion`),
             searchMusic(`global international world music hits`)

@@ -206,6 +206,7 @@ export default function HomePage() {
         <ShelfRow title="Curated For You" icon={<Sparkles size={20} className="text-[#FFB703]" />} tracks={curatedForYou} showMoreUrl="/dashboard/feed/curated" />
       ))}
       
+      {/* Batch 2: Editors, Trending, Artists */}
       {renderSection('editorsPicks', editorsPicks, () => (
         <ShelfRow title="Editor's Picks" icon={<Sparkles size={20} className="text-pink-500" />} tracks={editorsPicks} showMoreUrl="/dashboard/feed/editors" />
       ))}
@@ -214,16 +215,17 @@ export default function HomePage() {
         <ShelfRow title="Trending Right Now" icon={<TrendingUp size={20} className="text-green-500" />} tracks={trendingNow} showMoreUrl="/dashboard/feed/trending" />
       ))}
       
+      {renderSection('popularArtists', popularArtists, () => (
+        <PopularArtistsRow artists={popularArtists} showMoreUrl="/dashboard/feed/artists" />
+      ))}
+
+      {/* Batch 3: Genre, Albums, Mixes, Drops */}
       {renderSection('trendingInGenre', trendingInGenre, () => (
         <ShelfRow title={`Trending in ${userDna?.top_genres?.[0] || 'Pop'}`} icon={<Flame size={20} className="text-orange-500" />} tracks={trendingInGenre} showMoreUrl="/dashboard/feed/genre" />
       ))}
       
       {renderSection('popularAlbums', popularAlbums, () => (
         <PopularAlbumsRow albums={popularAlbums} showMoreUrl="/dashboard/feed/albums" />
-      ))}
-      
-      {renderSection('popularArtists', popularArtists, () => (
-        <PopularArtistsRow artists={popularArtists} showMoreUrl="/dashboard/feed/artists" />
       ))}
       
       {renderSection('yourTopMixes', yourTopMixes, () => (
