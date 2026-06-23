@@ -363,9 +363,6 @@ A: This feature is on our roadmap! In the future, we plan to implement a migrati
 
 ## 📸 Screenshots
 *(Coming soon! Feel free to open a PR with high-quality screenshots of the app running locally!)*
-<div align="center">
-  <img src="https://raw.githubusercontent.com/Niteshagarwal01/Resonance/main/frontend/public/logofiles/favappicon.png" alt="App Icon" width="100" />
-</div>
 
 ---
 
