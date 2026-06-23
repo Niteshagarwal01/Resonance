@@ -98,6 +98,22 @@ async def search_albums(q: str = Query(..., min_length=1)):
         })
     return {"results": formatted}
 
+@router.get("/search/playlists")
+async def search_playlists(q: str = Query(..., min_length=1)):
+    raw_results = await YTMusicService.search(q, filter_type="playlists", limit=10)
+    formatted = []
+    for item in raw_results:
+        browse_id = item.get("browseId")
+        if not browse_id: continue
+        formatted.append({
+            "id": browse_id,
+            "title": item.get("title", ""),
+            "author": item.get("author", ""),
+            "itemCount": item.get("itemCount", ""),
+            "image": Formatter.get_thumbnail(item.get("thumbnails"))
+        })
+    return {"results": formatted}
+
 @router.get("/home/shelves")
 async def get_home_shelves():
     categories = await YTMusicService.get_mood_categories()

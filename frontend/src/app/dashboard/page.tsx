@@ -87,10 +87,9 @@ export default function HomePage() {
   }
 
   const renderSection = (errorKey: string, data: any[], renderFn: () => ReactNode) => {
-    if (feedErrors[errorKey]) {
-      return <div className={`${PX} mb-6 text-red-500 text-sm bg-red-50 p-3 rounded-xl`}>Failed to load: {feedErrors[errorKey]}</div>;
+    if (feedErrors[errorKey] || !data || data.length === 0) {
+      return null;
     }
-    if (!data || data.length === 0) return null;
     return renderFn();
   };
 
