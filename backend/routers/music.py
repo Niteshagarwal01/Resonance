@@ -69,7 +69,7 @@ async def search_music(request: Request, q: str = Query(..., min_length=1)):
 
 @router.get("/search/artists")
 async def search_artists(q: str = Query(..., min_length=1)):
-    raw_results = await YTMusicService.search(q, filter_type="artists", limit=12)
+    raw_results = await YTMusicService.search(q, filter_type="artists", limit=40)
     formatted = []
     for item in raw_results:
         browse_id = item.get("browseId")
@@ -78,13 +78,14 @@ async def search_artists(q: str = Query(..., min_length=1)):
             "id": browse_id,
             "name": item.get("artist", ""),
             "subscribers": item.get("subscribers", ""),
-            "image": Formatter.get_thumbnail(item.get("thumbnails"))
+            "image": Formatter.get_thumbnail(item.get("thumbnails")),
+            "thumbnail": Formatter.get_thumbnail(item.get("thumbnails"))
         })
     return {"results": formatted}
 
 @router.get("/search/albums")
 async def search_albums(q: str = Query(..., min_length=1)):
-    raw_results = await YTMusicService.search(q, filter_type="albums", limit=10)
+    raw_results = await YTMusicService.search(q, filter_type="albums", limit=40)
     formatted = []
     for item in raw_results:
         browse_id = item.get("browseId")
@@ -93,14 +94,15 @@ async def search_albums(q: str = Query(..., min_length=1)):
             "id": browse_id,
             "title": item.get("title", ""),
             "year": item.get("year", ""),
-            "artist": ", ".join(a.get("name", "") for a in item.get("artists", [])),
-            "image": Formatter.get_thumbnail(item.get("thumbnails"))
+            "artist": ", ".join(a.get("name", "") for a in item.get("artists", [])) if item.get("artists") else item.get("artist", ""),
+            "image": Formatter.get_thumbnail(item.get("thumbnails")),
+            "thumbnail": Formatter.get_thumbnail(item.get("thumbnails"))
         })
     return {"results": formatted}
 
 @router.get("/search/playlists")
 async def search_playlists(q: str = Query(..., min_length=1)):
-    raw_results = await YTMusicService.search(q, filter_type="playlists", limit=10)
+    raw_results = await YTMusicService.search(q, filter_type="playlists", limit=40)
     formatted = []
     for item in raw_results:
         browse_id = item.get("browseId")
@@ -110,7 +112,8 @@ async def search_playlists(q: str = Query(..., min_length=1)):
             "title": item.get("title", ""),
             "author": item.get("author", ""),
             "itemCount": item.get("itemCount", ""),
-            "image": Formatter.get_thumbnail(item.get("thumbnails"))
+            "image": Formatter.get_thumbnail(item.get("thumbnails")),
+            "thumbnail": Formatter.get_thumbnail(item.get("thumbnails"))
         })
     return {"results": formatted}
 

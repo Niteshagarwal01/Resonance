@@ -78,12 +78,12 @@ export default function DiscoverPage() {
         } 
         else if (activeTab === "trending") {
           const [songs, albums] = await Promise.allSettled([
-            searchMusic(`top trending global hit songs`),
-            searchAlbums(`top trending hit albums`)
+            searchMusic(`top trending ${topGenre} global hit songs`),
+            searchAlbums(`top trending ${topGenre} hit albums`)
           ]);
           await new Promise(r => setTimeout(r, 400));
           const [playlists] = await Promise.allSettled([
-            searchPlaylists(`top trending hits`)
+            searchPlaylists(`top trending ${topGenre} hits`)
           ]);
           sections = [
             { title: "Trending Songs", tracks: songs.status === 'fulfilled' ? songs.value?.songs || [] : [] },
@@ -93,8 +93,8 @@ export default function DiscoverPage() {
         }
         else if (activeTab === "new-releases") {
           const [songs, albums] = await Promise.allSettled([
-            searchMusic(`latest new hit songs`),
-            searchAlbums(`latest new hit albums`)
+            searchMusic(`latest new ${topGenre} hit songs`),
+            searchAlbums(`latest new ${topGenre} hit albums`)
           ]);
           sections = [
             { title: "New Songs", tracks: songs.status === 'fulfilled' ? songs.value?.songs || [] : [] },
@@ -103,13 +103,13 @@ export default function DiscoverPage() {
         }
         else if (activeTab === "lab") {
           const [emerging, underground] = await Promise.allSettled([
-            searchMusic(`emerging indie hit songs`),
-            searchMusic(`underground hip hop indie songs`)
+            searchMusic(`emerging indie ${topGenre} hit songs`),
+            searchMusic(`underground hip hop indie ${topGenre} songs`)
           ]);
           await new Promise(r => setTimeout(r, 400));
           const [listeners, rising] = await Promise.allSettled([
-            searchMusic(`obscure hidden gem indie songs`),
-            searchMusic(`rising viral songs this week`)
+            searchMusic(`obscure hidden gem indie ${topGenre} songs`),
+            searchMusic(`rising viral ${topGenre} songs this week`)
           ]);
           sections = [
             { title: "Emerging Artists", tracks: emerging.status === 'fulfilled' ? emerging.value?.songs || [] : [] },
@@ -120,18 +120,18 @@ export default function DiscoverPage() {
         }
         else if (activeTab === "mood") {
           const [happy, focus] = await Promise.allSettled([
-            searchMusic(`happy upbeat songs`),
-            searchMusic(`deep focus study lofi`)
+            searchMusic(`happy upbeat ${topGenre} songs`),
+            searchMusic(`deep focus study lofi ${topGenre}`)
           ]);
           await new Promise(r => setTimeout(r, 400));
           const [workout, chill] = await Promise.allSettled([
-            searchMusic(`hype high energy workout`),
-            searchMusic(`chill acoustic relaxing`)
+            searchMusic(`hype high energy workout ${topGenre} ${topArtist}`),
+            searchMusic(`chill acoustic relaxing ${topArtist}`)
           ]);
           await new Promise(r => setTimeout(r, 400));
           const [sleep, party] = await Promise.allSettled([
-            searchMusic(`sleep ambient relaxing`),
-            searchMusic(`party dance hits`)
+            searchMusic(`sleep ambient relaxing ${topGenre}`),
+            searchMusic(`party dance hits ${topGenre} ${topArtist}`)
           ]);
           sections = [
             { title: "Happy", tracks: happy.status === 'fulfilled' ? happy.value?.songs || [] : [] },
@@ -143,26 +143,29 @@ export default function DiscoverPage() {
           ];
         }
         else if (activeTab === "genre") {
+           const genre1 = userDna?.top_genres?.[1] || "Pop";
+           const genre2 = userDna?.top_genres?.[2] || "Hip-Hop";
+           
            const [pop, hiphop] = await Promise.allSettled([
-            searchMusic(`best pop songs`),
-            searchMusic(`best hip hop rap songs`)
+            searchMusic(`best ${genre1} songs`),
+            searchMusic(`best ${genre2} songs`)
           ]);
           await new Promise(r => setTimeout(r, 400));
           const [indie, rock] = await Promise.allSettled([
-            searchMusic(`best indie songs`),
-            searchMusic(`best rock songs`)
+            searchMusic(`best indie ${topGenre} songs`),
+            searchMusic(`best rock ${topGenre} songs`)
           ]);
           await new Promise(r => setTimeout(r, 400));
           const [edm, regional] = await Promise.allSettled([
-            searchMusic(`best edm dance songs`),
-            searchMusic(`best regional folk songs`)
+            searchMusic(`best edm dance ${topGenre} songs`),
+            searchMusic(`best regional folk songs india`)
           ]);
           sections = [
-            { title: "Pop", tracks: pop.status === 'fulfilled' ? pop.value?.songs || [] : [] },
-            { title: "Hip-Hop", tracks: hiphop.status === 'fulfilled' ? hiphop.value?.songs || [] : [] },
-            { title: "Indie", tracks: indie.status === 'fulfilled' ? indie.value?.songs || [] : [] },
-            { title: "Rock", tracks: rock.status === 'fulfilled' ? rock.value?.songs || [] : [] },
-            { title: "EDM", tracks: edm.status === 'fulfilled' ? edm.value?.songs || [] : [] },
+            { title: genre1, tracks: pop.status === 'fulfilled' ? pop.value?.songs || [] : [] },
+            { title: genre2, tracks: hiphop.status === 'fulfilled' ? hiphop.value?.songs || [] : [] },
+            { title: `Indie ${topGenre}`, tracks: indie.status === 'fulfilled' ? indie.value?.songs || [] : [] },
+            { title: `Rock ${topGenre}`, tracks: rock.status === 'fulfilled' ? rock.value?.songs || [] : [] },
+            { title: `EDM ${topGenre}`, tracks: edm.status === 'fulfilled' ? edm.value?.songs || [] : [] },
             { title: "Regional", tracks: regional.status === 'fulfilled' ? regional.value?.songs || [] : [] }
           ];
         }
