@@ -62,9 +62,9 @@ export function HeroSection({ stats, heroY }: { stats: any, heroY: any }) {
               <MagneticBtn href="/signup" style={{ background: "#1A1A1A", color: "white", fontWeight: 900, fontSize: 16, padding: "17px 40px", borderRadius: 14, boxShadow: "0 16px 40px rgba(0,0,0,0.2)", letterSpacing: "-0.02em" }}>
                 <Play size={17} fill="white" /> Start Free
               </MagneticBtn>
-              <MagneticBtn href="#features" style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(16px)", border: "1.5px solid rgba(0,0,0,0.09)", color: "#1A1A1A", fontWeight: 700, fontSize: 15, padding: "15px 30px", borderRadius: 14 }}>
-                See Features <ArrowUpRight size={16} />
-              </MagneticBtn>
+              <div style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(16px)", border: "1.5px solid rgba(0,0,0,0.09)", color: "rgba(26,26,26,0.6)", fontWeight: 800, fontSize: 15, padding: "15px 30px", borderRadius: 14, display: "flex", alignItems: "center", gap: "8px", cursor: "not-allowed" }}>
+                Mobile App <span style={{ fontSize: 10, background: "rgba(0,0,0,0.08)", padding: "3px 8px", borderRadius: 100, textTransform: "uppercase", letterSpacing: "0.05em" }}>Soon</span>
+              </div>
             </motion.div>
 
             {/* Stats row — real data */}

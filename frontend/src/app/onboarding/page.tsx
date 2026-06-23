@@ -9,13 +9,17 @@ import {
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { searchMusic, searchArtists } from "@/lib/api";
+import seedData from "@/lib/onboardingData.json";
 
 // --- STATIC DATA ---
-const GENRES = [
-  "Pop", "Hip-Hop", "R&B", "Indie Rock", "Electronic",
-  "Classical", "Lofi Beats", "Jazz", "K-Pop", "Country",
-  "Metal", "Folk", "Reggaeton", "Ambient", "Punk",
-  "Dance", "Soul", "Gospel", "Afrobeats", "House"
+const GENRE_CATEGORIES = [
+  { name: "Mainstream", genres: ["Bollywood Pop", "Punjabi Pop", "English Pop", "K-Pop", "Indie Pop"] },
+  { name: "Hip-Hop", genres: ["DHH", "Indian Rap", "Trap", "Drill", "Conscious Rap"] },
+  { name: "Electronic", genres: ["EDM", "House", "Techno", "Future Bass", "Lo-Fi"] },
+  { name: "Regional", genres: ["Telugu", "Tamil", "Malayalam", "Kannada", "Marathi", "Bengali", "Bhojpuri", "Haryanvi"] },
+  { name: "Alternative", genres: ["Rock", "Metal", "Indie Rock", "Alternative"] },
+  { name: "Soulful", genres: ["R&B", "Sufi", "Ghazal", "Acoustic"] },
+  { name: "Traditional", genres: ["Devotional", "Classical", "Folk"] },
 ];
 
 const VIBES = [
@@ -51,6 +55,7 @@ export default function OnboardingWizard() {
   const [artistQuery, setArtistQuery] = useState("");
   const [artistResults, setArtistResults] = useState<Artist[]>([]);
   const [artistLoading, setArtistLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [selectedArtists, setSelectedArtists] = useState<Artist[]>([]);
 
   // Songs - live search
@@ -64,29 +69,41 @@ export default function OnboardingWizard() {
 
   // --- SEARCH HANDLERS ---
   const doArtistSearch = useCallback(async (q: string) => {
-    if (!q.trim()) { setArtistResults([]); return; }
+    if (!q.trim()) { setArtistResults([]); setSearchError(null); return; }
     setArtistLoading(true);
-    const res = await searchArtists(q);
-    setArtistResults(res.filter((a: Artist) => a.id && a.name));
-    setArtistLoading(false);
+    setSearchError(null);
+    try {
+      const res = await searchArtists(q);
+      setArtistResults(res.filter((a: Artist) => a.id && a.name));
+    } catch (err: any) {
+      if (err.message?.includes("429")) setSearchError("Please slow down, you're searching too fast.");
+    } finally {
+      setArtistLoading(false);
+    }
   }, []);
 
   const debouncedArtistSearch = useDebounce(doArtistSearch, 450);
 
   const doSongSearch = useCallback(async (q: string) => {
-    if (!q.trim()) { setSongResults([]); return; }
+    if (!q.trim()) { setSongResults([]); setSearchError(null); return; }
     setSongLoading(true);
-    const res = await searchMusic(q);
-    const songs: Song[] = res
-      .filter((s: { id?: string; title?: string }) => s.id && s.title)
-      .map((s: { id: string; title: string; artist?: string; thumbnail?: string }) => ({
-        id: s.id,
-        title: s.title,
-        artist: s.artist ?? "",
-        thumbnail: s.thumbnail ?? null,
-      }));
-    setSongResults(songs);
-    setSongLoading(false);
+    setSearchError(null);
+    try {
+      const res = await searchMusic(q);
+      const songs: Song[] = (res?.songs || [])
+        .filter((s: { id?: string; title?: string }) => s.id && s.title)
+        .map((s: { id: string; title: string; artist?: string; thumbnail?: string }) => ({
+          id: s.id,
+          title: s.title,
+          artist: s.artist ?? "",
+          thumbnail: s.thumbnail ?? null,
+        }));
+      setSongResults(songs);
+    } catch (err: any) {
+      if (err.message?.includes("429")) setSearchError("Please slow down, you're searching too fast.");
+    } finally {
+      setSongLoading(false);
+    }
   }, []);
 
   const debouncedSongSearch = useDebounce(doSongSearch, 450);
@@ -227,18 +244,25 @@ export default function OnboardingWizard() {
             <h1 className="text-4xl font-black text-[#1A1A1A] mb-3 text-center">What&apos;s your frequency?</h1>
             <p className="text-gray-400 mb-2 text-center">Pick up to <strong>5 genres</strong> you vibe with most.</p>
             <p className="text-xs text-gray-300 mb-8">{selectedGenres.length}/5 selected</p>
-            <div className="flex flex-wrap justify-center gap-3">
-              {GENRES.map(g => {
-                const sel = selectedGenres.includes(g);
-                return (
-                  <button key={g} onClick={() => toggleGenre(g)}
-                    className={`px-6 py-3 rounded-full font-bold text-sm transition-all border-2 ${sel
-                      ? "border-[#FFB703] bg-[#FFB703] text-[#1A1A1A] shadow-md scale-105"
-                      : "border-gray-200 bg-white text-gray-600 hover:border-[#FFB703]/50"}`}>
-                    {g}
-                  </button>
-                );
-              })}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 w-full max-w-5xl">
+              {GENRE_CATEGORIES.map(category => (
+                <div key={category.name} className="flex flex-col items-start bg-white border-2 border-gray-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">{category.name}</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {category.genres.map(g => {
+                      const sel = selectedGenres.includes(g);
+                      return (
+                        <button key={g} onClick={() => toggleGenre(g)}
+                          className={`px-4 py-2 rounded-full font-bold text-sm transition-all border-2 ${sel
+                            ? "border-[#FFB703] bg-[#FFB703] text-[#1A1A1A] shadow-md scale-105"
+                            : "border-gray-200 bg-gray-50 text-gray-600 hover:border-[#FFB703]/50 hover:bg-white"}`}>
+                          {g}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
             <button disabled={selectedGenres.length === 0} onClick={handleNext}
               className="mt-12 flex items-center justify-center gap-3 bg-[#1A1A1A] text-white px-10 py-4 rounded-full font-bold text-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-40 disabled:hover:scale-100">
@@ -282,9 +306,9 @@ export default function OnboardingWizard() {
                 className="w-full bg-white border-2 border-gray-100 shadow-sm rounded-full py-4 pl-12 pr-12 font-medium focus:outline-none focus:border-[#FFB703] transition-colors" />
             </div>
 
-            {/* Results Grid */}
-            {artistResults.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 w-full max-h-96 overflow-y-auto scrollbar-hide pb-4">
+            {/* Results Grid / Predefined Grid */}
+            {artistQuery && artistResults.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 w-full max-h-96 overflow-y-auto pr-2 pb-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-400">
                 {artistResults.map(artist => {
                   const sel = selectedArtists.find(a => a.id === artist.id);
                   return (
@@ -309,7 +333,28 @@ export default function OnboardingWizard() {
             ) : artistQuery && !artistLoading ? (
               <p className="text-gray-400 text-sm mt-4">No artists found for &quot;{artistQuery}&quot;. Try a different name.</p>
             ) : !artistQuery ? (
-              <p className="text-gray-300 text-sm mt-4">Start typing to search millions of artists...</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 w-full max-h-[450px] overflow-y-auto pr-2 pb-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-400">
+                {seedData.artists.map(artist => {
+                  const sel = selectedArtists.find(a => a.id === artist.id);
+                  return (
+                    <div key={artist.id} onClick={() => toggleArtist(artist)}
+                      className="flex flex-col items-center gap-3 cursor-pointer group">
+                      <div className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden transition-all duration-300 border-4 ${sel ? "border-[#FFB703] scale-105 shadow-lg shadow-[#FFB703]/20" : "border-transparent group-hover:scale-105 group-hover:shadow-xl"}`}>
+                        {artist.image
+                          ? <img src={artist.image} alt={artist.name} className="w-full h-full object-cover" loading="lazy" />
+                          : <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400"><Mic2 size={36} /></div>
+                        }
+                        {sel && (
+                          <div className="absolute inset-0 bg-[#FFB703]/30 flex items-center justify-center">
+                            <Check className="text-white drop-shadow" size={32} strokeWidth={3} />
+                          </div>
+                        )}
+                      </div>
+                      <span className={`font-bold text-sm text-center line-clamp-2 ${sel ? "text-[#1A1A1A]" : "text-gray-500"}`}>{artist.name}</span>
+                    </div>
+                  );
+                })}
+              </div>
             ) : null}
 
             <button disabled={selectedArtists.length === 0} onClick={handleNext}
@@ -353,9 +398,9 @@ export default function OnboardingWizard() {
                 className="w-full bg-white border-2 border-gray-100 shadow-sm rounded-full py-4 pl-12 pr-12 font-medium focus:outline-none focus:border-[#FFB703] transition-colors" />
             </div>
 
-            {/* Song Results List */}
-            {songResults.length > 0 ? (
-              <div className="w-full max-h-96 overflow-y-auto scrollbar-hide space-y-2 pb-4">
+            {/* Song Results List / Predefined List */}
+            {songQuery && songResults.length > 0 ? (
+              <div className="w-full max-h-96 overflow-y-auto pr-2 space-y-2 pb-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-400">
                 {songResults.map(song => {
                   const sel = selectedSongs.find(s => s.id === song.id);
                   return (
@@ -382,7 +427,29 @@ export default function OnboardingWizard() {
             ) : songQuery && !songLoading ? (
               <p className="text-gray-400 text-sm mt-4">No songs found for &quot;{songQuery}&quot;. Try a different title.</p>
             ) : !songQuery ? (
-              <p className="text-gray-300 text-sm mt-4">Start typing to search millions of songs...</p>
+              <div className="w-full max-h-[450px] overflow-y-auto pr-2 grid grid-cols-1 md:grid-cols-2 gap-3 pb-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-400">
+                {seedData.songs.map(song => {
+                  const sel = selectedSongs.find(s => s.id === song.id);
+                  return (
+                    <div key={song.id} onClick={() => toggleSong(song)}
+                      className={`flex items-center gap-4 p-3 rounded-2xl cursor-pointer transition-all ${sel ? "bg-[#FFB703]/10 border-2 border-[#FFB703]" : "bg-white border-2 border-transparent hover:border-gray-200 hover:shadow-sm"}`}>
+                      <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-gray-100">
+                        {song.thumbnail
+                          ? <img src={song.thumbnail} alt={song.title} className="w-full h-full object-cover" loading="lazy" />
+                          : <div className="w-full h-full flex items-center justify-center text-gray-300"><Music size={24} /></div>
+                        }
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-[#1A1A1A] truncate">{song.title}</p>
+                        <p className="text-sm text-gray-400 truncate">{song.artist}</p>
+                      </div>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${sel ? "bg-[#FFB703]" : "bg-gray-100"}`}>
+                        {sel ? <Check size={16} className="text-[#1A1A1A]" strokeWidth={3} /> : <span className="text-gray-400 text-lg">+</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             ) : null}
 
             <button disabled={selectedSongs.length === 0} onClick={handleNext}

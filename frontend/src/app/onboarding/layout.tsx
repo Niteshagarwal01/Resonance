@@ -1,12 +1,14 @@
 "use client";
 
 import { Logo } from "@/components/Logo";
+import { MobileBlocker } from "@/components/MobileBlocker";
 
 export default function OnboardingLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+
   return (
     <div className="min-h-screen bg-[#FDFBF7] flex flex-col font-sans relative overflow-hidden">
       {/* Subtle background blobs */}
@@ -26,6 +28,9 @@ export default function OnboardingLayout({
       <main className="flex-1 flex flex-col items-center justify-center relative z-10 px-6 py-12">
         {children}
       </main>
+
+      {/* Mobile Blocker */}
+      <MobileBlocker showLogout={true} />
     </div>
   );
 }

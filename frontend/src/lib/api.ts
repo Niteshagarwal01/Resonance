@@ -106,6 +106,17 @@ class ApiClient {
     if (!playlistId) return null;
     return await this.request<any>(`/playlist/${encodeURIComponent(playlistId)}`);
   }
+  async searchAlbums(query: string): Promise<any[]> {
+    if (!query) return [];
+    const data = await this.request<any>(`/search/albums?q=${encodeURIComponent(query)}`, { cache: 'no-store' });
+    return data.results || [];
+  }
+
+  async searchPlaylists(query: string): Promise<any[]> {
+    if (!query) return [];
+    const data = await this.request<any>(`/search/playlists?q=${encodeURIComponent(query)}`, { cache: 'no-store' });
+    return data.results || [];
+  }
 }
 
 const api = new ApiClient();
@@ -113,6 +124,7 @@ const api = new ApiClient();
 // Export the functions to maintain backwards compatibility with existing imports
 export const searchMusic = (q: string) => api.searchMusic(q);
 export const searchArtists = (q: string) => api.searchArtists(q);
+export const searchAlbums = (q: string) => api.searchAlbums(q);
 export const getArtist = (id: string) => api.getArtist(id);
 export const getArtistProfile = (id: string) => api.getArtistProfile(id);
 export const getRadioQueue = (id: string) => api.getRadioQueue(id);
@@ -122,3 +134,4 @@ export const getHomeShelves = () => api.getHomeShelves();
 export const getHomeMixes = () => api.getHomeMixes();
 export const getAlbum = (id: string) => api.getAlbum(id);
 export const getPlaylist = (id: string) => api.getPlaylist(id);
+export const searchPlaylists = (q: string) => api.searchPlaylists(q);

@@ -73,8 +73,12 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
   if (tracks.length > 0) {
     const totalSeconds = tracks.reduce((acc: number, t: any) => {
       if (!t.duration) return acc;
-      const [m, s] = t.duration.split(":").map(Number);
-      return acc + (m || 0) * 60 + (s || 0);
+      const parts = t.duration.split(":").map(Number);
+      let s = 0;
+      if (parts.length === 3) s = parts[0] * 3600 + parts[1] * 60 + parts[2];
+      else if (parts.length === 2) s = parts[0] * 60 + parts[1];
+      else s = parts[0] || 0;
+      return acc + s;
     }, 0);
     const totalMin = Math.floor(totalSeconds / 60);
     totalDurationStr = totalMin > 60

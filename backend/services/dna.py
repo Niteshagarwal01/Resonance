@@ -17,10 +17,10 @@ class DNAEvolutionEngine:
         try:
             # Fetch all data concurrently
             dna_res, artists_res, songs_res, history_res = await asyncio.gather(
-                asyncio.to_thread(supabase.table("taste_dna").select("top_artists, top_songs").eq("user_id", user_id).single().execute),
+                asyncio.to_thread(supabase.table("taste_dna").select("top_artists, top_songs").eq("user_id", user_id).limit(1).execute),
                 asyncio.to_thread(supabase.table("liked_artists").select("artist_name").eq("user_id", user_id).order("created_at", desc=True).limit(10).execute),
                 asyncio.to_thread(supabase.table("liked_songs").select("track_id").eq("user_id", user_id).order("created_at", desc=True).limit(10).execute),
-                asyncio.to_thread(supabase.table("listening_history").select("track_id, percentage_played").eq("user_id", user_id).order("created_at", desc=True).limit(50).execute)
+                asyncio.to_thread(supabase.table("listening_history").select("track_id, percentage_played").eq("user_id", user_id).order("played_at", desc=True).limit(50).execute)
             )
 
             seeds = {}

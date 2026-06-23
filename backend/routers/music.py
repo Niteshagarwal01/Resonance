@@ -7,7 +7,7 @@ from rate_limiter import limiter
 router = APIRouter()
 
 @router.get("/search")
-@limiter.limit("60/minute")
+@limiter.limit("200/minute")
 async def search_music(request: Request, q: str = Query(..., min_length=1)):
     raw_results = await YTMusicService.search(q, filter_type=None, limit=30)
     
@@ -121,25 +121,59 @@ async def get_home_shelves():
 async def get_home_mixes(request: Request, user: dict = Depends(verify_token)):
     user_id = user.user.id
     
-    # 1. Fetch evolved DNA seeds
+    import asyncio
+    
+    # 1. Fetch evolved DNA seeds (up to 5 video IDs)
     top_seeds = await DNAEvolutionEngine.get_evolved_seeds(supabase, user_id)
     
-    # 2. Pick the absolute highest weighted seed to anchor the radio
-    main_seed = top_seeds[0] if top_seeds else "RDAMVM"
+    if "RDAMVM" in top_seeds and len(top_seeds) == 1:
+        top_seeds = ["PL4fGSI1pDJn5RgLW0Sb_zECecWdH_4zOX"]
+
+    # 2. Fetch separate radio mixes concurrently
+    async def fetch_radio(seed):
+        try:
+            res = await YTMusicService.get_radio(seed, limit=15)
+            return res.get("tracks", [])
+        except Exception as e:
+            print(f"Failed to fetch radio for seed {seed}: {e}")
+            return []
+
+    radio_queues = await asyncio.gather(*[fetch_radio(seed) for seed in top_seeds])
     
-    # 3. Fetch a custom radio queue based on this evolving seed
-    try:
-        radio_queue = await YTMusicService.get_radio(main_seed, limit=40)
-    except Exception as e:
-        print(f"Failed to fetch radio for seed {main_seed}, falling back to default: {e}")
-        # Fallback to Top Weekly Videos Hindi to avoid generic English tracks
-        radio_queue = await YTMusicService.get_radio("PL4fGSI1pDJn5RgLW0Sb_zECecWdH_4zOX", limit=40)
+    # 3. Interleave tracks
+    interleaved = []
+    max_len = max([len(q) for q in radio_queues] + [0])
+    seen_ids = set()
     
-    tracks = []
-    for item in radio_queue.get("tracks", []):
-        track = Formatter.format_track(item)
-        if track: tracks.append(track)
-    return {"tracks": tracks, "evolved_seeds": top_seeds}
+    for i in range(max_len):
+        for q in radio_queues:
+            if i < len(q):
+                item = q[i]
+                vid = item.get("videoId")
+                if vid and vid not in seen_ids:
+                    seen_ids.add(vid)
+                    track = Formatter.format_track(item)
+                    if track: interleaved.append(track)
+                    
+    # Enforce constraints: min 25, max 60
+    final_tracks = interleaved[:60]
+    
+    if len(final_tracks) < 25:
+        # Fallback to a massive default chart if somehow the radios failed or returned too few
+        try:
+            fallback = await YTMusicService.get_radio("PL4fGSI1pDJn5RgLW0Sb_zECecWdH_4zOX", limit=40)
+            for item in fallback.get("tracks", []):
+                vid = item.get("videoId")
+                if vid and vid not in seen_ids:
+                    seen_ids.add(vid)
+                    track = Formatter.format_track(item)
+                    if track:
+                        final_tracks.append(track)
+                        if len(final_tracks) >= 60: break
+        except Exception:
+            pass
+
+    return {"tracks": final_tracks, "evolved_seeds": top_seeds}
 
 @router.get("/charts")
 @limiter.limit("60/minute")

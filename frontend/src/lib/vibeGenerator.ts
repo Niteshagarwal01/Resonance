@@ -51,14 +51,19 @@ export async function generateLiveVibe(
     } else if (eArtists && eArtists.length > 0) {
       // Fallback to getting a radio queue based on top artist if no history
       for (const artist of eArtists.slice(0, 1)) {
-        sources.push(
-          searchMusic(`${artist.name} song`).then(async (res) => {
-            if (res.length > 0) {
-              return await getRadioQueue(res[0].id).catch(() => res);
-            }
-            return [];
-          }).catch(() => [])
-        );
+        if (artist.id && !artist.id.startsWith("legacy-")) {
+          sources.push(getRadioQueue(artist.id).catch(() => []));
+        } else {
+          sources.push(
+            searchMusic(`${artist.name} song`).then(async (res) => {
+              const songs = res?.songs || [];
+              if (songs.length > 0) {
+                return await getRadioQueue(songs[0].id).catch(() => songs);
+              }
+              return [];
+            }).catch(() => [])
+          );
+        }
       }
     }
 
@@ -72,7 +77,7 @@ export async function generateLiveVibe(
               .catch(() => [])
           );
         } else {
-          sources.push(searchMusic(`${artist.name} songs`).catch(() => []));
+          sources.push(searchMusic(`${artist.name} songs`).then(res => res?.songs || []).catch(() => []));
         }
       }
     }
@@ -80,14 +85,14 @@ export async function generateLiveVibe(
     // 3. Contextual Genre searches
     if (eGenres && eGenres.length > 0) {
       for (const genre of eGenres.slice(0, 2)) {
-        sources.push(searchMusic(`${genre} hits`).catch(() => []));
+        sources.push(searchMusic(`${genre} hits`).then(res => res?.songs || []).catch(() => []));
       }
     }
 
     // 4. Core vibe context
     if (dnaData?.core_vibe) {
       const vibe = dnaData.core_vibe.replace(/[^\w\s]/gi, "").trim();
-      sources.push(searchMusic(`${vibe} playlist`).catch(() => []));
+      sources.push(searchMusic(`${vibe} playlist`).then(res => res?.songs || []).catch(() => []));
     }
 
     const results = await Promise.all(sources);

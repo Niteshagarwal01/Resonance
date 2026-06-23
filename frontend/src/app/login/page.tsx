@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { Mail, Lock, AlertCircle, Loader2, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { MobileBlocker } from "@/components/MobileBlocker";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -164,6 +165,7 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+      <MobileBlocker showLogout={false} />
     </div>
   );
 }

@@ -13,9 +13,12 @@ class Formatter:
     def parse_duration(text):
         if not text: return None
         parts = text.split(":")
-        if len(parts) == 1: return f"00:00:{parts[0].zfill(2)}"
-        if len(parts) == 2: return f"00:{parts[0].zfill(2)}:{parts[1].zfill(2)}"
-        if len(parts) == 3: return f"{parts[0].zfill(2)}:{parts[1].zfill(2)}:{parts[2].zfill(2)}"
+        if len(parts) == 1: return f"0:{parts[0].zfill(2)}"
+        if len(parts) == 2: return f"{parts[0]}:{parts[1].zfill(2)}"
+        if len(parts) == 3: 
+            if parts[0] == "00" or parts[0] == "0":
+                return f"{parts[1]}:{parts[2].zfill(2)}"
+            return f"{parts[0]}:{parts[1].zfill(2)}:{parts[2].zfill(2)}"
         return text
 
     @staticmethod

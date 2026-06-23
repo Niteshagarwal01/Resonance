@@ -3,11 +3,11 @@ import { SectionHeader } from "./SectionHeader";
 import { SafeImage as Image } from "@/components/SafeImage";
 import { Users } from "lucide-react";
 
-export function PopularArtistsRow({ artists }: { artists: any[] }) {
+export function PopularArtistsRow({ artists, showMoreUrl }: { artists: any[], showMoreUrl?: string }) {
   if (!artists || artists.length === 0) return null;
   return (
     <section className="mb-10">
-      <SectionHeader title="Iconic Artists" icon={<Users size={20} className="text-pink-500" />} />
+      <SectionHeader title="Iconic Artists" icon={<Users size={20} className="text-pink-500" />} showMoreUrl={showMoreUrl} />
       <div className="relative">
         <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2" style={{ scrollSnapType: "x mandatory", paddingLeft: "32px", paddingRight: "32px" }}>
           {artists.map((artist, idx) => (

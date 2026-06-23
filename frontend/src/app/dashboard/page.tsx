@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, ReactNode } from "react";
 import { usePlayer } from "@/context/PlayerContext";
 import { SafeImage as Image } from "@/components/SafeImage";
 import { Play, TrendingUp, Music2, Radio, Flame, Sparkles, Loader2 } from "lucide-react";
@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useDashboardFeeds } from "@/hooks/useDashboardFeeds";
 import { ShelfRow } from "@/components/ShelfRow";
 import { PopularArtistsRow } from "@/components/PopularArtistsRow";
+import { PopularAlbumsRow } from "@/components/PopularAlbumsRow";
 import { SongActions } from "@/components/SongActions";
 
 const PX = "px-6 md:px-12 lg:px-20";
@@ -26,6 +27,7 @@ export default function HomePage() {
   const { playTrack, currentTrack } = usePlayer();
   const {
     loading,
+    feedErrors,
     userProfile,
     userDna,
     recentlyPlayed,
@@ -33,6 +35,9 @@ export default function HomePage() {
     jumpBackIn,
     setJumpBackIn,
     curatedForYou,
+    editorsPicks,
+    popularAlbums,
+    trendingInGenre,
     yourTopMixes,
     trendingNow,
     freshDrops,
@@ -62,6 +67,13 @@ export default function HomePage() {
     }
   }, [currentTrack, setRecentlyPlayed, setJumpBackIn]);
 
+  let dnaText = "your unique acoustic fingerprint & recent history";
+  if (userDna?.top_genres && userDna.top_genres.length > 0) {
+    const genres = userDna.top_genres.slice(0, 2).map((g: any) => typeof g === 'object' ? g.name : g);
+    if (genres.length === 1) dnaText = genres[0];
+    else dnaText = `${genres[0]} & ${genres[1]}`;
+  }
+
   if (loading) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center min-h-[50vh] text-[#1A1A1A]">
@@ -73,6 +85,14 @@ export default function HomePage() {
       </div>
     );
   }
+
+  const renderSection = (errorKey: string, data: any[], renderFn: () => ReactNode) => {
+    if (feedErrors[errorKey]) {
+      return <div className={`${PX} mb-6 text-red-500 text-sm bg-red-50 p-3 rounded-xl`}>Failed to load: {feedErrors[errorKey]}</div>;
+    }
+    if (!data || data.length === 0) return null;
+    return renderFn();
+  };
 
   return (
     <div className="pb-32 bg-white min-h-screen">
@@ -108,8 +128,8 @@ export default function HomePage() {
                     </div>
                   </div>
                   <div className="px-3 flex-1 min-w-0">
-                    <p className="font-bold text-[#1A1A1A] text-xs truncate group-hover:text-black transition-colors">{track.title}</p>
-                    <p className="text-[11px] text-gray-500 truncate group-hover:text-gray-700 transition-colors">{track.artist}</p>
+                    <p className="font-bold text-[#1A1A1A] text-xs truncate group-hover:text-white transition-colors">{track.title}</p>
+                    <p className="text-[11px] text-gray-500 truncate group-hover:text-gray-400 transition-colors">{track.artist}</p>
                   </div>
                   <div className="pr-3 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
                     <SongActions track={track} size="sm" />
@@ -152,13 +172,13 @@ export default function HomePage() {
 
             <div className="flex-1 relative z-10 text-left min-w-0 w-full">
               <p className="text-[#FFB703] font-bold text-xs tracking-widest uppercase mb-1.5 flex items-center gap-1.5 justify-center md:justify-start">
-                <Sparkles size={12} /> Taste DNA Playlist
+                <Sparkles size={12} /> Taste DNA 40-Song Mix
               </p>
               <h2 className="text-2xl md:text-3xl font-black text-white mb-2 drop-shadow-lg">
                 {vibeGreeting}
               </h2>
               <p className="text-white/80 text-sm max-w-md mb-5 drop-shadow-md">
-                Your {userDna.core_vibe?.replace(/[^\w\s]/gi, '') || "Daily"} mix, curated from {(typeof userDna.top_artists?.[0] === 'object' ? userDna.top_artists[0].name : userDna.top_artists?.[0]) || "your favorites"} & {(typeof userDna.top_artists?.[1] === 'object' ? userDna.top_artists[1].name : userDna.top_artists?.[1]) || "recent history"}.
+                A hyper-personalized {userDna.core_vibe?.replace(/[^\w\s]/gi, '') || "Daily"} mix powered by your Taste DNA, blending {dnaText} with your daily rotation.
               </p>
               <div className="flex items-center gap-3 justify-center md:justify-start">
                 <button
@@ -178,45 +198,42 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ── Jump Back In ── */}
-      {jumpBackIn.length > 0 && (
-         <ShelfRow 
-           title="Jump Back In" 
-           icon={<Music2 size={20} className="text-blue-500" />} 
-           tracks={jumpBackIn} 
-         />
-      )}
-
-      {/* ── Curated For You ── */}
-      <ShelfRow 
-        title="Curated For You" 
-        icon={<Sparkles size={20} className="text-[#FFB703]" />} 
-        tracks={curatedForYou} 
-      />
-
-      {/* ── Trending Right Now ── */}
-      <ShelfRow 
-        title="Trending Right Now" 
-        icon={<TrendingUp size={20} className="text-green-500" />} 
-        tracks={trendingNow} 
-      />
-
-      {/* ── Iconic Artists ── */}
-      <PopularArtistsRow artists={popularArtists} />
-
-      {/* ── Your Top Mixes ── */}
-      <ShelfRow 
-        title="Your Top Mixes" 
-        icon={<Radio size={20} className="text-purple-500" />} 
-        tracks={yourTopMixes} 
-      />
-
-      {/* ── Fresh Drops ── */}
-      <ShelfRow 
-        title="Fresh Drops" 
-        icon={<Flame size={20} className="text-red-500" />} 
-        tracks={freshDrops} 
-      />
+      {/* Dynamic Shelves rendering using unified configuration array */}
+      {renderSection('jumpBackIn', jumpBackIn, () => (
+        <ShelfRow title="Jump Back In" icon={<Music2 size={20} className="text-blue-500" />} tracks={jumpBackIn} />
+      ))}
+      
+      {renderSection('curatedForYou', curatedForYou, () => (
+        <ShelfRow title="Curated For You" icon={<Sparkles size={20} className="text-[#FFB703]" />} tracks={curatedForYou} showMoreUrl="/dashboard/feed/curated" />
+      ))}
+      
+      {renderSection('editorsPicks', editorsPicks, () => (
+        <ShelfRow title="Editor's Picks" icon={<Sparkles size={20} className="text-pink-500" />} tracks={editorsPicks} showMoreUrl="/dashboard/feed/editors" />
+      ))}
+      
+      {renderSection('trendingNow', trendingNow, () => (
+        <ShelfRow title="Trending Right Now" icon={<TrendingUp size={20} className="text-green-500" />} tracks={trendingNow} showMoreUrl="/dashboard/feed/trending" />
+      ))}
+      
+      {renderSection('trendingInGenre', trendingInGenre, () => (
+        <ShelfRow title={`Trending in ${userDna?.top_genres?.[0] || 'Pop'}`} icon={<Flame size={20} className="text-orange-500" />} tracks={trendingInGenre} showMoreUrl="/dashboard/feed/genre" />
+      ))}
+      
+      {renderSection('popularAlbums', popularAlbums, () => (
+        <PopularAlbumsRow albums={popularAlbums} showMoreUrl="/dashboard/feed/albums" />
+      ))}
+      
+      {renderSection('popularArtists', popularArtists, () => (
+        <PopularArtistsRow artists={popularArtists} showMoreUrl="/dashboard/feed/artists" />
+      ))}
+      
+      {renderSection('yourTopMixes', yourTopMixes, () => (
+        <ShelfRow title="Your Top Mixes" icon={<Radio size={20} className="text-purple-500" />} tracks={yourTopMixes} showMoreUrl="/dashboard/feed/mixes" />
+      ))}
+      
+      {renderSection('freshDrops', freshDrops, () => (
+        <ShelfRow title="New Releases For You" icon={<Flame size={20} className="text-red-500" />} tracks={freshDrops} showMoreUrl="/dashboard/feed/fresh" />
+      ))}
 
     </div>
   );

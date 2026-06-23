@@ -29,11 +29,11 @@ export function ShelfRow({ title, icon, tracks, showMoreUrl }: { title: string, 
                     <Music2 size={32} className="text-gray-400" />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 flex items-center justify-center transition-colors">
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors">
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-black/50 backdrop-blur-md rounded-full px-1.5 py-0.5 border border-white/10" onClick={e => e.stopPropagation()}>
                     <SongActions track={track} size="sm" />
                   </div>
-                  <div className="w-12 h-12 bg-[#FFB703] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-xl">
+                  <div className="absolute bottom-2 right-2 w-12 h-12 bg-[#FFB703] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-xl z-10">
                     <Play size={20} fill="#1A1A1A" className="text-[#1A1A1A] ml-1" />
                   </div>
                 </div>

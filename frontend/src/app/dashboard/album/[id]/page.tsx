@@ -68,8 +68,12 @@ export default function AlbumPage({ params }: { params: Promise<{ id: string }> 
   // compute total duration
   const totalSeconds = tracks.reduce((acc: number, t: any) => {
     if (!t.duration) return acc;
-    const [m, s] = t.duration.split(":").map(Number);
-    return acc + (m || 0) * 60 + (s || 0);
+    const parts = t.duration.split(":").map(Number);
+    let s = 0;
+    if (parts.length === 3) s = parts[0] * 3600 + parts[1] * 60 + parts[2];
+    else if (parts.length === 2) s = parts[0] * 60 + parts[1];
+    else s = parts[0] || 0;
+    return acc + s;
   }, 0);
   const totalMin = Math.floor(totalSeconds / 60);
   const totalSec = totalSeconds % 60;
@@ -91,8 +95,8 @@ export default function AlbumPage({ params }: { params: Promise<{ id: string }> 
       <div className={`bg-gradient-to-b ${grad} to-[#FDFBF7] p-8 md:p-10 flex flex-col md:flex-row items-end gap-8`}>
         {/* Cover Art */}
         <div className="w-52 h-52 md:w-60 md:h-60 shrink-0 shadow-2xl rounded-2xl overflow-hidden">
-          {album.thumbnail ? (
-            <Image src={album.thumbnail} alt={album.title} width={240} height={240} className="object-cover w-full h-full" unoptimized />
+          {album.image || album.thumbnail ? (
+            <Image src={album.image || album.thumbnail} alt={album.title} width={240} height={240} className="object-cover w-full h-full" unoptimized />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
               <Disc3 size={64} className="text-gray-400" />

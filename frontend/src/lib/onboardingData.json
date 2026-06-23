@@ -1,0 +1,1206 @@
+{
+  "artists": [
+    {
+      "id": "UClYV6hHlupm_S_ObS1W-DYw",
+      "name": "The Weeknd",
+      "image": "https://lh3.googleusercontent.com/U-SAmNOu4TynE818gLCfKsuHZ0U5YNEtO9mrjSI9WCCKERs98LzrCal5kajBBTQNwdcisoB2Bn-pHp4=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCZn4r7heNOPY-C43YIywnVA",
+      "name": "Bruno Mars",
+      "image": "https://lh3.googleusercontent.com/hnefGBrazRhn4Z92bdSZBUENl40ONjRiVDsmZKZh-WZ2iCKE-2c7KKR7SNcZfzLHoRyB3E6as8L87YA=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCPC0L1d253x-KuMNwa05TpA",
+      "name": "Taylor Swift",
+      "image": "https://yt3.googleusercontent.com/RCpTA6EXJQyjVFDosWOKa2SMmqkua_lA9mHPDWWciLwgqpZLz-k8rXWRF_367trrQ7up9BUwCbk6kRk=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UClmXPfaYhXOYsNn_QUyheWQ",
+      "name": "Ed Sheeran",
+      "image": "https://lh3.googleusercontent.com/jQoBIAS6JjFGpcqQY1M_Mh3AasOvFENCdVRxkgax1a0K6qiq7AgE3MbJ6Jtt-Jndcarvoawmrg66KTny=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCGvj8kfUV5Q6lzECIrGY19g",
+      "name": "Justin Bieber",
+      "image": "https://lh3.googleusercontent.com/4ULlRiFBFglNemZJyKn6_e2-iOIdJEbgBgq_79RQclndG6pge0yGgS2k2On6E1FkCJzenyHkHRzkvjFp=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCERrDZ8oN0U_n9MphMKERcg",
+      "name": "Billie Eilish",
+      "image": "https://lh3.googleusercontent.com/tQC4rOL6xz6FhmFr0ggQExxyGbYSOsyveXVSnPBh2WjEyIzQ9pMHablLJ-0GlMBrLBlBrbWQGmzrV6KN=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UC0076UMUgEng8HORUw_MYHA",
+      "name": "Ariana Grande",
+      "image": "https://yt3.googleusercontent.com/DU6Kpr5TYKcW6QHvMnsJau5_8QSuix8LCLtf5UEaziZZdXw8SxvcxJ9YWmVIQuzhg2R-MVHYgjdGCQ=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCU6cE7pdJPc6DU2jSrKEsdQ",
+      "name": "Drake",
+      "image": "https://yt3.googleusercontent.com/MxNjcRJ-uK4Xvx7u90IhEFLQM8x9LIGTA9VCKHq5U4Wn2jOgiWaMtg-qz329SIzqnCyhdCCB3MpdAGs=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCedvOgsKFzcK3hA5taf3KoQ",
+      "name": "Eminem",
+      "image": "https://lh3.googleusercontent.com/JFI6JZrS-Lco4UdpqDfHY5Wgwy51VXWxmNdI7bCBU5CDlIpN6WWyisZ7MGlpjbrxEGYMFpsqoR_UwcE=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCyD3XWRK9ko-izf2nBSFitw",
+      "name": "Post Malone",
+      "image": "https://lh3.googleusercontent.com/48LfK4z6o-CCEWgHQnQfg0ltcT9tbZSN0qjSh0FSJsJI5GF48j2-pH219ciG1ML-PI80ZGD4Vz6sjg=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCzVb0SIXp9q9PeKCcFjsBtA",
+      "name": "Dua Lipa",
+      "image": "https://lh3.googleusercontent.com/aFx8s1fTuelgxONGbezmTG0EKR8r82uB5H-Q6ZJtssyCWLJWF8GfZNr4tHo84sXdFCPBKrA4R6zXOss=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCE5XNpliPM-SmyFEp61tL_g",
+      "name": "Olivia Rodrigo",
+      "image": "https://yt3.googleusercontent.com/41-4WZupE4yY88igineZefzBZ3ud2nrtlBMv61OBWOfOcATol8PhmI5OZ0fLlrTszyZ3Ul9I9sE=w120-h120-l90-rj-dcqUWI7R0J",
+      "subscribers": ""
+    },
+    {
+      "id": "UCeKDV9JgivrXehVluw5bKFA",
+      "name": "SZA",
+      "image": "https://lh3.googleusercontent.com/c-ILO8kXxjY6HhqSkoClWPUtPfHYQW6iHr51EiQOaZiUZ7IZr_WwwkyqclAOFyZgLpC3R0dPXuZiRt0=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCIaFw5VBEK8qaW6nRpx_qnw",
+      "name": "Coldplay",
+      "image": "https://lh3.googleusercontent.com/IOKuXtp8PCQ_Fc-vaRKm3sKIXBxFV51gZheLTH5br-YGnWHFQf_Jywcuk7wbprYRoEbQyS_XZY6-nMJX=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UC0aXrjVxG5pZr99v77wZdPQ",
+      "name": "Imagine Dragons",
+      "image": "https://lh3.googleusercontent.com/TAadzeojHFGU1EJ5jnOWDn6K8Cf8O2x0F04PVxnZwUEhcaYN0pA0dic49VU7OKGs7oovBTylWx70xhY=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCQ-ygxSFSlq-O2zGnXxELXQ",
+      "name": "Charlie Puth",
+      "image": "https://lh3.googleusercontent.com/Wqr_bvGshelPD-n5OohFA1Au6r130npkqQX3BS0bEb4l373-FVX9ZhkhWykNKdq3CrNCF6ubJNTLVwI=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCVacQ2t5GUZ2t_J3Ia9BynA",
+      "name": "Harry Styles",
+      "image": "https://lh3.googleusercontent.com/O6RvnokIzjsvwQzyRLLkKOx0mvxLXy1bEspu1YdG48jQ2s6o64wyr5Cd8MWjACGocpsl2zlN8iJoMg=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCRw0x9_EfawqmgDI2IgQLLg",
+      "name": "Adele",
+      "image": "https://lh3.googleusercontent.com/mFjMekiL9JJDrJOSTpAvu264z4DDmYS6pdy51ZCLr98kA256rvxSrIIuNv12kMj8RJW2vtTq1ECDhA=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UC6ZjlLJhqP79nqGr3Ic6Adg",
+      "name": "Shawn Mendes",
+      "image": "https://yt3.googleusercontent.com/VVGOJpxGFBbbUJHurZq_U1F_BjIhaMBAY1sDhOT3a2kE2DnidfYT8L_hY7WoJOusysvzn1msCoinvtma=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCeBYRgPhy8kcRmIGQWKuqdQ",
+      "name": "Selena Gomez & The Scene",
+      "image": "https://lh3.googleusercontent.com/iGTppsoVmH36Cz1M0e_pXYusBIWXOgDBzepEHWTIFtMdjZ-3khOVKtF31rrwii9_Kcp5nFSaoRGrNg=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UC9vrvNSL3xcWGSkV86REBSg",
+      "name": "BTS",
+      "image": "https://lh3.googleusercontent.com/8rsLpP6VJjt-yTN8ZG5rY-qt2aCC-IYMWmVkk7qa8c5vrjO6zetKSgwO2QknHI3FtWl6Zannp2VsQ5o=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCkbbMCA40i18i7UdjayMPAg",
+      "name": "BLACKPINK",
+      "image": "https://lh3.googleusercontent.com/pvJ1n3OBNXcz80KquAr-BY3ZRpp4Vfv8IHBk1SHBkJPF6eGhYJqaO3H5meVIQwb-BTOv0VsckNtPow=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UC-pOuHFcndLpyfWSPVqXt_A",
+      "name": "Jung Kook",
+      "image": "https://yt3.googleusercontent.com/nF4NkEAlP9_yjmwWQ2I_CXH2Qi415A1OHPxCdJZLL-WvGxO7CqAU8So7OFwxioRh6fA3WBrwChVbxeEM=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCE6l2NHQkpgF_P96isfOu4Q",
+      "name": "Jimin",
+      "image": "https://yt3.googleusercontent.com/SFxmgLab1Yc3bQUcA6dBArrqt4zB-zuqwNUHzVuqNl4i_3IQq2TPLSKwTGKMzjPZ1t7UQaLiLZQZYgM=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCFqldK305KOVQXbAIGi-flg",
+      "name": "V",
+      "image": "https://yt3.googleusercontent.com/yrwu3TjUqfVr3YPBfHf8yss-pkBz4dR8r5JBSwxvEBlcFz32eNk8ukjx5kSxZhDHtuVbK_q8v0AWMQ=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCXtPv6CbKfuXPNj3MyKFOig",
+      "name": "LISA",
+      "image": "https://lh3.googleusercontent.com/hmnyO8zLxS7UIicw_KCGpLwxxGZhugnBVIezNSF2UJL92X37biI2giJTyOv_AgvNqMG1ivkP2R9wf-A=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCAl7xQ6q0PEgZMQD7zr4AKQ",
+      "name": "JENNIE",
+      "image": "https://lh3.googleusercontent.com/BKgJ2Qcko6lgLsnvB-URUnK2bgQ682OoJd7Dpa0829XrmIC40zfsFm74vNdmyaMBx8xUt-MHFwDIUUC9=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCbpXC82cTLngSiZrysAaE-w",
+      "name": "ROSÉ",
+      "image": "https://yt3.googleusercontent.com/JSr1fuJqoaRVL7_93SuqdZlVGZI0XjyNNIXEnZgkt7ZfWANDb6RF_B5A_Gusviz6h6yCJ24_62cuIKc=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCIMmuidNJdncfMEelOU08Fg",
+      "name": "Stray Kids",
+      "image": "https://yt3.googleusercontent.com/IWkwFI-WN2z4P39GdTDcTvM_Yh0_8VB6fqm5OhACiiDvqF1DqtMLi2vX93pcCnS0dxxNIcgCQAKVGg=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCxOqS3cYg4FaHbobICo7nFQ",
+      "name": "NewJeans",
+      "image": "https://lh3.googleusercontent.com/BRRildqotq_VSCj8pu9ZY283bnPar2qKMrGTsulASYINjJ4Z0mJMQYm0k1tIOeQKJYdJrZNbfN_DXg=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCDxKh1gFWeYsqePvgVzmPoQ",
+      "name": "Arijit Singh",
+      "image": "https://lh3.googleusercontent.com/W_yOqnKSDYyeVOY_AsXhuAtb6rW3vCL3GtJ9DA1GxWOrJfyeSOqzvTv_TkFHijdkVPXWutASBlRFPg=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCCTN01plFzn4npREHKT2_9Q",
+      "name": "Pritam",
+      "image": "https://yt3.googleusercontent.com/sjGMYJQ1J3FZEIBsMYUztMjjYOM4-NJ24CjmIHqxTWCxAM1YgjL-d_17u7_PRhTouOwwAjbu-2x5S6I=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCrC-7fsdTCYeaRBpwA6j-Eg",
+      "name": "Shreya Ghoshal",
+      "image": "https://yt3.ggpht.com/PgINZNe0qVxgMSXKG5vF82bNN4WCC12zgWsz9I7OLs4CLF9Cn0Vxq7Xc1ToupnzXrCv0nKfe3VM=w120-c-h120-k-c0x00ffffff-no-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCtJe0RYzgPddQXKtWduxz_w",
+      "name": "A. R. Rahman",
+      "image": "https://yt3.googleusercontent.com/vHMOuDn8gr3SW9Pm8yFgmtYzM5kj4ayng5HKRjW0OyjG9mPK923XMVtTZTt4NUG_1aemWNLSQ27zjtA=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCcuXjaACiyViK8QTuztjR6A",
+      "name": "Sachin-Jigar",
+      "image": "https://yt3.googleusercontent.com/WsON1EVOq-0WvhxezglqL45NOAnbhixiTBxFMN1UeFaeM3ugDlUbsM_Z7h2zrsLItFKn9_LP0DcnlJQFKA=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCWXJyrk1diAufFuTHCTfQ2A",
+      "name": "Vishal - Shekhar",
+      "image": "https://yt3.googleusercontent.com/fFEQDkLmuaBzUyXZAHIaQHUm78MRsN5oatXNscSJfE7e7IOFc3cVUqqgEoVo6mvYhp-3D4zd94nZZgY=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCqzQ51ZqgxPvIGGAVUdcuVA",
+      "name": "Tanishk Bagchi",
+      "image": "https://yt3.googleusercontent.com/YvpPMeofLnDR_qBgZXweGksVKRxUCgnqjnbQXZu87AkcAMIEioLtI8a7kFokgwbNS1FpylL86GValWI=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCdWuR07og626xwU93eSCh9A",
+      "name": "Jubin Nautiyal",
+      "image": "https://lh3.googleusercontent.com/4Jd9XSimz29-o12oJKUmgfTx3otHBHlTy0jb3Ace4ti2bz8Nuo59IeneNlM9EKRQXNRpLwk6YoEuNQ=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCsC4u-BJAd4OX1hJXtwXSOQ",
+      "name": "Sonu Nigam",
+      "image": "https://lh3.googleusercontent.com/iWH_XSIO8yZvIqz8vxkwC9BjzGM4giAhR69Z6LZ0t8Rp79ASNFVwpwHZWOyyo94B_jsXl8HtFueMgMA=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UC41L0sFqy6_Q43RGgUnJ75Q",
+      "name": "Sunidhi Chauhan",
+      "image": "https://lh3.googleusercontent.com/_c102EBASHERqDnrU32iygceCB0ItZy5PSeR6rvnKEusmQWNZhZRcp_xdlZHS578a82QVSPKfOyrzn8=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCVGomUS__PL0c4jDXa0QwXA",
+      "name": "Atif Aslam",
+      "image": "https://yt3.googleusercontent.com/ykJkyILKum4B2oudDxjnf5WNenWWZAp-WEz0_CHp4cu0VnqB2-uaNDylItqC68WLXV62rdHDun-ahbg=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCPexK6Vq8vDGf_ldYFFbnIg",
+      "name": "Mohit Chauhan",
+      "image": "https://yt3.ggpht.com/ytc/AIdro_li2lsmbfskQRf4VjFrJ0-qXRPjVmorZu8DsI4fRBBm4Wc=w120-h120-l90-rj-dclYOGyjkE",
+      "subscribers": ""
+    },
+    {
+      "id": "UCZc_y0R_mSKeNtkcuhgLxCA",
+      "name": "Armaan Malik",
+      "image": "https://lh3.googleusercontent.com/ZksW8_EkjShyDT_9OMxSw-yMRMG3FNDU6DPI0YtGowyfD5aSlWd63qbm3q4guIqVcGQ6cgFylRQ1EQ=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCeBxx7m7yrwSyvpVpKcMI8w",
+      "name": "Kay Kay",
+      "image": "https://lh3.googleusercontent.com/u_YlAOSU7_M6mI6_4Xo0KIIwI_9pVCnLg0BrdLQsW-KENvVuvnvsq-cHhFrCiD9Ft48jqirgp_gWWwg=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UC3RXV3x1J7HdgHskfDyVeEw",
+      "name": "B Praak",
+      "image": "https://yt3.googleusercontent.com/v3OLvtC4FbLMVN8q1NTWVMHC_PA1fB6kQ_G78J4zqh7wQfgeodjTTK85kxWmh-4HJuc5N58i9Q=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCvfE4xZDghK_FlDVSgPTKyw",
+      "name": "Asees Kaur",
+      "image": "https://yt3.googleusercontent.com/uLPqCCHxg__NEFfnTkzQOX95m6_vbzEx1aKKIarIyC5U4SnMMdVHIlAnIq2SPS8SrV8UY6tSUHIB9N0=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCsmm-jjSLILh12mZ2aR6Qrg",
+      "name": "Neha Kakkar",
+      "image": "https://lh3.googleusercontent.com/fV2lMYLeaJc9jxta-eXfwHhvfQHCk9c6HgTVw8MqiGasI-kZQ8qbkuHnrTcXIhzkfmwGfMxwFbI-4CU=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCHxwQajTiv8div1Fe-yvWpA",
+      "name": "Mithoon",
+      "image": "https://yt3.googleusercontent.com/xYYmHJgS68kA226eTLzisZdMgZw6fe4LJc6fUAmM6K-Wu61D0jWjIaA1601Q3iQvlze6TFSw04IOudA=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCqefmgtPwFWMi1V1f-dJ9vQ",
+      "name": "Shaan",
+      "image": "https://yt3.googleusercontent.com/lBKBrEG_jPVF0-vz_c1dH67B624UJT9DZh1-mt8m82a7YcXbqB6PV0wDlPhf-9iPBNtZXR1iBSM=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCoUueF3OL9dGVLwhlTKxSpw",
+      "name": "Sukhwinder Singh",
+      "image": "https://yt3.ggpht.com/ytc/AIdro_mlI5JHMgWLPJr9MD0QxzRwv23EvDWuSvA1via6H5iHJFA=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UC13ToEQgfmTe8_GW19LYtCg",
+      "name": "Udit Narayan",
+      "image": "https://lh3.googleusercontent.com/coesV4OVEVkua3_wJG-2BVvTc95yHF9sS1W6mOAtl4-vvTjQb250Hy_nVlfvudmEugb7_k05vhY9aJm4=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCptBkLZ6XRxoyn8SkUMc_Iw",
+      "name": "Alka Yagnik",
+      "image": "https://lh3.googleusercontent.com/_wPXKRCH5rAX8AK1kJZ1bNhSpNyyEgBRNmREdPmLbvTy3sX_ldiKMRYFc5uChygV_KRx_SDrH1KgUifk=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCVfSAUepe_FzP6ge6WexO5Q",
+      "name": "Badshah",
+      "image": "https://lh3.googleusercontent.com/bbR8znm7CX07mCGQH-M484ckFRaKkSmTjwrwuFZxQUBy7Uc5gQcintkpqDXCuSX0DdLLg2aPskZhC2s=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCGPCYz1FTl_dvFFnzQTQzjw",
+      "name": "Honey Singh",
+      "image": "https://lh3.googleusercontent.com/Ss_NEfGmfpwXCiuoNxiKxWAoU3M484SwZ4UmahATX7KwOqIaoqTyESuNyZV3fzJm25bmjtfSUxsIFI8=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCzJRkr4MuVD7sEGHR_zRSEQ",
+      "name": "Tulsi Kumar",
+      "image": "https://yt3.googleusercontent.com/Ea_u7o1gYEKehVYjz_DQYUi-Nrsmo6EIJKYt2HuNbnaUPCQsV-M68OoXEtAfN3bRBAH1fuMuew=w120-h120-l90-rj-dcpVSUrqEI",
+      "subscribers": ""
+    },
+    {
+      "id": "UCbRSywya_rl8YS15Lo9ttsA",
+      "name": "Anirudh Ravichander",
+      "image": "https://lh3.googleusercontent.com/wBG4jypwBcEGHd-qSbM2_4B46WPEhlOCjusCOEkxdnsoIC4WLS9LmFARZsE854pB-vAEYlsp4x2yiHE=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UC7_KgmSrwM247k2lnh5GhHw",
+      "name": "Sid Sriram",
+      "image": "https://yt3.googleusercontent.com/Ip35qauI_vMztXkJ3Wd6etvLwiyRrHIGvDyKK3714vyWMBx1ogHxPxkA8ohPnOLyy68wzEVBblPmsHHU=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCwHleA-qNWiMl05mwTDbuWA",
+      "name": "Devi Sri Prasad",
+      "image": "https://yt3.googleusercontent.com/Jn3s6U5foBczx3HoJuiVN6euF7QRB1b8rsp3lecxZ7EwumQ-27E_iR2uu8fJV0H6cctb74s5nut_dhM=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCLnRv17aPDpTM_Z_2nHFikA",
+      "name": "Thaman S",
+      "image": "https://yt3.googleusercontent.com/j3DSkMEyz8PSZoEZpv-qZ1iFJTBv11SOWEnwZ6mznTcY-DE3QGrxQU6SHdc6uRTm3FfoUCn3Ub2Vq1vk=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCQXg6kTstIOwbrjBwE3IlDw",
+      "name": "Yuvan Shankar Raja",
+      "image": "https://lh3.googleusercontent.com/-IRVL5B0n7-V9Gh9XZvQG161HYqkH_SNSHfJwWYeIcVVh35sMq9-jHTk1FCeAmeUHSdEq7UMpoVzUPw=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCU37UsNOenKAvxe_s0OAu9A",
+      "name": "Dhee",
+      "image": "https://yt3.googleusercontent.com/IwYdyGlJcyy0dGdgcJ_zmnBFLAxQjkxbiDg6o1v_A4bQO3Ur3tLnMEX3-Q3wiDXL8lzohe4Dvw=w120-h120-l90-rj-dcsQWSr40K",
+      "subscribers": ""
+    },
+    {
+      "id": "UC_WJkGXW3szoVG1hx6c0VZw",
+      "name": "Karthik",
+      "image": "https://yt3.googleusercontent.com/gPBBYPlGN0WexHKcTMUVgXpn3T2NSvqIfOMc_bf-MnHnS6Hhv0qF0KY7BgOfb8x5jJraXZnqZz8BTgk=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCf1p1hGlMCmuq-jIMjLNk0w",
+      "name": "Haricharan",
+      "image": "https://yt3.googleusercontent.com/3OxqzMOveOAdURinww61-M1YKCd2hcKMhBEu4zDZrI0iAWFdZLhRseRdVt0R-DM1o0H565opsw=w120-h120-l90-rj-dcCUKUbyEJ",
+      "subscribers": ""
+    },
+    {
+      "id": "UCwQE3u490GTgL3KkGylwpkQ",
+      "name": "Vijay Prakash",
+      "image": "https://yt3.googleusercontent.com/zSzuaIP-OMj_kns5Q4erv8rW0-oMS5fIbANYcUt_2cnyKQ_3ThEFP4AvjH_D7DeWlCtRQ60ULA=w120-h120-l90-rj-dcpUWACyIJ",
+      "subscribers": ""
+    },
+    {
+      "id": "UCAMJ6FZcDvdrSRoYcZ14x1Q",
+      "name": "Santhosh Narayanan",
+      "image": "https://yt3.googleusercontent.com/YfMj32x0B85XqpZCgWu1KXSSXsy8t4Ajt3GUIJw5oLLU94for_wN4HMDQYNvO3U-Hou1TiML9w=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCo36OSM_dp0KynQ02zibnsQ",
+      "name": "Anuv Jain",
+      "image": "https://lh3.googleusercontent.com/CAu3xx6p8BwER8QaY0YDJBBhROtJJbrm-NZwL97zhZjZkwipdUDSZXL1WWdWVD1X9FyQFFpwmOj-WQ=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCO_sphdxl8_K6mfXzzmkDGQ",
+      "name": "Prateek Kuhad",
+      "image": "https://yt3.googleusercontent.com/BiRpK2glMND5F33a5ZwrwU8XSFnV2Ec36pl_3ygI73Dz1oqPZ-_M8f-drqAIP3rIUgLEx7t1aQ=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UC8TXnDE17HVa8j2Ko6glyAQ",
+      "name": "When Chai Met Toast",
+      "image": "https://yt3.googleusercontent.com/ibAp6t2UTu5RzM_Ut-j_EdQE2Ps7odiBGcR6PalSSiIeKSt0rM-vEWFcDwSs4HMiMA76yHg-8OSnNzM=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCwXvxgmYjgO1PKBCXdufT4Q",
+      "name": "The Local Train",
+      "image": "https://lh3.googleusercontent.com/ARUki3BL93R5bx5J8agI0hdxNf1i3DxtkfFh68-_0A5NWjw359e-bjT-88QX3pI0gM0ipvWHhY-dx8E=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCLEO1vIrNARN4bvojv8d5gA",
+      "name": "Ritviz",
+      "image": "https://yt3.googleusercontent.com/Vf-yC86I5zEjg_NbOi4-oGI1TcqkWLnSXZytFbDISWhk4UfX2URU1HW0Ju-gmaHQ1vFlhFqw=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCSVbVFy5yqkfwbqs_aWmx8w",
+      "name": "OAFF",
+      "image": "https://lh3.googleusercontent.com/bTP28VB8p3HBBWRz9rzc5X_2De9o_pmp1BZ4MPqbMeBb0s2kzfPdRC676_yim0QvqLQbleKTZ_-TbQ=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UC_J95_cv9c-8v5pfNK82qbQ",
+      "name": "Abdul Hannan",
+      "image": "https://lh3.googleusercontent.com/GQt__nwkDIZLKUbBqaKRYe8V49oddkwuCmJzTQWyFluJamZmr0uwFbD0J6SmQyQwyYnF9gh4qRRCDT0=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UC4pXWqeKDSIWEvlLLTYWmXQ",
+      "name": "Aditya Rikhari",
+      "image": "https://lh3.googleusercontent.com/UOVLOmi522l1eK0cVfxDsTohVHwTvrP6xt41nu-7kvGtN0HBxUvn8qoczYcWWTy7XnQXg7pqIgo6jKM=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCKUZB6yQYr9je25TGXOr3yg",
+      "name": "Dream Note",
+      "image": "https://yt3.googleusercontent.com/cNtHu9at0QkGeno8tS7jyNgcYO82NaOtVp9SLVjp6aRN7b8mmeF1AdTd8o1R2Lt9MWLR80YHsL5St70=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCMQS3w1nGv8HliTTyp3Szkw",
+      "name": "Taba Chake",
+      "image": "https://yt3.googleusercontent.com/KL_t57gdDlWvcGW-zVJI5FB5PR2O7vZlfGZuZDHpm2O49DoSVNJPG5qHzYM0wm3a6qAWlk8H5hg=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCWkKRb2w41maMLGIMK-FpLQ",
+      "name": "Nikhil D'Souza",
+      "image": "https://yt3.googleusercontent.com/TSgjduVmFq5WqDwVsQYFTq54NM0cWm8UHj2M5YUWZdFdgYncroezgAwrJMdkWafG5bd-Geqc=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCGkN2ZxCoAUCxGK5ysEuYeA",
+      "name": "Raman Negi",
+      "image": "https://yt3.googleusercontent.com/HuQ_a_bTagBvbcKsBJfCt8C-WWmNZyIR_7_IniWb3FCxwfl9FzLHsa0qq8VDmsbj1BTYN1cGA6P9CrkJ=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCxIJaZ7Lac-wh2SUK5y2bbA",
+      "name": "Anumita Nadesan",
+      "image": "https://yt3.googleusercontent.com/i0wZdCInbHZB9EPqFoYGSa4XEERpRodGrSb5AV1fCWjoPBCan1ZprbT10ea5f8Ju-GgW84gG9iq9fA2m=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCWTc48VDX9hWJA3CFp0Xm_w",
+      "name": "Akshath",
+      "image": "https://yt3.googleusercontent.com/CjinOZSoDPPaXpMMS6vHcZqhpVWf-2BA9pFxm9emjRGxDDF4pt5aCcLvoI10V9fdFnB5EitwzA=w120-h120-l90-rj-dcnZWS6zEH",
+      "subscribers": ""
+    },
+    {
+      "id": "UC2VvwD2MJDUX0SGguO8ogqg",
+      "name": "Bharath Sankar",
+      "image": "https://yt3.googleusercontent.com/G-IVNRHoqCzh5cZEUVpVQl7hQuwpmzdlbTUjkQIwq2-qsqMG7s8uAQrutehGObN_pdLFSN2mjoB8Yizi=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCSmK5WX5U4gdtebWjoL81og",
+      "name": "Karan Aujla",
+      "image": "https://lh3.googleusercontent.com/k7sgqqcV5VScaMZtTmS8W_tfouLVBpgyJII0epYE2Vjw1-zzhGgUCV51aHxZn6cmZKKJgUfNlIVpZg=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCQmNiXx378nooDuZPA2fTAg",
+      "name": "AP Dhillon",
+      "image": "https://lh3.googleusercontent.com/yJh1MZL2FvtJz3YeDAUhTRpfdUSwdotWw8XmB_An-4coKiVG4pDpUGRAPV7ooqmzBP4HAWrtjPyAfI4=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCDoxhZGShhNvN4Bc3nWZptg",
+      "name": "Shubh",
+      "image": "https://lh3.googleusercontent.com/xGLCqdWB64eQARHXZdE4ut8VkNK7UnkrRKmQ4Bnx5ksOSmXctLUiEzjd4fh48EdpslwA219yNJnKU3k=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCKmB5zwbEfmx4hqdTjLHDfQ",
+      "name": "DIVINE",
+      "image": "https://lh3.googleusercontent.com/RaYF_XJtrT829WF9RNApYYC6Pd9plxjNHwvUVQoGZDFLNe9bixlQdlmHSIy0CT-S96JAC4ARXgm5nsz5=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCL0-89BZ7NWvJfmwDunDJ-A",
+      "name": "Seedhe Maut",
+      "image": "https://yt3.googleusercontent.com/DUcKt_1YaJ_48_T_hlxWg285BGKkTfwNdzKRV82G-gHZVerUQ8FD8Dl2hkqHLUirrJDnG4C3RA=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCfp03WF5o4epbVJpSIr4Rag",
+      "name": "Krsna",
+      "image": "https://yt3.ggpht.com/ytc/AIdro_n00p_ZePoxDQQ9m1fOAv5f6CPy-GyG97eU5hKHI3wX5cM=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCqEWM-AW9V5B5TzJxs4j3pA",
+      "name": "Emiway Bantai",
+      "image": "https://yt3.googleusercontent.com/-7rsPejxcna4AlrsVt_SsAFs8TH34Mh967V-jGHCxR7dalOrcbxVQUcVLhMvIKI0_AbJenSCbA=w120-h120-l90-rj-dcFTOeM5kJ",
+      "subscribers": ""
+    },
+    {
+      "id": "UCtuI6oKGbmI-fQPSQwQKqiw",
+      "name": "Raftaar",
+      "image": "https://lh3.googleusercontent.com/z610DpdCiipHA1F_igiSvVNupDEv9ES2-bO0N1Ox69vW-lItyCOD9Jsqti4PBm5ZPD3XoKowbHPMxw=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCXPnAUkxJtng8M_5yWuSTjw",
+      "name": "MC STAN",
+      "image": "https://yt3.googleusercontent.com/XyR-xmJJoR6J4AqcxHERWkBGfrNxtdLKU0GvK3FsstWqM6Sfuyt7HdDjOZU-sZt3Yiq9eSvVLA=w120-h120-l90-rj-dcpUWO7KEI",
+      "subscribers": ""
+    },
+    {
+      "id": "UCZQUb-qB6nViYaPABPYGxQA",
+      "name": "Talha Anjum",
+      "image": "https://yt3.googleusercontent.com/uzC9URxAARJqdw72fOKjs_7v-DS0U38ouexywYT1D-Xp9L7tpD_IjXX6cVdlUrckcpYRiZzkKDcMN-b9=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCO-cTyKfwqLXRGaMCzY9GNQ",
+      "name": "Talhah Yunus",
+      "image": "https://yt3.googleusercontent.com/BgHUQfg1LdkodiDQJ0RXPyrREow5IVOfprCoCJjJ0j-FLCUsKkpgVF2yO1Dsyifaupi3dLAbeQ=w120-h120-l90-rj-dcIWWSraUH",
+      "subscribers": ""
+    },
+    {
+      "id": "UC3D5MnxFDaZzw1MAYWMxg4g",
+      "name": "Young Stunners",
+      "image": "https://yt3.googleusercontent.com/zGaJjNDJcPtVAS_1iwOT-Ka4HH8U2eRkZld2d8FNxwvfMePFRSjew-Qi3H4JbkHTaHliAAEQPQ=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UC2ceGDkMiX_apj3yBciUTsA",
+      "name": "King",
+      "image": "https://yt3.googleusercontent.com/zXNttSOqO-WhRBCImfU_U_SVCrEmk4GUENAM5F_hf7n704lMA6I2fvXvTrw1D_Sf8Lq7Gkz46Q=w120-h120-l90-rj-dcqVSaryEJ",
+      "subscribers": ""
+    },
+    {
+      "id": "UCm5qeha0w05KKH-CCtkKMqA",
+      "name": "IKKA",
+      "image": "https://yt3.googleusercontent.com/aNJ9j1Eu0aIY_3XqpqB1VzeB-k8ibi1mI7gzBBoH2anb3o8T53SUXSLVHXuqKJbIInqG224An2rpA2vkuA=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCVNrGn22OvcY7BQBsN6RvWg",
+      "name": "Hanumankind",
+      "image": "https://yt3.googleusercontent.com/zOS_QYl-65KQgDT1-DVVEBuDt31HEDBz2KqtycWoRbXn6JeKcGE763hTIxqnkEP-2kL69Pwk5w=w120-h120-l90-rj-dcAUCWTxko0EgC",
+      "subscribers": ""
+    },
+    {
+      "id": "UCejrQ4mlwXxXW8JZkUMYQdA",
+      "name": "RAGA",
+      "image": "https://yt3.googleusercontent.com/cYcuXuExBqFVD1b2cQzJBGl9kyv4AgRSaka3rPzF-ck-ZKGrNYbEpOlyvVMnoJ9NfxHE4wlTwQ=w120-h120-l90-rj-dcrRSgrpUK",
+      "subscribers": ""
+    },
+    {
+      "id": "UC93bH1-lpg2YijziIUoqrYA",
+      "name": "KARMA",
+      "image": "https://yt3.googleusercontent.com/ISpEOMgCSLx4BjNvwCYA1BkSeWYn8S8ExxWnuSs9YyzAM47o6jzBM0NafIk4XPrcoQi5DSYZweQ=w120-h120-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCJNpBRXIzKRjAL3uu0S60Nw",
+      "name": "Bella",
+      "image": "https://lh3.googleusercontent.com/Bjg67MDpcchmUlMxJpRQm8-C6XCVi6-DQB4tHPZ4HpgSUgWCxVeqUbB9qFNka6S-tNedeWWG1S27N2Y=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCc6ZhmiYsVmBbiBqNhD6_1Q",
+      "name": "Paradox",
+      "image": "https://yt3.googleusercontent.com/jxBMrpqmYuz-F0g_Q5WK3-m2tN7Pw2b6WJRYu22lxGfNZe1z7tdmkQaZKIZhZo2D4KZmDYJIeFhI7CM=w120-h120-p-l90-rj",
+      "subscribers": ""
+    },
+    {
+      "id": "UCNp_hFjRDFVr_EsF0qjigCQ",
+      "name": "Mc Square",
+      "image": "https://yt3.googleusercontent.com/VmJ-Sy4NKotUgplYlsyYBEF10bM_tOZ2wjJsySKsCSjAQSMLN6c4FdeYP84g0AyMbGrr_5aI=w120-h120-l90-rj",
+      "subscribers": ""
+    }
+  ],
+  "songs": [
+    {
+      "id": "NJAv_7lHUIU",
+      "title": "Kesariya (From \"Brahmastra\")",
+      "artist": "Arijit Singh",
+      "thumbnail": "https://yt3.googleusercontent.com/CH0SThQN0HOk2eV81GGA-Tiftn58G48iy8lEyKNXJjbDSI9ApKKnmt4ncwr5gO_mZoQvFF3HPfHtky1Y=w120-h120-l90-rj"
+    },
+    {
+      "id": "YALvuUpY_b0",
+      "title": "Apna Bana Le (From \"Bhediya\")",
+      "artist": "Arijit Singh, Sachin-Jigar",
+      "thumbnail": "https://yt3.googleusercontent.com/EqN-4y9jQg91mt-94KKI8L1xu3olMS-Fh_WLL5tMlnqh1pSRzt-uWdnTVlY_GBnvLuA_WJmS6FYAXJlZtQ=w120-h120-l90-rj"
+    },
+    {
+      "id": "4VwtfInG-LU",
+      "title": "Heeriye",
+      "artist": "Jasleen Royal, Arijit Singh",
+      "thumbnail": "https://yt3.googleusercontent.com/IUaNm7SOpB6sip0Q_VCWbLLaQ_rnqgH4gy7_i_7GwWFsDFR3BK6CzAQJpg7IN2UUqGgE79lAeBEYTxh18A=w120-h120-l90-rj"
+    },
+    {
+      "id": "fsiPzT50ZiM",
+      "title": "Tum Hi Ho",
+      "artist": "Arijit Singh",
+      "thumbnail": "https://yt3.googleusercontent.com/3q33amH9hzn1dO8IeAX7TMb1QtEVfvVbqd2eSCaelOXNVmfMjbpDYdqD2HSiXtNP6i5Es7oynkWU2NfOXA=w120-h120-l90-rj"
+    },
+    {
+      "id": "FOA9iyxsW_A",
+      "title": "AGAR TUM SAATH HO",
+      "artist": "Arijit Singh, Alka Yagnik",
+      "thumbnail": "https://yt3.googleusercontent.com/AT2wfk1PvKjnHO7BzH2i2NkAvqRy_oZNEq48QGBlLJb51AuguCiR3mzp99X1uFdZezAkoSJ2WGjUU-HXZg=w120-h120-l90-rj"
+    },
+    {
+      "id": "qnQCd_nZn_g",
+      "title": "O Maahi",
+      "artist": "Arijit Singh",
+      "thumbnail": "https://yt3.googleusercontent.com/olTad2rSFdiV02kmWaC_xYlKkZiB6nV7279LAf1r6uar7rcyojJ4WoCc9A6kY9Cf5ecp-yUk0-NGy1c=w120-h120-l90-rj"
+    },
+    {
+      "id": "V_jp5_VAzXk",
+      "title": "Chaleya",
+      "artist": "Arijit Singh, Shilpa Rao",
+      "thumbnail": "https://yt3.googleusercontent.com/DuC8PRTm11127t5sQtQ-k8PRHO5JrB1XFyG4WK634cBSHJ-misa0-vkjJVfmpmp8_e5gN8dr5Tw3L0OlSQ=w120-h120-l90-rj"
+    },
+    {
+      "id": "mVWekQAP7vQ",
+      "title": "Tere Vaaste (From \"Zara Hatke Zara Bachke\")",
+      "artist": "Varun Jain, Sachin-Jigar, Shadab Faridi, Altamash Faridi, and Amitabh Bhattacharya",
+      "thumbnail": "https://yt3.googleusercontent.com/OC_FG417cB8VQuLPKI28K5xpamTf28ThvTTM6nET-oA2tNLbB-gHrUZtYhcNb4x_j_nlUiVHYlnR8wYOTg=w120-h120-l90-rj"
+    },
+    {
+      "id": "7Iqe_yCYwvM",
+      "title": "Raanjhan",
+      "artist": "Parampara Tandon",
+      "thumbnail": "https://yt3.googleusercontent.com/HDxRWaagMWwCIkzB4Fo-WCTWvdiO4e_RJ2cw7WLaizqVCCh58hYL9dXnkKBdkLVj11ydoN9mtguJTSxZ=w120-h120-l90-rj"
+    },
+    {
+      "id": "IDOghyqFA8s",
+      "title": "Sajni",
+      "artist": "Jal -The Band",
+      "thumbnail": "https://yt3.googleusercontent.com/bUvZP55mpnikabTlhXMONOgWKLyXl2_wX84EyMxxY2dRYL9rukDJMSagd7hDZ8fBJW5APN4kbQNRfWQivQ=w120-h120-l90-rj"
+    },
+    {
+      "id": "YCwP7X42wfw",
+      "title": "Satranga",
+      "artist": "Arijit Singh",
+      "thumbnail": "https://yt3.googleusercontent.com/02xLoCOZmap3ihA_v28cqFz1zBcE9cMzfwzJHzsgwxyGklT0rRWkfUqztPCgAx7CdBtVM5MahamnGuJw=w120-h120-l90-rj"
+    },
+    {
+      "id": "S15GwOj_1us",
+      "title": "Tum Kya Mile (From \"Rocky Aur Rani Kii Prem Kahaani\")",
+      "artist": "Pritam, Arijit Singh, Shreya Ghoshal, Amitabh Bhattacharya",
+      "thumbnail": "https://yt3.googleusercontent.com/BvEU7FiPfMsSg7Y6JVAqkwbBxqmmLzqIBQelhqUgPVgLKR9IWGJT5XdoVvNcd0KlCqN9CKa_XFsUIObz=w120-h120-l90-rj"
+    },
+    {
+      "id": "z-PUf6k552I",
+      "title": "Soulmate",
+      "artist": "Badshah, Arijit Singh",
+      "thumbnail": "https://yt3.googleusercontent.com/X9z43RY-8TZE8Vtxq7vuvRIWhp57i02tcFvgEUOUPSALtLloNQNnfwAZLDYPCCebcl2PSf2a6AMxBsnD=w120-h120-l90-rj"
+    },
+    {
+      "id": "9cHq63r1vHQ",
+      "title": "Pehle Bhi Main",
+      "artist": "Vishal Mishra",
+      "thumbnail": "https://yt3.googleusercontent.com/02xLoCOZmap3ihA_v28cqFz1zBcE9cMzfwzJHzsgwxyGklT0rRWkfUqztPCgAx7CdBtVM5MahamnGuJw=w120-h120-l90-rj"
+    },
+    {
+      "id": "EQxEms7gnqs",
+      "title": "Shayad (From \"Love Aaj Kal\")",
+      "artist": "Pritam",
+      "thumbnail": "https://yt3.googleusercontent.com/Cr0zxxJ-n5CVF8zYultpi3FCef-BVXkFryW3rJGt6TCOLECklGKAFjLsmuAGdhuVvDUsPdpnnIbgV1RNPQ=w120-h120-l90-rj"
+    },
+    {
+      "id": "ii9KLQoV78I",
+      "title": "Hawayein (From \"Jab Harry Met Sejal\")",
+      "artist": "Pritam, Arijit Singh",
+      "thumbnail": "https://yt3.googleusercontent.com/S-A1H940pKO854h157hHNY_Z_n1wRHJT-81NkgO6axWxaNPNcMxNx69r88oiJ_aT5_D-sZAqVS1_s2l5=w120-h120-l90-rj"
+    },
+    {
+      "id": "piUHBTXsoiY",
+      "title": "Raabta",
+      "artist": "Arijit Singh, Pritam, Amitabh Bhattacharya",
+      "thumbnail": "https://yt3.googleusercontent.com/6LxvTuAggHEs4fkqMwtTsspSf58-T7-ThAnw4aRWn1XV5XA63QNOHxnVxhcGbiAgF66eAG8LVv9yBZU=w120-h120-l90-rj"
+    },
+    {
+      "id": "q3HNo5a3ol4",
+      "title": "Khairiyat (Bonus Track)",
+      "artist": "Arijit Singh",
+      "thumbnail": "https://yt3.googleusercontent.com/gyw6VH1uRAGq01PIpjnv5c-UFgJV08xE5x4Fd061iJ0CfOcuZacKO7Ap1uyoX9ID_MMBkeEVFKmpK1U=w120-h120-l90-rj"
+    },
+    {
+      "id": "GkJ_wZy0iB4",
+      "title": "Ve Kamleya (From \"Rocky Aur Rani Kii Prem Kahaani\")",
+      "artist": "Pritam, Arijit Singh, Shreya Ghoshal, Shadab Faridi, Altamash Faridi, and Amitabh Bhattacharya",
+      "thumbnail": "https://yt3.googleusercontent.com/SkHH8FBBfUOnW1HWQgR1vbf4bMMKAA67kWV2CBywD38QBHa_I1kU7dJ51w43RhIldeflyRwY5c7u35A7=w120-h120-l90-rj"
+    },
+    {
+      "id": "oeYgD5w3NQo",
+      "title": "Tera Hone Laga Hoon",
+      "artist": "Pritam Chakraborty, Atif Aslam, Alisha Chinai",
+      "thumbnail": "https://yt3.googleusercontent.com/2_0MIu6f5PUC3VO5R5vw_U1CTPBcRtDhbzOW1rgAd4QmiKMommcDYbL1CrV78AzP-6EkaR-MzF673WwJ0w=w120-h120-l90-rj"
+    },
+    {
+      "id": "WKv07mnKVEE",
+      "title": "Kaise Hua (From \"Kabir Singh\")",
+      "artist": "Vishal Mishra",
+      "thumbnail": "https://yt3.googleusercontent.com/_qw4wNEITr8WhH6Q6M575GPfNuXbpcl_Kfzhfsin63k_rSdu907M9LO4Eq2M2n_7uPEoptYuwEs3oT4O=w120-h120-l90-rj"
+    },
+    {
+      "id": "SDQdGibJ9mE",
+      "title": "Mast Magan (From \"2 States)",
+      "artist": "Arijit Singh, Chinmayi Sripada",
+      "thumbnail": "https://yt3.googleusercontent.com/Uf3FU8ElyrFboJFBiyva4RPgj7LBkm43iJ4srRMJ4Z2-PmYlxzB3uvsMWzXlXfrBYwYrVnqlAcurYVoUew=w120-h120-l90-rj"
+    },
+    {
+      "id": "pUwpLoLlzNQ",
+      "title": "Samjhawan",
+      "artist": "Jawad Ahmed, Sharib Toshi, Arijit Singh, Shreya Ghoshal",
+      "thumbnail": "https://yt3.googleusercontent.com/DaNYaIF7k-oNb2Ndmw9sMeL4ZX6ycPeGJaUaiMOyMhitPujRa0sygmmy8ODHqzARaVE_rVaT4ZlHJu4=w120-h120-l90-rj"
+    },
+    {
+      "id": "-3vUz7QPljM",
+      "title": "DARKHAAST (feat. Sunidhi Chauhan & Arijit Singh)",
+      "artist": "Mithoon",
+      "thumbnail": "https://yt3.googleusercontent.com/w1EZeqcglVG2xSP4bFR0NYyim4B9uQhBdp2JXPsfloVgnrb72gNOCdqG0stwaSVa6ADU20mSSGArQ4U=w120-h120-l90-rj"
+    },
+    {
+      "id": "wx89ZdkwtS8",
+      "title": "Ae Dil Hai Mushkil Title Track (From \"Ae Dil Hai Mushkil\")",
+      "artist": "Pritam, Arijit Singh",
+      "thumbnail": "https://yt3.googleusercontent.com/WP7l4p-2WhWzLM6lXJ0n2gXLK6u07eCejpybWzb-yhEyt9Y0aOkxMlLhpayO7PdXYOYy2NgkWu9hGBPy=w120-h120-l90-rj"
+    },
+    {
+      "id": "XT_ANSoov00",
+      "title": "Phir Le Aya Dil (Reprise)",
+      "artist": "Pritam, Arijit Singh, Sayeed Quadri",
+      "thumbnail": "https://yt3.googleusercontent.com/W3crfuGhM-7bR81I9dSXDfM99SGWeGLEqSS29DtIw23ITd7nlLzTC1dXHgMxsxLxlPTcvqFp2Hnq4D3V=w120-h120-l90-rj"
+    },
+    {
+      "id": "FO9rBogdRRQ",
+      "title": "Channa Mereya (From \"Ae Dil Hai Mushkil\")",
+      "artist": "Arijit Singh",
+      "thumbnail": "https://yt3.googleusercontent.com/X5T7RpQwMKML8zP8wv9_ESEONMdC3Tp4Jrdmx6rXl1lYeE7IxY3rAVTQ6AATqMRLdLybeJl8l8hDfBd5=w120-h120-l90-rj"
+    },
+    {
+      "id": "lSPNH_rYKIg",
+      "title": "ILAHI",
+      "artist": "ARIJIT SINGH, PRITAM, AMITABH BHATTACHARYA",
+      "thumbnail": "https://yt3.googleusercontent.com/8WRsPwoMoabdu5ISlf9f7tGGPzd2I7CTaWxc8qd6GYjaEBreC2Yw0KWMId6Y2vUTqSkt7GdlUi4NAXyf=w120-h120-l90-rj"
+    },
+    {
+      "id": "FCRUrHJW468",
+      "title": "SAFARNAMA",
+      "artist": "Lucky Ali",
+      "thumbnail": "https://yt3.googleusercontent.com/AT2wfk1PvKjnHO7BzH2i2NkAvqRy_oZNEq48QGBlLJb51AuguCiR3mzp99X1uFdZezAkoSJ2WGjUU-HXZg=w120-h120-l90-rj"
+    },
+    {
+      "id": "_fmA1RoHbzA",
+      "title": "Kun Faya Kun",
+      "artist": "A.R. Rahman, Javed Ali, Mohit Chauhan",
+      "thumbnail": "https://yt3.googleusercontent.com/KYw74XSQwtKPbZTrHMNEBAnEMg1P1gNGwymnZwBSjstbqSE-MpigGlTIy6IZvC-ERlRkeP0c7VTiZObS=w120-h120-l90-rj"
+    },
+    {
+      "id": "a1P55Z1Jugg",
+      "title": "Admirin' You (feat. Preston Pablo)",
+      "artist": "Karan Aujla, Ikky",
+      "thumbnail": "https://yt3.googleusercontent.com/CwS-QQuTf5ggHK9A9-5Pvn1CQyyALQfNHWP5hl40a6v33HS55zpUAbaT6R3nrnN2DuJTh1vlfTtN5DpO=w120-h120-l90-rj"
+    },
+    {
+      "id": "U4qD41gPQMU",
+      "title": "Softly",
+      "artist": "Karan Aujla, Ikky",
+      "thumbnail": "https://yt3.googleusercontent.com/CwS-QQuTf5ggHK9A9-5Pvn1CQyyALQfNHWP5hl40a6v33HS55zpUAbaT6R3nrnN2DuJTh1vlfTtN5DpO=w120-h120-l90-rj"
+    },
+    {
+      "id": "wScs3JNn8Lg",
+      "title": "With You",
+      "artist": "AP Dhillon",
+      "thumbnail": "https://yt3.googleusercontent.com/M9INXhYwd81KszitvO9SsFJayopHXS_7ojWdQWrsAqiicW-KemjzlHdwFlRNNhp0iQ_LjQ108tAoIkU=w120-h120-l90-rj"
+    },
+    {
+      "id": "0DS5jYQeiw0",
+      "title": "Winning Speech",
+      "artist": "Karan Aujla, Mxrci",
+      "thumbnail": "https://yt3.googleusercontent.com/mnu2kpE-hPCxQJ33mntkFMt5kmXuUqba4v1BuPvxdVaPB229swK_bujTrkHYrvJJtjGO86lqJ1G5jR0=w120-h120-l90-rj"
+    },
+    {
+      "id": "N6_EvGT0ZfM",
+      "title": "Tauba Tauba (From \"Bad Newz\")",
+      "artist": "Karan Aujla",
+      "thumbnail": "https://yt3.googleusercontent.com/xlZs7zjh277lx98oHLHWOJc9l4abh9-cPtav9vvlRrrEt0XTqmmQYYK6mm0YJrAKWrbebJlKwtw43c4=w120-h120-l90-rj"
+    },
+    {
+      "id": "qlOwSBYKD6g",
+      "title": "Wavy",
+      "artist": "Karan Aujla & Jay Trak",
+      "thumbnail": "https://yt3.googleusercontent.com/PNoDnnbrVoQsy6hLGqp-FEp7OwkJmFoh6XRw-DpH1qgA8qoXkOoqH2U8AUsYReAEtjyOWgLCTWlrNmpp4w=w120-h120-l90-rj"
+    },
+    {
+      "id": "6y9_c5Qavhs",
+      "title": "52 Bars",
+      "artist": "Karan Aujla, Ikky",
+      "thumbnail": "https://yt3.googleusercontent.com/zg1EsZNA6n2PBaSGOxo2braaGIGcQFCuttdBx3arwZUiD2CBiHmRsmcdb8D5A84Clnz02XY-Mftn4rT_9Q=w120-h120-l90-rj"
+    },
+    {
+      "id": "FM2ykrYbzqg",
+      "title": "Brown Munde",
+      "artist": "AP Dhillon, Gurinder Gill, Shinda Kahlon",
+      "thumbnail": "https://yt3.googleusercontent.com/61uwz4Fic91-Ot8PmBTt-Ln5-N1sK4UnANdyVHqaQRsawpDwIXRxd6yEwqxvIxKUVcDnCutrAFQyG5q3=w120-h120-l90-rj"
+    },
+    {
+      "id": "x18b0D8sTwo",
+      "title": "Excuses",
+      "artist": "AP Dhillon, Gurinder Gill, Intense",
+      "thumbnail": "https://yt3.googleusercontent.com/YodB8IMuc531lUrvJBl5gwh5yl242hTBKfVj-cpk4oFOqOm-wElw5Lcw3_DvagrR0arcXXs19l6xr6MN5Q=w120-h120-l90-rj"
+    },
+    {
+      "id": "5DlJJbkXQe0",
+      "title": "Insane",
+      "artist": "AP Dhillon, Shinda Kahlon, Gurinder Gill, Gminxr",
+      "thumbnail": "https://yt3.googleusercontent.com/KeEBJiN7-fZM1K8i9Kzvo3lvMCOik6rfSV-pQETMJZnJzEh760ICEeFnJQFCFzB5DbOYFc97UfaBuRpymQ=w120-h120-l90-rj"
+    },
+    {
+      "id": "OEo9mz8pljQ",
+      "title": "Cheques",
+      "artist": "Shubh",
+      "thumbnail": "https://yt3.googleusercontent.com/V_w7m2kuoVshpqcS1-RlEl-aONMQcGjP84WSo1tJS5IU8IDCr0v0s0NBMMGrLXtlL4CNjUKEdXcN3gAy=w120-h120-l90-rj"
+    },
+    {
+      "id": "h4SGsHUr4SA",
+      "title": "Baller",
+      "artist": "Shubh, Ikky",
+      "thumbnail": "https://yt3.googleusercontent.com/TMs8F36tog6BNOxTQhxdfa_NwGlGSxctjDOk1GpFiblDD2GGeo-gwXbq5tqqohMSwAJawqI9p8fnI1E=w120-h120-l90-rj"
+    },
+    {
+      "id": "n6pM531_rac",
+      "title": "Obsessed",
+      "artist": "Riar Saab, Abhijay Sharma",
+      "thumbnail": "https://yt3.googleusercontent.com/T4LRcQwrigppA4iZC_ANtb8ibGUCjAq3IK8Jf1oUOliY2Hsl1CqoKHVdfoErYg-NDus0kaSnQgw6URpY=w120-h120-l90-rj"
+    },
+    {
+      "id": "KrJ5c-Egz-U",
+      "title": "Khat",
+      "artist": "Navjot Ahuja",
+      "thumbnail": "https://yt3.googleusercontent.com/uzfTAu64E4d7zsoQHAd2sOX24RIYd5jYeaX3B_STbS0lk0X_cxrTquiFmZEU3khp6WwtTFrrmEEiaEg=w120-h120-l90-rj"
+    },
+    {
+      "id": "yjO84xl_XAU",
+      "title": "White Brown Black",
+      "artist": "Avvy Sra, Karan Aujla, Jaani",
+      "thumbnail": "https://yt3.googleusercontent.com/DrHL1RxGIuS6xg__cT1dmj46LesGS9CtIUtMYvQW25td2mJYdHHZ3cwyebVhsCtEr6clYUsDizyGbYuwDA=w120-h120-l90-rj"
+    },
+    {
+      "id": "gtxL331yPRQ",
+      "title": "Hola Amigo",
+      "artist": "KR$NA, Seedhe Maut, Umair",
+      "thumbnail": "https://yt3.googleusercontent.com/9V-0tNE5nv0gTLT5gU6ebljZDWNmJVJ9JUG_bkSONOKG4-jnPS0QHGz_i9AMdidbmn4h589IynuMwkw=w120-h120-l90-rj"
+    },
+    {
+      "id": "IBkT4Yww7zk",
+      "title": "Khatta Flow",
+      "artist": "Seedhe Maut, KR$NA",
+      "thumbnail": "https://yt3.googleusercontent.com/9-7SPcwOYnLLWG1UEPZU2JSeifw0dzMR4SugQ2Xq3tyanj5-Yrwe4vmNjQKIafvm99uwzOvVq1JL-JOMvA=w120-h120-l90-rj"
+    },
+    {
+      "id": "ciya_AQu25o",
+      "title": "KOD",
+      "artist": "J. Cole",
+      "thumbnail": "https://yt3.googleusercontent.com/k0ZTAI5rAAFoR3FpTqnYbNtVWguGwVnsR0Tz3Xh4OBUxdI20z3tYr8GHLmoUvhMuc4JnItN9usfS2Mrp=w120-h120-l90-rj"
+    },
+    {
+      "id": "ioew8CnMFbQ",
+      "title": "Legacy Vs Clout (feat. Encore ABJ)",
+      "artist": "Karma, Encore ABJ",
+      "thumbnail": "https://yt3.googleusercontent.com/G5_-WJ06vDsx6aZloQet9LelIEpyC5GOlnnsb85i9PDUwCGH7S-MZC8mmF4FXvJ96u-pJ_R_CeqiQtM=w120-h120-l90-rj"
+    },
+    {
+      "id": "6Zv9mSiZGBU",
+      "title": "No Cap",
+      "artist": "KR$NA",
+      "thumbnail": "https://yt3.googleusercontent.com/5UpT2hG4hlB1t3doKC4HWloVK5wgWsaZYyJqQI_MaLQM3gTlph25OuHIg3GGlLktnPY4SnGgyUmfh161sQ=w120-h120-l90-rj"
+    },
+    {
+      "id": "nsLOaAzd3Ic",
+      "title": "Wanna Know",
+      "artist": "KR$NA",
+      "thumbnail": "https://yt3.googleusercontent.com/9V-0tNE5nv0gTLT5gU6ebljZDWNmJVJ9JUG_bkSONOKG4-jnPS0QHGz_i9AMdidbmn4h589IynuMwkw=w120-h120-l90-rj"
+    },
+    {
+      "id": "ESWHVtbBMlM",
+      "title": "Machayenge 4",
+      "artist": "KR$NA",
+      "thumbnail": "https://yt3.googleusercontent.com/WFi1g4QxLhsFG2gAY6EQ4WKZLlfnTQaj3c-6dGLK2vLWstJBxIV5Le3htmhLLP270MTXHVWX-eW_mFvNMg=w120-h120-l90-rj"
+    },
+    {
+      "id": "JPfoLgd3uKg",
+      "title": "Sheesha (Aakhya Mai Aakh Ghali Jo Bairan)",
+      "artist": "Mitta Ror, Swara Verma",
+      "thumbnail": "https://yt3.googleusercontent.com/qSLRDoW9xku1Tn0g5cH-1Xfw4NF7HjSdPU8j0rfsNoPSl3r5TN-5OEC8g8mF_I1TbpxDDMZp4t_mlE6y=w120-h120-l90-rj"
+    },
+    {
+      "id": "6pb1gw2xSD8",
+      "title": "Baazigar O Baazigar",
+      "artist": "Kumar Sanu, Alka Yagnik",
+      "thumbnail": "https://yt3.googleusercontent.com/G07jxQVDY4XB1FA0iWi-T6otGfZ0IZ7NEWPxFpfbcll2MpXgSxqCwrgr_JnXlBIV0zp2KVfaC4A6sJ7ymA=w120-h120-l90-rj"
+    },
+    {
+      "id": "SBk3O1L1sZQ",
+      "title": "Still Here (feat. Katya Krishnan)",
+      "artist": "Dino James",
+      "thumbnail": "https://yt3.googleusercontent.com/-Jl4eBV29U6FTyCFk4UXfq48X2_J_WajphSHslJBenSBXgwl6JXVSVu_tGgfxw9GBzKb8kk14EtGzCzK=w120-h120-l90-rj"
+    },
+    {
+      "id": "BzfR4Yt1Dxg",
+      "title": "Kaha Tak",
+      "artist": "KR$NA, Jokhay, & Umair",
+      "thumbnail": "https://yt3.googleusercontent.com/IlPiK7DK8z9U5d6VTOhYduZabTQTmfkwCrp_OJ47rvftq2GbvagiYpQWxFYFaNR8qdOWJnFqe3bgmp_9=w120-h120-l90-rj"
+    },
+    {
+      "id": "kNCqgNnd2co",
+      "title": "Nanchaku",
+      "artist": "Seedhe Maut, MC STAN",
+      "thumbnail": "https://yt3.googleusercontent.com/c1bbuf0wxbEMqywO9nt_rXu_RFt8TT2AqqvhZVj-cwuAXBEMY0aaGvm_Yrm-T4nTsCW4f8iCnLxnZ8pL=w120-h120-l90-rj"
+    },
+    {
+      "id": "RyZH1iQ77E8",
+      "title": "Agency",
+      "artist": "Rap Demon, Talha Anjum, Umair",
+      "thumbnail": "https://yt3.googleusercontent.com/KaOU8C_F7EjH6RNsJfToXEblKqkPeFwKOOXBIlvwFmeYlaEq5gj8jPeihAooYOac7DPKHLFEjW_KNEUL=w120-h120-l90-rj"
+    },
+    {
+      "id": "ysSq218zW4E",
+      "title": "Downers at Dusk",
+      "artist": "Talha Anjum, Umair",
+      "thumbnail": "https://yt3.googleusercontent.com/yCWZ1kvh-qYpI-mVkhRSD-1qJsTj8LGUO-pR781H24gPCAB-jdSYE0kVBIUEERI5c20qFjOG9xdpH7s0=w120-h120-l90-rj"
+    },
+    {
+      "id": "sFkfWt_Fga4",
+      "title": "Gumaan",
+      "artist": "Young Stunners",
+      "thumbnail": "https://yt3.googleusercontent.com/b3m0Bg7ykbo7kN5d5Lh3ZciLkpmSZkd0keX13i14H28tWcMSu70YSeRRyTOFTjsVQ_y0b6QIXpw_QYdM=w120-h120-l90-rj"
+    },
+    {
+      "id": "te_YjDk_vgM",
+      "title": "Class-Sikh Maut, Vol. II",
+      "artist": "Seedhe Maut, Prabh Deep",
+      "thumbnail": "https://yt3.googleusercontent.com/Jb0Lr94D2sY6noqbmvsPQuwIrbFSyfGrCDJE9UFk91jG7zybTiyySSzne2-IA8aqCi-YdFh065SPem8K=w120-h120-l90-rj"
+    },
+    {
+      "id": "oODE3UZ-w8Y",
+      "title": "Anaadi",
+      "artist": "Seedhe Maut, Sez on the Beat",
+      "thumbnail": "https://yt3.googleusercontent.com/XSxNDSeXO_SweqLZzUVj9WgFrKoOfVlN6Vtsg9jSlNdZteEr_xP8Swlm4jB6PomETePOguF2qW6wiaCoDg=w120-h120-l90-rj"
+    },
+    {
+      "id": "HmW1wIhyCng",
+      "title": "3:59 AM",
+      "artist": "DIVINE",
+      "thumbnail": "https://yt3.googleusercontent.com/ql-hSv7Guf2Be88QxjFdu_dAwPwbNuRPrTMeBV6_fgjBvj79-bwi_fpd57mB1HsxGiIB9Ln5j_zp2KdyOQ=w120-h120-l90-rj"
+    },
+    {
+      "id": "UPtMjHYO6Ik",
+      "title": "Galat Karam",
+      "artist": "Panther, Raga",
+      "thumbnail": "https://yt3.googleusercontent.com/t1S8cY9gXzzX9TonWts7MRErPxz989h4-tny0vykiKY6nRfek19MrCG7df7PvOao8z0lDClEjfv-usyDoA=w120-h120-l90-rj"
+    },
+    {
+      "id": "JCf7lKL1UQ4",
+      "title": "Big Dawgs",
+      "artist": "Hanumankind, Kalmi",
+      "thumbnail": "https://yt3.googleusercontent.com/pg52FEOeoYVpQXERZa3uJ6-UgdZUtJrdN4xi171PUru8qmmt1T77QaGPvT85OOX-XxQDGD7bm_ohJgg=w120-h120-l90-rj"
+    },
+    {
+      "id": "usvVGXFIpTM",
+      "title": "Jo Tum Mere Ho",
+      "artist": "Anuv Jain",
+      "thumbnail": "https://yt3.googleusercontent.com/BU2wudOgpgn3sa2kO2MfEvfHeMTDZjZwPZlugNy89o_PtFbdCuXAJCZm8asRa9V9Y7cMZVw4FhqAQ_4=w120-h120-l90-rj"
+    },
+    {
+      "id": "_deqdZmKzyg",
+      "title": "Husn",
+      "artist": "Anuv Jain",
+      "thumbnail": "https://yt3.googleusercontent.com/KyrCGnftqfj4eJ9FnumH8GlNsddPCa8y_LUtsS1dZqX-cQmILOMPKZQp3tEmPWMGN-Ee97I1USn3911GLg=w120-h120-l90-rj"
+    },
+    {
+      "id": "tYqZK7bq5Bs",
+      "title": "Baarishein",
+      "artist": "Anuv Jain",
+      "thumbnail": "https://yt3.googleusercontent.com/3-krcQ6FdG53f1ovjz5mc8b7DkDQ6tRAtXCrEQpdGM-dNECmriD7pX4i5CfLNXuaF1WP4ppPaa801Ns=w120-h120-l90-rj"
+    },
+    {
+      "id": "iAQcOfKO8CM",
+      "title": "Kasoor",
+      "artist": "Prateek Kuhad",
+      "thumbnail": "https://yt3.googleusercontent.com/S4zqUztJkNfFfgRCwOVBbjkx4k2KkJmZB9bF3U9S3EfFy8bJuFc4YypjN5dQTRiiwpCgcQQ0qlf4MO-ZbQ=w120-h120-l90-rj"
+    },
+    {
+      "id": "Kh49Zqa84IE",
+      "title": "Gul",
+      "artist": "Anuv Jain",
+      "thumbnail": "https://yt3.googleusercontent.com/XVFqLdB92wrjHxysLMRPP0L44wNPNC8g30Sk8VHNyqlAEWrtuihhxKV6sM4c8oCKOEM20SuV95MKuQXE=w120-h120-l90-rj"
+    },
+    {
+      "id": "PZtSnQBsBW0",
+      "title": "Finding Her",
+      "artist": "Kushagra, Bharath, Saaheal",
+      "thumbnail": "https://yt3.googleusercontent.com/XEpKU4CHyyIkE33zKcYJz8uMrZv9W03Q2SKx7RTE3_bj1ZSBjZ_sIUPdcglS2_1wWNZTo09hHNpmo0R8Dg=w120-h120-l90-rj"
+    },
+    {
+      "id": "f419vqAt8PU",
+      "title": "Ishq (From \"Lost;Found\")",
+      "artist": "Faheem Abdullah, Rauhan Malik, Amir Ameer",
+      "thumbnail": "https://yt3.googleusercontent.com/mrfYb0F3sQqIGyVpf8wZ1zuY8AB9VtISZlY0nIOEZE_DfI6Dj29MEkvSjAkEalBZXOJXqn9nLQDVDK2-Og=w120-h120-l90-rj"
+    },
+    {
+      "id": "i1IDh_ZoJgI",
+      "title": "Alag Aasmaan",
+      "artist": "Anuv Jain",
+      "thumbnail": "https://yt3.googleusercontent.com/XSFFKq9eWgpI4jKsD7luwyqpCgAYkIapEAV-92HNIoOrFj7KfTySAmr8n0s_LJMXfDQFS370iVxN7fXg=w120-h120-l90-rj"
+    },
+    {
+      "id": "5Y6x1UHCpJk",
+      "title": "Riha",
+      "artist": "Anuv Jain",
+      "thumbnail": "https://yt3.googleusercontent.com/ZsllsAFZHhmHIkz9KUXbbY54eG87-o-ySKWsTdbF5zNELXbI28MuHUlC1kqwojMprTSusiTP-7Ui4hjA=w120-h120-l90-rj"
+    },
+    {
+      "id": "79Yc9gN3TPM",
+      "title": "Aaoge Tum Kabhi",
+      "artist": "The Local Train",
+      "thumbnail": "https://yt3.googleusercontent.com/FOWVxykYND0FkmVvjkxwvP3t8EQtJi3dg1obE2c1MfhFLmbUwbfzGYOKF3VDSKXs-MZNiYUxPCskzucI=w120-h120-l90-rj"
+    },
+    {
+      "id": "opwZ_PJ-F_E",
+      "title": "Choo Lo",
+      "artist": "The Local Train",
+      "thumbnail": "https://yt3.googleusercontent.com/FOWVxykYND0FkmVvjkxwvP3t8EQtJi3dg1obE2c1MfhFLmbUwbfzGYOKF3VDSKXs-MZNiYUxPCskzucI=w120-h120-l90-rj"
+    },
+    {
+      "id": "-BJt4fCAtZE",
+      "title": "Arz Kiya Hai | Coke Studio Bharat",
+      "artist": "Anuv Jain",
+      "thumbnail": "https://yt3.googleusercontent.com/D8zrTH1RKP2TDB_Zg60FO9CLeb8WehGyT7wnSKjc0cXEwgt9AYcRuWWIg3UMkmIZJsO2SMOg6l1J8bV-=w120-h120-l90-rj"
+    },
+    {
+      "id": "k8bXbFBItgI",
+      "title": "Sajde (From \"Lost;Found\")",
+      "artist": "Faheem Abdullah, Huzaif Nazar",
+      "thumbnail": "https://yt3.googleusercontent.com/RifEUhIwW91Kp-cOz7-5xJfkRswdYtsJb_oMtKx7gLP0-9eztF8TTcLBGJRmEfj8X3T_Upe7ASoE5ejHGg=w120-h120-l90-rj"
+    },
+    {
+      "id": "XFOVXD1qttc",
+      "title": "Suniyan Suniyan",
+      "artist": "Juss, Mixsingh",
+      "thumbnail": "https://yt3.googleusercontent.com/1Rik9Jho_LZKBUiUnxR3h8oLhdquioSjV397tkNe66_PK7zbehd1Hy7ZAX25OebqXuTjj4bl0kFGBc_M=w120-h120-l90-rj"
+    },
+    {
+      "id": "GHTg-EzUr4M",
+      "title": "Aaftaab",
+      "artist": "The Local Train",
+      "thumbnail": "https://yt3.googleusercontent.com/bJksi9-eR3JAjIYce3fLz3NMX-lNvU-xhQXRrPLfFTqeN58sJLr-m5dzeFVI0qvTy_r-eQcUaYemz2iKgw=w120-h120-l90-rj"
+    },
+    {
+      "id": "J7p4bzqLvCw",
+      "title": "Blinding Lights",
+      "artist": "The Weeknd",
+      "thumbnail": "https://yt3.googleusercontent.com/R_cjQK3wwLPEzri1jerx-79zgzGocoKvwGU3NMONaTsaMM0Idd641pfB8r5jgfpn6I8JAoFtf9RBIcI=w120-h120-l90-rj"
+    },
+    {
+      "id": "DlFXDl_ROAM",
+      "title": "Die With A Smile",
+      "artist": "Lady Gaga, Bruno Mars",
+      "thumbnail": "https://yt3.googleusercontent.com/RFK4wHeGqwI3DndbARbRJB21IC0TcmqnrlyjxYK7T-nC8wlIVbfxNaCIFKNvSpchDKmYyVLe1RN36w=w120-h120-l90-rj"
+    },
+    {
+      "id": "DiTd771WumE",
+      "title": "APT.",
+      "artist": "ROSÉ, Bruno Mars",
+      "thumbnail": "https://yt3.googleusercontent.com/-MtYkhdYuOvj8YWHA4afh-OUYMYHNpBpkk047QgGAxLJMLE570Pj0-LQjA2PW1ltedqTusKOjzXvuS8=w120-h120-l90-rj"
+    },
+    {
+      "id": "WKZO-CWeOVA",
+      "title": "BIRDS OF A FEATHER",
+      "artist": "Billie Eilish",
+      "thumbnail": "https://yt3.googleusercontent.com/mXJjWX4E6Gpr03CUYl18PdVXlczmoL2Tm-LEBGafIr_8smlHnl8AHniJu0_7Y80e-aeloJxcryQQx0ZJ=w120-h120-l90-rj"
+    },
+    {
+      "id": "kIft-LUHHVA",
+      "title": "Espresso",
+      "artist": "Sabrina Carpenter",
+      "thumbnail": "https://yt3.googleusercontent.com/bTWlZSenrOAYgH4r6NAzyDraWQR_wLl3OuRexJ_8h3NZUVHEilRSzUmKNa9YMOFSVcF0YtOuzKdXrt2UHg=w120-h120-l90-rj"
+    },
+    {
+      "id": "aC9HkZW2hZk",
+      "title": "Cruel Summer",
+      "artist": "Taylor Swift",
+      "thumbnail": "https://yt3.googleusercontent.com/OhxDTHQOQzSrcdgH9hzqzp1v22GYDE-QKnkryvCeq4ddx-3K3_c8oDXN0E6NvHlMn1q4XV59aHr0oL4f=w120-h120-l90-rj"
+    },
+    {
+      "id": "xTvyyoF_LZY",
+      "title": "Shape of You",
+      "artist": "Ed Sheeran",
+      "thumbnail": "https://yt3.googleusercontent.com/TMbA3LImAL96nFkm5cI1x6LiEMvMbRg4IRxEeABd9qpXsfmwKhZHRD1MucnjG5QIsVEp0Vpn7h7M51FH3Q=w120-h120-l90-rj"
+    },
+    {
+      "id": "ORrFJ63nlcA",
+      "title": "Perfect",
+      "artist": "Ed Sheeran",
+      "thumbnail": "https://yt3.googleusercontent.com/xpDEOr2TeqEn1QpXosXhqtj149FzNnTgAG3oqPnpTxTbQk-oceO90Sz4Axq0s4Jp_QLGQha_um6_EG3WGQ=w120-h120-l90-rj"
+    },
+    {
+      "id": "XfEMj-z3TtA",
+      "title": "STAY",
+      "artist": "The Kid LAROI, Justin Bieber",
+      "thumbnail": "https://yt3.googleusercontent.com/_72AYxGc5r6U2SwbDvo8qLTx0wLp1bxRAQTSWNZfeZOdP2zf6yHjIAzTZCFILrbz3AvxHqHJdqde56Y=w120-h120-l90-rj"
+    },
+    {
+      "id": "3_g2un5M350",
+      "title": "Starboy (feat. Daft Punk)",
+      "artist": "The Weeknd",
+      "thumbnail": "https://yt3.googleusercontent.com/dcxXIIlest09vnvKznWM9VWQXu1EL7lKxBzXGzwgmVjmMNBm1dEWT_0qn1xrEZYyKF_qRE1TLq8P_JY_mQ=w120-h120-l90-rj"
+    },
+    {
+      "id": "HaEYUJ2aRHs",
+      "title": "Dynamite",
+      "artist": "BTS",
+      "thumbnail": "https://yt3.googleusercontent.com/n1-pqG9jYCHqxiSSq7DORgk10PCS7vyMX5VX0o0HoPwEEIZM5pamJAFIDOHqo7Hl27hJ9YvqTahya3Fg=w120-h120-l90-rj"
+    },
+    {
+      "id": "NNCBq0JHXsU",
+      "title": "Butter",
+      "artist": "BTS",
+      "thumbnail": "https://yt3.googleusercontent.com/DZLnUlmagZUyAJPBvh1Jlf_ER26uxSDwzv2-SXzU3JZAyrWVeRTVE4GEKFsmCIKk8E2ISKmsghaaCSw3=w120-h120-l90-rj"
+    },
+    {
+      "id": "5McUFZz2s-w",
+      "title": "Seven - Explicit Ver. (feat. Latto)",
+      "artist": "Jung Kook",
+      "thumbnail": "https://yt3.googleusercontent.com/6HM8d1d7o2RDgf17Qi-T_XWgOAE8eOxYRWTVmAMxjdKjQ0vzq5rn4zQt1QkGW4fCNEGJifJ50Kboozkj=w120-h120-l90-rj"
+    },
+    {
+      "id": "8mA6jIeojnk",
+      "title": "How You Like That",
+      "artist": "BLACKPINK",
+      "thumbnail": "https://yt3.googleusercontent.com/LtzwLew9W3Igam672B19Vp7Kotr_tjTSkEY4L4DNjAvIkfLOxs34jYaAUJ3cCd5SUIzHwJfPyDIlHl_N=w120-h120-l90-rj"
+    },
+    {
+      "id": "HBqH4uJS0PU",
+      "title": "Magnetic",
+      "artist": "ILLIT",
+      "thumbnail": "https://yt3.googleusercontent.com/vSYEILsfvGwSZU3PuZPU15DX0FRHcWbDnei-30-ZKQmg5XM9QKlL2BpwF9Obuvls9H3YEAMaqcusetE=w120-h120-l90-rj"
+    },
+    {
+      "id": "DsjRNPrvq6U",
+      "title": "Hukum - Thalaivar Alappara - Tamil (From \"Jailer\")",
+      "artist": "Anirudh Ravichander, Super Subu",
+      "thumbnail": "https://yt3.googleusercontent.com/ygk5Xlec3rG3BKuzYerG4vGSMdWvFg3-Izm7H3wjZtW1RnJu2cx4dPh6Lo2ZSCy4iGzzolwuR9TTHIQ=w120-h120-l90-rj"
+    },
+    {
+      "id": "5XthUghC2Po",
+      "title": "Vikram (Title Track)",
+      "artist": "Anirudh Ravichander",
+      "thumbnail": "https://yt3.googleusercontent.com/LcSQ14ggv7JhGWikgTRHfxsCZyvFx6SoMXhI44kD5WlB-p1JgNt5aCslLC_CpfW-Fouj1S1tGKSkiHgp=w120-h120-l90-rj"
+    },
+    {
+      "id": "9nRvqemGydw",
+      "title": "Arabic Kuthu - Halamithi Habibo (From \"Beast\")",
+      "artist": "Anirudh Ravichander, Jonita Gandhi",
+      "thumbnail": "https://yt3.googleusercontent.com/O4RhrlnxH-04BkiZEGih1ZfpkRwsbF4gsF-fGJL0jUactIoK732grGn3FWbKdhTqkBvRK9Hvw2riIetI=w120-h120-l90-rj"
+    },
+    {
+      "id": "hwfk5_50qJ4",
+      "title": "Rowdy Baby",
+      "artist": "Dhanush, Dhee, Yuvan Shankar Raja",
+      "thumbnail": "https://yt3.googleusercontent.com/LDnGM7dnRsMAI4EM-AK4n-wR5hYTEIKXdsw-m0X-QdA-o9I_-u48xyJDRFHX2aZ2s-W3_6BstPBoFp4=w120-h120-l90-rj"
+    },
+    {
+      "id": "_ZTgLLePqxs",
+      "title": "Fear Song",
+      "artist": "Anirudh Ravichander",
+      "thumbnail": "https://yt3.googleusercontent.com/IUv04nodzvmgrok70A5QLxPEEl2RClnTqrPCcQtPO2iXzJ1lkL1IFrlhvBxC2AYGb0Qn0VHgiCy109EcSw=w120-h120-l90-rj"
+    }
+  ]
+}

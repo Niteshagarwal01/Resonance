@@ -1,26 +1,63 @@
 import { useState, useEffect } from "react";
-import { searchMusic, getHomeMixes, getCharts, Track, searchArtists } from "@/lib/api";
+import { searchMusic, getHomeMixes, getCharts, Track, searchArtists, getHomeShelves, searchAlbums, getRadioQueue } from "@/lib/api";
+import { computeEvolvedDNA, generateLiveVibe } from "@/lib/vibeGenerator";
 import { createClient } from "@/utils/supabase/client";
+import onboardingData from "@/lib/onboardingData.json";
+
+let feedCache: any = null;
+let lastFetchTime = 0;
+const CACHE_TTL = 3 * 60 * 1000;
 
 export function useDashboardFeeds() {
   const supabase = createClient();
-  const [loading, setLoading] = useState(true);
+  const isCacheValid = feedCache !== null && (Date.now() - lastFetchTime < CACHE_TTL);
+
+  const [loading, setLoading] = useState(!isCacheValid);
+  
+  // Expose errors so UI can handle silent failures
+  const [feedErrors, setFeedErrors] = useState<Record<string, string>>({});
+
+  const recordError = (key: string, error: any) => {
+    console.error(`[DashboardFeed] Error loading ${key}:`, error);
+    setFeedErrors(prev => ({ ...prev, [key]: error?.message || String(error) }));
+  };
 
   // User State
-  const [userProfile, setUserProfile] = useState<any>(null);
-  const [userDna, setUserDna] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<any>(isCacheValid ? feedCache.userProfile : null);
+  const [userDna, setUserDna] = useState<any>(isCacheValid ? feedCache.userDna : null);
 
   // Feed State
-  const [recentlyPlayed, setRecentlyPlayed] = useState<Track[]>([]);
-  const [jumpBackIn, setJumpBackIn] = useState<Track[]>([]);
-  const [curatedForYou, setCuratedForYou] = useState<Track[]>([]);
-  const [yourTopMixes, setYourTopMixes] = useState<Track[]>([]);
-  const [trendingNow, setTrendingNow] = useState<Track[]>([]);
-  const [freshDrops, setFreshDrops] = useState<Track[]>([]);
-  const [popularArtists, setPopularArtists] = useState<any[]>([]);
+  const [recentlyPlayed, setRecentlyPlayed] = useState<Track[]>(isCacheValid ? feedCache.recentlyPlayed : []);
+  const [jumpBackIn, setJumpBackIn] = useState<Track[]>(isCacheValid ? feedCache.jumpBackIn : []);
+  const [curatedForYou, setCuratedForYou] = useState<Track[]>(isCacheValid ? feedCache.curatedForYou : []);
+  const [yourTopMixes, setYourTopMixes] = useState<Track[]>(isCacheValid ? feedCache.yourTopMixes : []);
+  const [trendingNow, setTrendingNow] = useState<Track[]>(isCacheValid ? feedCache.trendingNow : []);
+  const [freshDrops, setFreshDrops] = useState<Track[]>(isCacheValid ? feedCache.freshDrops : []);
+  const [popularArtists, setPopularArtists] = useState<any[]>(isCacheValid ? feedCache.popularArtists : []);
+  const [editorsPicks, setEditorsPicks] = useState<Track[]>(isCacheValid ? feedCache.editorsPicks : []);
+  const [popularAlbums, setPopularAlbums] = useState<any[]>(isCacheValid ? feedCache.popularAlbums : []);
+  const [trendingInGenre, setTrendingInGenre] = useState<Track[]>(isCacheValid ? feedCache.trendingInGenre : []);
+  
   const [vibeLoading, setVibeLoading] = useState(false);
 
+  // Sync cache on updates (always keep cache up to date with latest fetched data)
   useEffect(() => {
+    feedCache = {
+      userProfile, userDna, recentlyPlayed, jumpBackIn, curatedForYou,
+      yourTopMixes, trendingNow, freshDrops, popularArtists, editorsPicks,
+      popularAlbums, trendingInGenre
+    };
+  }, [userProfile, userDna, recentlyPlayed, jumpBackIn, curatedForYou, yourTopMixes, trendingNow, freshDrops, popularArtists, editorsPicks, popularAlbums, trendingInGenre]);
+
+  // Helper to safely extract artist name
+  const getArtistName = (artistObj: any) => {
+    if (!artistObj) return "";
+    return typeof artistObj === 'object' ? artistObj.name : String(artistObj);
+  };
+
+  useEffect(() => {
+    if (isCacheValid) return;
+
     async function loadData() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -28,7 +65,7 @@ export function useDashboardFeeds() {
         let localUserDna: any = null;
         let localRecentlyPlayed: Track[] = [];
 
-        // 1. Fetch User Data (Profile, DNA, History)
+        // 1. Fetch User Data
         if (session) {
           const [profileRes, dnaRes, historyRes] = await Promise.allSettled([
             supabase.from("profiles").select("*").eq("id", session.user.id).single(),
@@ -58,62 +95,177 @@ export function useDashboardFeeds() {
           }
         }
 
-        // 2. Fetch DNA Vibe Mix
-        if (localUserDna) {
-          setVibeLoading(true);
-          getHomeMixes().then(vibe => {
+        // 2. Fetch DNA Vibe Mix (Taste DNA 40-Song Mix)
+        setVibeLoading(true);
+        const dnaLogic = computeEvolvedDNA(localUserDna, localRecentlyPlayed);
+        generateLiveVibe(localUserDna, localRecentlyPlayed, dnaLogic.evolvedArtists, dnaLogic.evolvedGenres)
+          .then(vibe => {
             if (vibe && vibe.length > 0) {
               setCuratedForYou(vibe);
-              setYourTopMixes(vibe.slice(15, 30));
             }
-          }).catch(console.error).finally(() => setVibeLoading(false));
-        } else {
-          getHomeMixes().then(vibe => {
-            if (vibe && vibe.length > 0) {
-              setCuratedForYou(vibe);
-              setYourTopMixes(vibe.slice(15, 30));
-            }
-          }).catch(console.error);
-        }
+          })
+          .catch(err => recordError("curatedForYou", err))
+          .finally(() => setVibeLoading(false));
 
-        // 3. Fetch Generic Home Feeds
-        const genre2 = localUserDna?.top_genres?.[1] || "desi hip hop";
+        // Setup DNA defaults
+        const topGenre = localUserDna?.top_genres?.[0] || "Pop";
+        const topArtistObj1 = localUserDna?.top_artists?.[0];
+        const topArtistObj2 = localUserDna?.top_artists?.[1];
+        const topSongObj1 = localUserDna?.top_songs?.[0];
+        const topSongObj2 = localUserDna?.top_songs?.[1];
+
+        const artist1 = getArtistName(topArtistObj1) || "Arijit Singh";
+        const artist2 = getArtistName(topArtistObj2) || "Taylor Swift";
+
+        // 3. Iconic Artists (Mixed & Shuffled)
+        searchArtists(artist1)
+          .then(async (apiArtists) => {
+            const baseArtists = [...onboardingData.artists];
+            for (let i = baseArtists.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [baseArtists[i], baseArtists[j]] = [baseArtists[j], baseArtists[i]];
+            }
+            
+            let combined = [...(apiArtists.slice(0, 3)), ...baseArtists].slice(0, 15);
+            combined = Array.from(new Map(combined.map(item => [item.id, item])).values());
+            
+            for (let i = combined.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [combined[i], combined[j]] = [combined[j], combined[i]];
+            }
+            setPopularArtists(combined.slice(0, 60));
+          })
+          .catch(err => recordError("popularArtists", err));
+
+        // 4. Editor's Picks & Trending Right Now (Global Mixed Ratio Algorithm)
+        Promise.all([
+          searchMusic("top trending global hit songs"),
+          searchMusic("top trending kpop songs"),
+          searchMusic("top trending bollywood hit songs"),
+          searchMusic("top trending south indian hits"),
+          searchMusic("top trending desi hip hop indie hit songs")
+        ]).then(results => {
+          const [enRes, kpRes, boRes, soRes, dhRes] = results;
+          const trendingMix = [
+            ...(enRes?.songs?.slice(0, 20) || []),
+            ...(kpRes?.songs?.slice(0, 10) || []),
+            ...(boRes?.songs?.slice(0, 25) || []),
+            ...(soRes?.songs?.slice(0, 10) || []),
+            ...(dhRes?.songs?.slice(0, 10) || [])
+          ];
+          // Shuffle Trending Mix
+          for (let i = trendingMix.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [trendingMix[i], trendingMix[j]] = [trendingMix[j], trendingMix[i]];
+          }
+          setTrendingNow(trendingMix);
+
+          // Editor's Picks
+          getCharts("IN").then(charts => {
+            const topCharts = charts.slice(0, 10);
+            const onboardSongs = [...onboardingData.songs];
+            for (let i = onboardSongs.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [onboardSongs[i], onboardSongs[j]] = [onboardSongs[j], onboardSongs[i]];
+            }
+            const mixedPicks = [...topCharts, ...onboardSongs.slice(0, 30)];
+            for (let i = mixedPicks.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [mixedPicks[i], mixedPicks[j]] = [mixedPicks[j], mixedPicks[i]];
+            }
+            setEditorsPicks(mixedPicks.slice(0, 60));
+          }).catch(err => recordError("editorsPicks", err));
+        }).catch(err => recordError("trendingNow", err));
+
+        // 5. Popular Albums & EPs (Dynamic DNA Focused)
+        Promise.allSettled([
+          searchAlbums(`best hit albums by ${artist1}`),
+          searchAlbums(`best hit albums by ${artist2}`),
+          searchAlbums(`top trending new indian bollywood albums`),
+          searchAlbums(`latest hit indian punjabi albums`)
+        ]).then(results => {
+          let mixed: any[] = [];
+          results.forEach(res => {
+            if (res.status === 'fulfilled' && res.value) {
+              mixed = [...mixed, ...res.value];
+            }
+          });
+          
+          // Remove duplicates by ID or title
+          const unique = Array.from(new Map(mixed.map(item => [item.id || item.title, item])).values());
+          
+          // Shuffle the array to ensure a good mix of the artists and trending albums
+          for (let i = unique.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [unique[i], unique[j]] = [unique[j], unique[i]];
+          }
+          
+          setPopularAlbums(unique.slice(0, 60));
+        }).catch(err => recordError("popularAlbums", err));
+
+        // 6. Trending in [Your Top Genre]
+        searchMusic(`top trending ${topGenre} songs`)
+          .then(async res => {
+             let finalRes = res?.songs || [];
+             if (finalRes.length < 25) {
+                const fb = await searchMusic(`top trending indian hit songs`).catch(() => null);
+                finalRes = [...finalRes, ...(fb?.songs || [])];
+             }
+             setTrendingInGenre(finalRes.slice(0, 60));
+          })
+          .catch(err => recordError("trendingInGenre", err));
+
+        // 7. Fresh Drops (DNA-Powered)
+        searchMusic(`latest ${topGenre} new songs`)
+          .then(async res => {
+             let finalRes = res?.songs || [];
+             if (finalRes.length < 25) {
+                const fb = await searchMusic(`latest new indian hit songs`).catch(() => null);
+                finalRes = [...finalRes, ...(fb?.songs || [])];
+             }
+             setFreshDrops(finalRes.slice(0, 60));
+          })
+          .catch(err => recordError("freshDrops", err));
+
+        // 8. Your Top Mixes (Based on 2nd and 3rd DNA songs)
+        const seed2 = typeof topSongObj1 === 'object' ? topSongObj1.id : null;
         
-        const [trendingRes, newRes] = await Promise.allSettled([
-          getCharts("IN"),
-          searchMusic(`latest ${genre2} new releases`),
-        ]);
-
-        if (trendingRes.status === "fulfilled" && trendingRes.value) {
-          setTrendingNow(trendingRes.value);
+        if (seed2) {
+          getRadioQueue(seed2)
+            .then(async queue => {
+               let finalQueue = queue || [];
+               if (finalQueue.length < 25) {
+                  const m = await getHomeMixes().catch(() => []);
+                  finalQueue = [...finalQueue, ...m];
+               }
+               setYourTopMixes(finalQueue.slice(0, 60));
+            })
+            .catch(async err => {
+              recordError("yourTopMixes", err);
+              // Fallback
+              const m = await getHomeMixes().catch(() => []);
+              setYourTopMixes(m.slice(0, 60));
+            });
+        } else {
+          getHomeMixes().then(m => setYourTopMixes(m.slice(0, 60))).catch(err => recordError("yourTopMixes", err));
         }
-        if (newRes.status === "fulfilled" && newRes.value && newRes.value.songs) {
-          setFreshDrops(newRes.value.songs);
-        }
 
-        // 4. Fetch Real Data for Iconic Artists
-        const POPULAR_ARTIST_NAMES = ["Arijit Singh", "Shreya Ghoshal", "AR Rahman", "Diljit Dosanjh", "Karan Aujla", "Pritam", "Anirudh Ravichander", "Badshah"];
-        Promise.allSettled(
-          POPULAR_ARTIST_NAMES.map(name => searchArtists(name).then(res => res[0]))
-        ).then(results => {
-          const artists = results
-            .filter((r): r is PromiseFulfilledResult<any> => r.status === 'fulfilled' && !!r.value)
-            .map(r => r.value);
-          setPopularArtists(artists);
-        });
+        // Only update lastFetchTime after a successful fetch of the core sections
+        lastFetchTime = Date.now();
 
       } catch (err) {
-        console.error("Error loading dashboard data:", err);
+        console.error("Dashboard fetch error:", err);
       } finally {
         setLoading(false);
       }
     }
 
     loadData();
-  }, [supabase]);
+  }, [isCacheValid]);
 
   return {
     loading,
+    feedErrors,
     userProfile,
     userDna,
     recentlyPlayed,
@@ -121,6 +273,9 @@ export function useDashboardFeeds() {
     jumpBackIn,
     setJumpBackIn,
     curatedForYou,
+    editorsPicks,
+    popularAlbums,
+    trendingInGenre,
     yourTopMixes,
     trendingNow,
     freshDrops,
