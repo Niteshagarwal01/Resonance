@@ -1,9 +1,9 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/Niteshagarwal01/Resonance/main/frontend/public/icon.png" alt="Resonance Logo" width="120" height="120" />
+  <img src="frontend/public/logofiles/main-logo.png" alt="Resonance Logo" width="350" />
   
   <h1 align="center">Resonance</h1>
   <p align="center">
-    <strong>An open-source, beautifully designed social music player built with Next.js & Supabase.</strong>
+    <strong>An open-source, beautifully designed social music player powered by YouTube Music & Supabase.</strong>
   </p>
 
   <p align="center">
@@ -15,27 +15,48 @@
 
 <br />
 
-> **Note**: Resonance utilizes `ytmusicapi` to tap into the 100M+ song catalog of YouTube Music. No DRM. No premium subscriptions required. 100% open platform.
+> **Note**: Resonance utilizes the `ytmusicapi` to tap into the 100M+ song catalog of YouTube Music. No DRM. No premium subscriptions required. 100% open platform.
 
-## ✨ Features
+## ✨ Key Features
 
-- 🧬 **Taste DNA:** An evolving algorithm that learns your sonic identity based on your listening history and dynamically generates personalized *Vibe Mixes*.
-- 📻 **Live Jam Sessions:** Host or join live music rooms. Sync playback state in real-time with other users via Supabase WebSockets. Like Discord's "Listening Party".
-- 💬 **Ephemeral Global Chat:** Discuss music drops in live community rooms. Messages disappear after 24 hours.
-- 🎨 **Extremely Premium UI:** Built with TailwindCSS and Framer Motion for a fluid, glassmorphic, micro-animated user experience.
-- 📚 **Full Library Management:** Create custom playlists, like songs, and track your listening history. 
+- 🧬 **Taste DNA & Hyper-Personalization:** An evolving algorithm that learns your sonic identity based on your onboarding choices and listening history, instantly curating your dashboard to your unique vibe.
+- 🌍 **Massive Discover Engine:** A robust, tabbed exploration system featuring 40+ dynamic shelves (from *Underground Hip Hop* to *Viral TikTok Hits*) designed to help you find your next obsession.
+- 📻 **Live Jam Sessions & Community:** Host or join live music rooms. Sync playback state in real-time with other users via Supabase WebSockets. Share tracks and chat globally.
+- 🎨 **Extremely Premium UI:** Built with TailwindCSS and Framer Motion for a fluid, glassmorphic, micro-animated user experience. Massive horizontal shelves, glowing shadows, and seamless routing.
+- 📚 **Full Library Management:** Create custom playlists, like songs, follow artists, and track your listening history.
+- ⚡ **Infinite Auto-Play:** The music never stops. Our dynamic Radio algorithm fetches context-aware tracks infinitely based on the current song's seed.
+
+---
+
+## 📸 Screenshots
+*(Coming soon! Feel free to open a PR with high-quality screenshots of the app running locally!)*
+<div align="center">
+  <img src="frontend/public/logofiles/favappicon.png" alt="App Icon" width="100" />
+</div>
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** Next.js 14 (App Router), React, Tailwind CSS, Framer Motion, Lucide Icons.
-- **Backend/Database:** Supabase (PostgreSQL, Auth, Realtime WebSockets).
-- **Music API:** Custom Node.js bridge using `ytmusicapi` to stream audio securely and fetch metadata without API keys.
+### Frontend (Client)
+- **Framework:** Next.js 14 (App Router)
+- **Library:** React 18
+- **Styling:** Tailwind CSS + Framer Motion
+- **Icons:** Lucide React
+
+### Backend (API)
+- **Framework:** Python FastAPI
+- **Music Data:** `ytmusicapi` (Python library for YouTube Music)
+- **Database / Auth:** Supabase (PostgreSQL, Row Level Security, WebSockets)
+
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js 18+
-- A free Supabase project
+- Python 3.9+
+- A free [Supabase](https://supabase.com) project
 - Git
 
 ### Installation
@@ -46,15 +67,23 @@
    cd Resonance
    ```
 
-2. **Setup the Backend Services**
-   Navigate to the `backend` folder to start the YouTube Music API wrapper:
+2. **Setup the Python Backend (FastAPI)**
+   The backend acts as a bridge to securely stream audio and fetch metadata from YouTube Music.
    ```bash
    cd backend
-   npm install
-   npm run start
+   
+   # Create a virtual environment (optional but recommended)
+   python -m venv venv
+   source venv/bin/activate  # On Windows use: venv\Scripts\activate
+   
+   # Install dependencies
+   pip install -r requirements.txt
+   
+   # Start the FastAPI server
+   uvicorn main:app --reload --port 8000
    ```
 
-3. **Setup the Frontend**
+3. **Setup the Next.js Frontend**
    Open a new terminal window and navigate to the `frontend` folder:
    ```bash
    cd frontend
@@ -62,20 +91,29 @@
    ```
 
 4. **Environment Variables**
-   Create a `.env.local` file in the `frontend` directory and add your Supabase keys:
+   Create a `.env.local` file in the `frontend` directory and add your Supabase credentials, as well as the local API URL:
    ```env
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
    ```
 
-5. **Run the Migrations**
-   Copy the SQL scripts located in `backend/migrations/` and run them in your Supabase SQL Editor to create the required tables (`profiles`, `taste_dna`, `playlists`, `chat_messages`, etc).
+5. **Run the Database Migrations**
+   You can push the database schema to your Supabase project by copying the SQL files (if available) into the Supabase SQL Editor, or by running:
+   ```bash
+   cd backend
+   python seed.py
+   ```
+   *(Ensure you have configured your database connection strings in the backend `.env` file first if using scripts).*
 
 6. **Start the Development Server**
    ```bash
+   cd frontend
    npm run dev
    ```
-   Open [http://localhost:3000](http://localhost:3000) to view Resonance in your browser.
+   Open [http://localhost:3000](http://localhost:3000) to view Resonance in your browser!
+
+---
 
 ## 🤝 Contributing
 Resonance is open-source and built for the community. Contributions, issues, and feature requests are always welcome! 
@@ -85,6 +123,8 @@ Resonance is open-source and built for the community. Contributions, issues, and
 3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
+
+---
 
 ## 📄 License
 This project is open-sourced under the MIT License. See the `LICENSE` file for more details.
