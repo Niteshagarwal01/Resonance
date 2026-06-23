@@ -380,5 +380,5 @@ A massive thank you to:
 <div align="center">
   <br/>
   <p>Built with ❤️ by <a href="https://github.com/Niteshagarwal01">Niteshagarwal01</a> and contributors.</p>
-  <img src="https://raw.githubusercontent.com/Niteshagarwal01/Resonance/main/frontend/public/logofiles/main-logo.png" alt="Resonance Footer" width="150" />
+
 </div>
