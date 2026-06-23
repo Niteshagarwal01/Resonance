@@ -117,5 +117,9 @@ class YTMusicService:
         return await YTMusicService.run_with_cache(f"charts:{country}", ytmusic.get_charts, country=country)
 
     @staticmethod
+    async def get_explore():
+        return await YTMusicService.run_with_cache("explore", ytmusic.get_explore)
+
+    @staticmethod
     async def get_mood_categories():
         return await YTMusicService.run_with_cache("moods", ytmusic.get_mood_categories)

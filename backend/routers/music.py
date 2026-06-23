@@ -89,6 +89,24 @@ async def search_artists(q: str = Query(..., min_length=1)):
         })
     return {"results": formatted}
 
+@router.get("/search/songs")
+async def search_songs(q: str = Query(..., min_length=1)):
+    raw_results = await YTMusicService.search(q, filter_type="songs", limit=40)
+    formatted = []
+    for item in raw_results:
+        video_id = item.get("videoId")
+        if not video_id: continue
+        formatted.append({
+            "id": video_id,
+            "title": item.get("title", ""),
+            "artist": ", ".join(a.get("name", "") for a in item.get("artists", [])) if item.get("artists") else item.get("artist", ""),
+            "duration": Formatter.parse_duration(item.get("duration", item.get("length"))),
+            "album": item.get("album", {}).get("name") if item.get("album") else None,
+            "thumbnail": Formatter.get_thumbnail(item.get("thumbnails")),
+            "type": "song"
+        })
+    return {"results": formatted}
+
 @router.get("/search/albums")
 async def search_albums(q: str = Query(..., min_length=1)):
     raw_results = await YTMusicService.search(q, filter_type="albums", limit=40)
@@ -214,10 +232,12 @@ async def get_charts(request: Request, country: str = Query(default="IN")):
     daily = data.get("daily", [])
     if not daily:
         daily = data.get("weekly", [])
+    if not daily:
+        daily = data.get("videos", [])
         
     if daily and daily[0].get("playlistId"):
         playlist_id = daily[0]["playlistId"]
-        playlist_data = await YTMusicService.get_playlist(playlist_id, limit=20)
+        playlist_data = await YTMusicService.get_playlist(playlist_id, limit=100)
         trending = playlist_data.get("tracks", [])
     else:
         # Fallback if structure is missing
@@ -229,6 +249,28 @@ async def get_charts(request: Request, country: str = Query(default="IN")):
         if track: tracks.append(track)
     return {"tracks": tracks}
 
+@router.get("/explore/new_releases")
+@limiter.limit("60/minute")
+async def get_explore_new_releases(request: Request):
+    try:
+        data = await YTMusicService.get_explore()
+        new_releases = data.get("new_releases", [])
+        formatted = []
+        for item in new_releases:
+            browse_id = item.get("browseId")
+            if not browse_id: continue
+            formatted.append({
+                "id": browse_id,
+                "title": item.get("title", ""),
+                "artist": ", ".join(a.get("name", "") for a in item.get("artists", [])) if item.get("artists") else "",
+                "image": Formatter.get_thumbnail(item.get("thumbnails")),
+                "thumbnail": Formatter.get_thumbnail(item.get("thumbnails")),
+                "type": "album"
+            })
+        return {"albums": formatted}
+    except Exception as e:
+        return {"albums": []}
+
 @router.get("/moods")
 async def get_moods():
     categories = await YTMusicService.get_mood_categories()
@@ -237,7 +279,7 @@ async def get_moods():
 @router.get("/radio")
 @limiter.limit("60/minute")
 async def get_radio(request: Request, seed_id: str = Query(..., min_length=1)):
-    radio_queue = await YTMusicService.get_radio(seed_id, limit=50)
+    radio_queue = await YTMusicService.get_radio(seed_id, limit=100)
     tracks = []
     for item in radio_queue.get("tracks", []):
         track = Formatter.format_track(item)

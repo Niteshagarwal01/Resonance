@@ -1,25 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { usePlayer } from "@/context/PlayerContext";
-import { searchMusic, searchAlbums, searchPlaylists } from "@/lib/api";
-import { Search, Mic, Sparkles, Loader2, Music2, Play, Users, Flame, Radio, Zap, Globe, Heart, Activity, Disc } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { getHomeMixes, getCharts, getExploreNewReleases, getRadioQueue } from "@/lib/api";
+import { Search, Mic, Sparkles, Loader2, Music2, Users, Flame, Radio, Zap, Globe, Heart, Activity } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
-import { motion, AnimatePresence } from "framer-motion";
-import { ShelfRow } from "@/components/ShelfRow";
 import { useRouter } from "next/navigation";
+import { LazyShelfRow } from "@/components/LazyShelfRow";
 
-// TABS DEFINITION
 const TABS = [
   { id: "for-you", label: "For You", icon: <Heart size={16} /> },
   { id: "trending", label: "Trending Now", icon: <Flame size={16} /> },
   { id: "new-releases", label: "New Releases", icon: <Sparkles size={16} /> },
-  { id: "lab", label: "Discovery Lab", icon: <Zap size={16} /> },
-  { id: "mood", label: "Explore By Mood", icon: <Activity size={16} /> },
-  { id: "genre", label: "Explore By Genre", icon: <Music2 size={16} /> },
-  { id: "taste", label: "Taste Expansion", icon: <Globe size={16} /> },
-  { id: "ai", label: "AI Discovery", icon: <Radio size={16} /> },
-  { id: "community", label: "Community", icon: <Users size={16} /> }
+  { id: "hip-hop", label: "Hip Hop & RnB", icon: <Music2 size={16} /> },
+  { id: "pop", label: "Pop Culture", icon: <Music2 size={16} /> },
+  { id: "electronic", label: "Electronic", icon: <Zap size={16} /> },
+  { id: "mood", label: "Mood & Vibe", icon: <Activity size={16} /> },
+  { id: "underground", label: "Underground", icon: <Radio size={16} /> },
+  { id: "global", label: "Global Taste", icon: <Globe size={16} /> },
+  { id: "ai", label: "AI Discovery", icon: <Users size={16} /> }
 ];
 
 export default function DiscoverPage() {
@@ -27,13 +25,18 @@ export default function DiscoverPage() {
   const supabase = createClient();
   const [activeTab, setActiveTab] = useState("for-you");
   const [searchQuery, setSearchQuery] = useState("");
-  
-  // Data States
-  const [tabData, setTabData] = useState<Record<string, { title: string, tracks: any[], type?: "tracks" | "albums" | "artists" | "playlists" }[]>>({});
-  const [loading, setLoading] = useState(false);
   const [userDna, setUserDna] = useState<any>(null);
 
-  // Load User DNA once
+  // Promise cache for batching requests across multiple sliced rows
+  const promiseCache = useRef<Record<string, Promise<any[]>>>({});
+
+  const getCachedFetch = (key: string, fetcher: () => Promise<any[]>) => {
+    if (!promiseCache.current[key]) {
+      promiseCache.current[key] = fetcher();
+    }
+    return promiseCache.current[key];
+  };
+
   useEffect(() => {
     async function loadDNA() {
       const { data: { session } } = await supabase.auth.getSession();
@@ -45,191 +48,6 @@ export default function DiscoverPage() {
     loadDNA();
   }, [supabase]);
 
-  // Handle Tab Change and Fetching
-  useEffect(() => {
-    if (tabData[activeTab]) return; // Already loaded!
-    
-    let isMounted = true;
-    
-    async function fetchTabData() {
-      setLoading(true);
-      try {
-        const topGenre = userDna?.top_genres?.[0] || "Pop";
-        const topArtist = typeof userDna?.top_artists?.[0] === 'object' ? userDna?.top_artists?.[0].name : (userDna?.top_artists?.[0] || "trending top hits");
-
-        let sections: any[] = [];
-
-        if (activeTab === "for-you") {
-          const [daily, recent] = await Promise.allSettled([
-            searchMusic(`top hit songs`),
-            searchMusic(`more like ${topArtist}`)
-          ]);
-          await new Promise(r => setTimeout(r, 200));
-          const [gems, future] = await Promise.allSettled([
-            searchMusic(`underrated indie ${topGenre} hit songs`),
-            searchMusic(`more like ${userDna?.top_songs?.[0]?.title || topArtist}`)
-          ]);
-          sections = [
-            { title: "Daily Discoveries", tracks: daily.status === 'fulfilled' ? daily.value?.songs || [] : [] },
-            { title: `Based On ${topArtist}`, tracks: recent.status === 'fulfilled' ? recent.value?.songs || [] : [] },
-            { title: `${topGenre} Hidden Gems`, tracks: gems.status === 'fulfilled' ? gems.value?.songs || [] : [] },
-            { title: `Similar to Your DNA`, tracks: future.status === 'fulfilled' ? future.value?.songs || [] : [] },
-          ];
-        } 
-        else if (activeTab === "trending") {
-          const [songs, albums] = await Promise.allSettled([
-            searchMusic(`top trending ${topGenre} global hit songs`),
-            searchAlbums(`top trending ${topGenre} hit albums`)
-          ]);
-          await new Promise(r => setTimeout(r, 200));
-          const [playlists] = await Promise.allSettled([
-            searchPlaylists(`top trending ${topGenre} hits right now`)
-          ]);
-          sections = [
-            { title: "Trending Songs", tracks: songs.status === 'fulfilled' ? songs.value?.songs || [] : [] },
-            { title: "Trending Albums", tracks: albums.status === 'fulfilled' ? albums.value || [] : [], type: "albums" },
-            { title: "Trending Playlists", tracks: playlists.status === 'fulfilled' ? playlists.value || [] : [], type: "playlists" },
-          ];
-        }
-        else if (activeTab === "new-releases") {
-          const [songs, albums] = await Promise.allSettled([
-            searchMusic(`latest new ${topGenre} hit songs`),
-            searchAlbums(`latest new ${topGenre} hit albums`)
-          ]);
-          sections = [
-            { title: "New Songs", tracks: songs.status === 'fulfilled' ? songs.value?.songs || [] : [] },
-            { title: "New Albums", tracks: albums.status === 'fulfilled' ? albums.value || [] : [], type: "albums" },
-          ];
-        }
-        else if (activeTab === "lab") {
-          const [emerging, underground] = await Promise.allSettled([
-            searchMusic(`emerging indie ${topGenre} hit songs`),
-            searchMusic(`underground hip hop indie ${topGenre} songs`)
-          ]);
-          await new Promise(r => setTimeout(r, 200));
-          const [listeners, rising] = await Promise.allSettled([
-            searchMusic(`obscure hidden gem indie ${topGenre} songs`),
-            searchMusic(`rising viral ${topGenre} songs this week`)
-          ]);
-          sections = [
-            { title: `Emerging ${topGenre} Artists`, tracks: emerging.status === 'fulfilled' ? emerging.value?.songs || [] : [] },
-            { title: `Underground ${topGenre}`, tracks: underground.status === 'fulfilled' ? underground.value?.songs || [] : [] },
-            { title: "DNA Obscure Gems", tracks: listeners.status === 'fulfilled' ? listeners.value?.songs || [] : [] },
-            { title: `Rising ${topGenre} This Week`, tracks: rising.status === 'fulfilled' ? rising.value?.songs || [] : [] },
-          ];
-        }
-        else if (activeTab === "mood") {
-          const [happy, focus] = await Promise.allSettled([
-            searchMusic(`happy upbeat ${topGenre} songs`),
-            searchMusic(`deep focus study lofi ${topGenre}`)
-          ]);
-          await new Promise(r => setTimeout(r, 200));
-          const [workout, chill] = await Promise.allSettled([
-            searchMusic(`hype high energy workout ${topGenre} ${topArtist}`),
-            searchMusic(`chill acoustic relaxing ${topArtist}`)
-          ]);
-          await new Promise(r => setTimeout(r, 200));
-          const [sleep, party] = await Promise.allSettled([
-            searchMusic(`sleep ambient relaxing ${topGenre}`),
-            searchMusic(`party dance hits ${topGenre} ${topArtist}`)
-          ]);
-          sections = [
-            { title: "Happy", tracks: happy.status === 'fulfilled' ? happy.value?.songs || [] : [] },
-            { title: "Focus", tracks: focus.status === 'fulfilled' ? focus.value?.songs || [] : [] },
-            { title: "Workout", tracks: workout.status === 'fulfilled' ? workout.value?.songs || [] : [] },
-            { title: "Chill", tracks: chill.status === 'fulfilled' ? chill.value?.songs || [] : [] },
-            { title: "Sleep", tracks: sleep.status === 'fulfilled' ? sleep.value?.songs || [] : [] },
-            { title: "Party", tracks: party.status === 'fulfilled' ? party.value?.songs || [] : [] }
-          ];
-        }
-        else if (activeTab === "genre") {
-           const genre1 = userDna?.top_genres?.[1] || "Pop";
-           const genre2 = userDna?.top_genres?.[2] || "Hip-Hop";
-           
-           const [pop, hiphop] = await Promise.allSettled([
-            searchMusic(`best ${genre1} songs`),
-            searchMusic(`best ${genre2} songs`)
-          ]);
-          await new Promise(r => setTimeout(r, 200));
-          const [indie, rock] = await Promise.allSettled([
-            searchMusic(`best indie ${topGenre} songs`),
-            searchMusic(`best rock ${topGenre} songs`)
-          ]);
-          await new Promise(r => setTimeout(r, 200));
-          const [edm, regional] = await Promise.allSettled([
-            searchMusic(`best edm dance ${topGenre} songs`),
-            searchMusic(`best regional folk songs india`)
-          ]);
-          sections = [
-            { title: genre1, tracks: pop.status === 'fulfilled' ? pop.value?.songs || [] : [] },
-            { title: genre2, tracks: hiphop.status === 'fulfilled' ? hiphop.value?.songs || [] : [] },
-            { title: `Indie ${topGenre}`, tracks: indie.status === 'fulfilled' ? indie.value?.songs || [] : [] },
-            { title: `Rock ${topGenre}`, tracks: rock.status === 'fulfilled' ? rock.value?.songs || [] : [] },
-            { title: `EDM ${topGenre}`, tracks: edm.status === 'fulfilled' ? edm.value?.songs || [] : [] },
-            { title: "Regional", tracks: regional.status === 'fulfilled' ? regional.value?.songs || [] : [] }
-          ];
-        }
-        else if (activeTab === "taste") {
-           const [similarA, similarG] = await Promise.allSettled([
-            searchMusic(`more like ${topArtist}`),
-            searchMusic(`more ${topGenre} hits`)
-          ]);
-          await new Promise(r => setTimeout(r, 200));
-          const [adjacent, outside] = await Promise.allSettled([
-            searchMusic(`experimental electronic ${topGenre} fusion`),
-            searchMusic(`global international world music hits`)
-          ]);
-          sections = [
-            { title: `Similar to ${topArtist}`, tracks: similarA.status === 'fulfilled' ? similarA.value?.songs || [] : [] },
-            { title: `More ${topGenre}`, tracks: similarG.status === 'fulfilled' ? similarG.value?.songs || [] : [] },
-            { title: "Adjacent Genres", tracks: adjacent.status === 'fulfilled' ? adjacent.value?.songs || [] : [] },
-            { title: "Outside Your Bubble", tracks: outside.status === 'fulfilled' ? outside.value?.songs || [] : [] }
-          ];
-        }
-        else if (activeTab === "ai") {
-           const [surprise, fusion, journey, rabbit] = await Promise.allSettled([
-            searchMusic(`random trending hit songs`),
-            searchMusic(`electronic classical fusion`),
-            searchMusic(`ambient cinematic journey`),
-            searchMusic(`weird obscure internet music`)
-          ]);
-          sections = [
-            { title: "Surprise Me", tracks: surprise.status === 'fulfilled' ? surprise.value?.songs || [] : [] },
-            { title: "Genre Fusion", tracks: fusion.status === 'fulfilled' ? fusion.value?.songs || [] : [] },
-            { title: "Mood Journey", tracks: journey.status === 'fulfilled' ? journey.value?.songs || [] : [] },
-            { title: "Random Rabbit Hole", tracks: rabbit.status === 'fulfilled' ? rabbit.value?.songs || [] : [] }
-          ];
-        }
-        else if (activeTab === "community") {
-           const [shared, saved, picks, discussions] = await Promise.allSettled([
-            searchMusic(`viral tiktok hits ${topGenre}`),
-            searchMusic(`most popular trending hits ${topArtist}`),
-            searchMusic(`indie viral hits ${topGenre}`),
-            searchMusic(`trending rap hip hop discussions`)
-          ]);
-          sections = [
-            { title: `Most Shared ${topGenre}`, tracks: shared.status === 'fulfilled' ? shared.value?.songs || [] : [] },
-            { title: `Most Saved ${topArtist}`, tracks: saved.status === 'fulfilled' ? saved.value?.songs || [] : [] },
-            { title: `Community ${topGenre} Picks`, tracks: picks.status === 'fulfilled' ? picks.value?.songs || [] : [] },
-            { title: "Rising Discussions", tracks: discussions.status === 'fulfilled' ? discussions.value?.songs || [] : [] }
-          ];
-        }
-
-        if (isMounted) {
-          setTabData(prev => ({ ...prev, [activeTab]: sections }));
-        }
-
-      } catch (err) {
-        console.error("Tab fetch error:", err);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
-
-    fetchTabData();
-    return () => { isMounted = false; };
-  }, [activeTab, tabData, userDna]);
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -237,56 +55,308 @@ export default function DiscoverPage() {
     }
   };
 
-  const currentData = tabData[activeTab] || [];
+  const topSongId = userDna?.top_songs?.[0]?.id || "RDAMVM";
+  const SEEDS = {
+    hiphop: "fiOpBR-4o0Q", // desi hip hop
+    pop: "51Oz0l-qR3M",    // bollywood pop hit
+    house: "aG3iwAU0LUc",  // bollywood edm
+    kpop: "ghrlZIMDzbM",   // keep global taste
+    latin: "FXovf5dsRTw",  // keep global taste
+    french: "Z7cuTnbF-2c", // keep global taste
+    party: "IlsPKUrTAwM",  // bollywood party anthem
+    lofi: "HhkyEKko868",   // hindi lofi chill
+    workout: "5x7Kks9Zscw",// indian workout
+    indie: "tNc2coVC2aw",  // indian indie
+    edm: "aG3iwAU0LUc"     // bollywood edm
+  };
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "for-you":
+        return (
+          <>
+            <LazyShelfRow key={`for-you-1`} title="Your Personalized Mixes" icon={<Heart className="text-pink-500"/>} fetchData={async () => {
+              const data = await getCachedFetch("for-you-mix", getHomeMixes);
+              return data.slice(0, 20);
+            }} />
+            <LazyShelfRow key={`for-you-2`} title="Made For Your DNA" fetchData={async () => {
+              const data = await getCachedFetch(`dna-radio-${topSongId}`, () => getRadioQueue(topSongId));
+              return data.slice(0, 20);
+            }} />
+            <LazyShelfRow key={`for-you-3`} title="Deep Cuts" fetchData={async () => {
+              const data = await getCachedFetch("for-you-mix", getHomeMixes);
+              return data.slice(20, 40);
+            }} />
+            <LazyShelfRow key={`for-you-4`} title="If You Liked Your Top Song" fetchData={async () => {
+              const data = await getCachedFetch(`dna-radio-${topSongId}`, () => getRadioQueue(topSongId));
+              return data.slice(20, 40);
+            }} />
+            <LazyShelfRow key={`for-you-5`} title="Daily Discoveries" fetchData={async () => {
+              const data = await getCachedFetch("for-you-mix", getHomeMixes);
+              return data.slice(40, 60);
+            }} />
+          </>
+        );
+
+      case "trending":
+        return (
+          <>
+            <LazyShelfRow key={`trending-1`} title="Global Top 20" icon={<Flame className="text-orange-500"/>} fetchData={async () => await getCachedFetch("chart-zz", () => getCharts("ZZ"))} />
+            <LazyShelfRow key={`trending-2`} title="US Trending" fetchData={async () => await getCachedFetch("chart-us", () => getCharts("US"))} />
+            <LazyShelfRow key={`trending-3`} title="UK Trending" fetchData={async () => await getCachedFetch("chart-gb", () => getCharts("GB"))} />
+            <LazyShelfRow key={`trending-4`} title="Emerging India" fetchData={async () => await getCachedFetch("chart-in", () => getCharts("IN"))} />
+            <LazyShelfRow key={`trending-5`} title="Viral Hits Globally" fetchData={async () => {
+              const data = await getCachedFetch("chart-zz", () => getCharts("ZZ"));
+              return data.slice().reverse();
+            }} />
+          </>
+        );
+
+      case "new-releases":
+        return (
+          <>
+            <LazyShelfRow key={`new-1`} title="Top New Releases" type="albums" icon={<Sparkles className="text-purple-500"/>} fetchData={async () => {
+              const data = await getCachedFetch("new-albums", getExploreNewReleases);
+              return data.slice(0, 20);
+            }} />
+            <LazyShelfRow key={`new-2`} title="Fresh EPs" type="albums" fetchData={async () => {
+              const data = await getCachedFetch("new-albums", getExploreNewReleases);
+              return data.slice(20, 40);
+            }} />
+            <LazyShelfRow key={`new-3`} title="Just Dropped" type="albums" fetchData={async () => {
+              const data = await getCachedFetch("new-albums", getExploreNewReleases);
+              return data.slice(40, 60);
+            }} />
+            <LazyShelfRow key={`new-4`} title="Trending Drops" type="albums" fetchData={async () => {
+              const data = await getCachedFetch("new-albums", getExploreNewReleases);
+              return data.slice(60, 80);
+            }} />
+            <LazyShelfRow key={`new-5`} title="Undiscovered Releases" type="albums" fetchData={async () => {
+              const data = await getCachedFetch("new-albums", getExploreNewReleases);
+              return data.slice(80, 100);
+            }} />
+          </>
+        );
+
+      case "hip-hop":
+        return (
+          <>
+            <LazyShelfRow key={`hh-1`} title="Rap Caviar Essentials" fetchData={async () => {
+              const data = await getCachedFetch("hiphop-radio", () => getRadioQueue(SEEDS.hiphop));
+              return data.slice(0, 20);
+            }} />
+            <LazyShelfRow key={`hh-2`} title="Trap Anthems" fetchData={async () => {
+              const data = await getCachedFetch("hiphop-radio", () => getRadioQueue(SEEDS.hiphop));
+              return data.slice(20, 40);
+            }} />
+            <LazyShelfRow key={`hh-3`} title="Lofi Beats & Rhymes" fetchData={async () => {
+              const data = await getCachedFetch("hiphop-radio", () => getRadioQueue(SEEDS.hiphop));
+              return data.slice(40, 60);
+            }} />
+            <LazyShelfRow key={`hh-4`} title="R&B Soul Elements" fetchData={async () => {
+              const data = await getCachedFetch("hiphop-radio", () => getRadioQueue(SEEDS.hiphop));
+              return data.slice(60, 80);
+            }} />
+            <LazyShelfRow key={`hh-5`} title="Underground Rap" fetchData={async () => {
+              const data = await getCachedFetch("hiphop-radio", () => getRadioQueue(SEEDS.hiphop));
+              return data.slice(80, 100);
+            }} />
+          </>
+        );
+
+      case "pop":
+        return (
+          <>
+            <LazyShelfRow key={`pop-1`} title="Global Pop Hits" fetchData={async () => {
+              const data = await getCachedFetch("pop-radio", () => getRadioQueue(SEEDS.pop));
+              return data.slice(0, 20);
+            }} />
+            <LazyShelfRow key={`pop-2`} title="Synthpop Journey" fetchData={async () => {
+              const data = await getCachedFetch("pop-radio", () => getRadioQueue(SEEDS.pop));
+              return data.slice(20, 40);
+            }} />
+            <LazyShelfRow key={`pop-3`} title="Indie Pop" fetchData={async () => {
+              const data = await getCachedFetch("pop-radio", () => getRadioQueue(SEEDS.pop));
+              return data.slice(40, 60);
+            }} />
+            <LazyShelfRow key={`pop-4`} title="Vocal Powerhouses" fetchData={async () => {
+              const data = await getCachedFetch("pop-radio", () => getRadioQueue(SEEDS.pop));
+              return data.slice(60, 80);
+            }} />
+            <LazyShelfRow key={`pop-5`} title="Acoustic Pop" fetchData={async () => {
+              const data = await getCachedFetch("pop-radio", () => getRadioQueue(SEEDS.pop));
+              return data.slice(80, 100);
+            }} />
+          </>
+        );
+
+      case "electronic":
+        return (
+          <>
+            <LazyShelfRow key={`elec-1`} title="Festival EDM" fetchData={async () => {
+              const data = await getCachedFetch("edm-radio", () => getRadioQueue(SEEDS.edm));
+              return data.slice(0, 20);
+            }} />
+            <LazyShelfRow key={`elec-2`} title="Deep House" fetchData={async () => {
+              const data = await getCachedFetch("house-radio", () => getRadioQueue(SEEDS.house));
+              return data.slice(0, 20);
+            }} />
+            <LazyShelfRow key={`elec-3`} title="Trance & Techno" fetchData={async () => {
+              const data = await getCachedFetch("edm-radio", () => getRadioQueue(SEEDS.edm));
+              return data.slice(20, 40);
+            }} />
+            <LazyShelfRow key={`elec-4`} title="Bass Drops" fetchData={async () => {
+              const data = await getCachedFetch("house-radio", () => getRadioQueue(SEEDS.house));
+              return data.slice(20, 40);
+            }} />
+            <LazyShelfRow key={`elec-5`} title="Ambient Electronic" fetchData={async () => {
+              const data = await getCachedFetch("edm-radio", () => getRadioQueue(SEEDS.edm));
+              return data.slice(40, 60);
+            }} />
+          </>
+        );
+
+      case "mood":
+        return (
+          <>
+            <LazyShelfRow key={`mood-1`} title="Chill & Focus (Lofi)" fetchData={async () => {
+              const data = await getCachedFetch("lofi-radio", () => getRadioQueue(SEEDS.lofi));
+              return data.slice(0, 20);
+            }} />
+            <LazyShelfRow key={`mood-2`} title="High Energy Workout" fetchData={async () => {
+              const data = await getCachedFetch("workout-radio", () => getRadioQueue(SEEDS.workout));
+              return data.slice(0, 20);
+            }} />
+            <LazyShelfRow key={`mood-3`} title="Late Night Drive" fetchData={async () => {
+              const data = await getCachedFetch("lofi-radio", () => getRadioQueue(SEEDS.lofi));
+              return data.slice(20, 40);
+            }} />
+            <LazyShelfRow key={`mood-4`} title="Party Mix" fetchData={async () => {
+              const data = await getCachedFetch("party-radio", () => getRadioQueue(SEEDS.party));
+              return data.slice(0, 20);
+            }} />
+            <LazyShelfRow key={`mood-5`} title="Study Session" fetchData={async () => {
+              const data = await getCachedFetch("lofi-radio", () => getRadioQueue(SEEDS.lofi));
+              return data.slice(40, 60);
+            }} />
+          </>
+        );
+
+      case "underground":
+        return (
+          <>
+            <LazyShelfRow key={`ug-1`} title="Indie Rock Darlings" fetchData={async () => {
+              const data = await getCachedFetch("indie-radio", () => getRadioQueue(SEEDS.indie));
+              return data.slice(0, 20);
+            }} />
+            <LazyShelfRow key={`ug-2`} title="Alternative Hits" fetchData={async () => {
+              const data = await getCachedFetch("indie-radio", () => getRadioQueue(SEEDS.indie));
+              return data.slice(20, 40);
+            }} />
+            <LazyShelfRow key={`ug-3`} title="Bedroom Studio" fetchData={async () => {
+              const data = await getCachedFetch("indie-radio", () => getRadioQueue(SEEDS.indie));
+              return data.slice(40, 60);
+            }} />
+            <LazyShelfRow key={`ug-4`} title="Experimental Echoes" fetchData={async () => {
+              const data = await getCachedFetch("indie-radio", () => getRadioQueue(SEEDS.indie));
+              return data.slice(60, 80);
+            }} />
+            <LazyShelfRow key={`ug-5`} title="Obscure Gems" fetchData={async () => {
+              const data = await getCachedFetch("indie-radio", () => getRadioQueue(SEEDS.indie));
+              return data.slice(80, 100);
+            }} />
+          </>
+        );
+
+      case "global":
+        return (
+          <>
+            <LazyShelfRow key={`gl-1`} title="K-Pop Bangers" fetchData={async () => {
+              const data = await getCachedFetch("kpop-radio", () => getRadioQueue(SEEDS.kpop));
+              return data.slice(0, 20);
+            }} />
+            <LazyShelfRow key={`gl-2`} title="Latin Exclusives" fetchData={async () => {
+              const data = await getCachedFetch("latin-radio", () => getRadioQueue(SEEDS.latin));
+              return data.slice(0, 20);
+            }} />
+            <LazyShelfRow key={`gl-3`} title="French Top Hits" fetchData={async () => {
+              const data = await getCachedFetch("french-radio", () => getRadioQueue(SEEDS.french));
+              return data.slice(0, 20);
+            }} />
+            <LazyShelfRow key={`gl-4`} title="Japan Top 20" fetchData={async () => await getCachedFetch("chart-jp", () => getCharts("JP"))} />
+            <LazyShelfRow key={`gl-5`} title="Global Discovery" fetchData={async () => {
+              const data = await getCachedFetch("latin-radio", () => getRadioQueue(SEEDS.latin));
+              return data.slice(20, 40);
+            }} />
+          </>
+        );
+
+      case "ai":
+        return (
+          <>
+            <LazyShelfRow key={`ai-1`} title="Surprise Me" fetchData={async () => {
+              const data = await getCachedFetch("ai-mix", getHomeMixes);
+              return data.slice(0, 20).sort(() => 0.5 - Math.random());
+            }} />
+            <LazyShelfRow key={`ai-2`} title="Algorithmic Wonders" fetchData={async () => {
+              const data = await getCachedFetch("ai-chart", () => getCharts("ZZ"));
+              return data.slice().sort(() => 0.5 - Math.random());
+            }} />
+            <LazyShelfRow key={`ai-3`} title="Community Picks" fetchData={async () => {
+              const data = await getCachedFetch("ai-mix", getHomeMixes);
+              return data.slice(20, 40).sort(() => 0.5 - Math.random());
+            }} />
+            <LazyShelfRow key={`ai-4`} title="Trending Discussions" fetchData={async () => {
+              const data = await getCachedFetch("indie-radio", () => getRadioQueue(SEEDS.indie));
+              return data.slice().sort(() => 0.5 - Math.random()).slice(0, 20);
+            }} />
+            <LazyShelfRow key={`ai-5`} title="Hidden Code" fetchData={async () => {
+              const data = await getCachedFetch("ai-mix", getHomeMixes);
+              return data.slice(40, 60).sort(() => 0.5 - Math.random());
+            }} />
+          </>
+        );
+    }
+  };
 
   return (
     <div className="pb-32 min-h-screen bg-[#FDFBF7]">
-      {/* HERO SEARCH SECTION */}
-      <div className="bg-[#1A1A1A] px-4 md:px-12 py-20 rounded-b-[3rem] shadow-2xl relative overflow-hidden">
+      <div className="bg-[#1A1A1A] px-4 md:px-12 py-20 rounded-b-[3rem] shadow-2xl relative z-10 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-[#1A1A1A] to-orange-900/30" />
         
-        <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
+        <div className="relative z-20 max-w-3xl mx-auto flex flex-col items-center">
           <h1 className="text-4xl md:text-5xl font-black text-white text-center mb-6 tracking-tight">
             Discover Your Sound
           </h1>
-          <p className="text-gray-400 text-center mb-10 text-lg max-w-xl">
-            Search across millions of songs, albums, and artists, or explore the curated categories below.
-          </p>
           
           <form onSubmit={handleSearch} className="w-full relative group">
-            <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
-              <Search className="text-gray-400 group-focus-within:text-[#FFB703] transition-colors" size={24} />
+            <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+              <Search size={22} className="text-gray-400 group-focus-within:text-[#FFB703] transition-colors" />
             </div>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="What do you want to listen to?"
-              className="w-full bg-white/10 hover:bg-white/15 focus:bg-white text-white focus:text-black placeholder-gray-400 border-2 border-white/20 focus:border-[#FFB703] rounded-full py-5 pl-16 pr-32 outline-none text-lg transition-all shadow-xl"
+              placeholder="What are you looking for?"
+              className="w-full bg-white/10 text-white placeholder-gray-400 rounded-full py-5 pl-14 pr-16 text-lg border border-white/10 focus:outline-none focus:border-[#FFB703]/50 focus:bg-white/15 transition-all shadow-inner"
             />
-            <div className="absolute inset-y-0 right-3 flex items-center gap-2">
-              <button type="button" className="p-2 hover:bg-gray-100 hover:text-black rounded-full text-gray-400 transition-colors" title="Voice Search">
-                <Mic size={20} />
-              </button>
-              <button type="submit" className="bg-[#FFB703] text-black px-6 py-2.5 rounded-full font-bold hover:bg-[#e6a500] transition-colors shadow-md">
-                Search
-              </button>
-            </div>
+            <button type="button" className="absolute inset-y-0 right-2 flex items-center px-4 text-gray-400 hover:text-white transition-colors">
+              <Mic size={20} />
+            </button>
           </form>
         </div>
       </div>
 
-      {/* TABS NAVIGATION */}
-      <div className="px-4 md:px-8 mt-10 mb-12">
-        <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-4 pt-4 px-2 -mx-2">
-          {TABS.map(tab => (
+      <div className="max-w-7xl mx-auto px-4 md:px-8 mt-8 relative z-20">
+        <div className="flex overflow-x-auto scrollbar-hide gap-3 pt-4 pb-6 mb-4 px-2">
+          {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`whitespace-nowrap px-6 py-3 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${
-                activeTab === tab.id 
-                  ? "bg-[#1A1A1A] text-white shadow-xl scale-105" 
-                  : "bg-white text-gray-500 hover:bg-gray-50 border border-gray-200 hover:border-gray-300"
+              className={`flex items-center gap-2 whitespace-nowrap px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300 ${
+                activeTab === tab.id
+                  ? "bg-[#FFB703] text-black shadow-lg scale-105"
+                  : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
               }`}
             >
               {tab.icon}
@@ -294,75 +364,10 @@ export default function DiscoverPage() {
             </button>
           ))}
         </div>
-      </div>
 
-      {/* TAB CONTENT */}
-      <div className="space-y-12 pb-12">
-        <AnimatePresence mode="wait">
-          {loading ? (
-            <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center py-32">
-              <Loader2 size={40} className="animate-spin text-[#FFB703] mb-4" />
-              <p className="text-sm font-bold tracking-widest uppercase text-gray-400">Loading {TABS.find(t=>t.id===activeTab)?.label}...</p>
-            </motion.div>
-          ) : (
-            <motion.div key={activeTab} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
-              {currentData.length > 0 ? (
-                currentData.map((section, idx) => {
-                  if (!section.tracks || section.tracks.length === 0) return null;
-                  
-                  if (section.type === "albums" || section.type === "playlists") {
-                    return (
-                      <div key={idx} className="w-full mb-12 px-4 md:px-8">
-                        <div className="flex items-center gap-2 mb-6">
-                          <Sparkles size={20} className="text-[#FFB703]" />
-                          <h2 className="text-xl md:text-2xl font-black tracking-tight text-[#1A1A1A]">{section.title}</h2>
-                        </div>
-                        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-2" style={{ scrollSnapType: "x mandatory" }}>
-                          {section.tracks.map((item: any, i: number) => {
-                            const isAlbum = section.type === "albums";
-                            const linkHref = isAlbum ? `/dashboard/album/${item.browseId || item.id}` : `/dashboard/playlist/${item.browseId || item.id}`;
-                            const imgUrl = item.thumbnail || item.thumbnails?.[0]?.url || item.image;
-                            const title = item.title || item.name;
-                            const subtitle = item.artist || item.author || "Various Artists";
-                            
-                            return (
-                              <div key={`${item.browseId || item.id}-${i}`} className="group flex-shrink-0 w-[140px] md:w-[160px] flex flex-col cursor-pointer" style={{ scrollSnapAlign: "start" }} onClick={() => router.push(linkHref)}>
-                                <div className="relative w-full aspect-square bg-gray-100 rounded-2xl overflow-hidden mb-3 shadow-sm group-hover:shadow-xl transition-all duration-300 border border-gray-100">
-                                  {imgUrl ? (
-                                    <img src={imgUrl} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                  ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                                      <Disc size={32} className="text-gray-400" />
-                                    </div>
-                                  )}
-                                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                                </div>
-                                <p className="font-bold text-[#1A1A1A] text-sm truncate group-hover:text-[#FFB703] transition-colors px-1">{title}</p>
-                                <p className="text-xs text-gray-500 truncate px-1 mt-0.5">{subtitle}</p>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <div key={idx} className="w-full mb-12">
-                      <ShelfRow 
-                        title={section.title} 
-                        icon={<Sparkles size={20} className="text-[#FFB703]" />} 
-                        tracks={section.tracks} 
-                      />
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="text-center py-32 text-gray-500 font-medium">No results found for this category.</div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <div className="min-h-[800px] space-y-12">
+          {renderTabContent()}
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { searchMusic, getHomeMixes, getCharts, Track, searchArtists, getHomeShelves, searchAlbums, getRadioQueue } from "@/lib/api";
+import { searchMusic, searchSongs, getExploreNewReleases, getHomeMixes, getCharts, Track, searchArtists, getHomeShelves, searchAlbums, getRadioQueue } from "@/lib/api";
 import { computeEvolvedDNA, generateLiveVibe } from "@/lib/vibeGenerator";
 import { createClient } from "@/utils/supabase/client";
 import onboardingData from "@/lib/onboardingData.json";
@@ -131,7 +131,7 @@ export function useDashboardFeeds() {
               [baseArtists[i], baseArtists[j]] = [baseArtists[j], baseArtists[i]];
             }
             
-            let combined = [...(apiArtists.slice(0, 10)), ...baseArtists];
+            let combined = [...(apiArtists.slice(0, 2)), ...baseArtists];
             const seenNames = new Set();
             combined = combined.filter(item => {
                 const name = item.name.toLowerCase().trim();
@@ -224,13 +224,9 @@ export function useDashboardFeeds() {
           })
           .catch(err => recordError("trendingInGenre", err));
 
-        const fetchDrops = searchSongs(`new releases ${topGenre} hits`)
+        const fetchDrops = getExploreNewReleases()
           .then(async res => {
              let finalRes = res || [];
-             if (finalRes.length < 25) {
-                const fb = await searchSongs(`latest new songs right now`).catch(() => null);
-                finalRes = [...finalRes, ...(fb || [])];
-             }
              setFreshDrops(finalRes.slice(0, 60));
           })
           .catch(err => recordError("freshDrops", err));

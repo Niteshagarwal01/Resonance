@@ -62,6 +62,12 @@ class ApiClient {
     return data.results || [];
   }
 
+  async searchSongs(query: string): Promise<any[]> {
+    if (!query) return [];
+    const data = await this.request<any>(`/search/songs?q=${encodeURIComponent(query)}`, { cache: 'no-store' });
+    return data.results || [];
+  }
+
   async getArtist(id: string): Promise<any> {
     if (!id) return null;
     return await this.request<any>(`/artist/${encodeURIComponent(id)}`, { cache: 'no-store' });
@@ -75,7 +81,7 @@ class ApiClient {
   async getRadioQueue(seedId: string): Promise<Track[]> {
     if (!seedId) return [];
     const data = await this.request<any>(`/radio?seed_id=${encodeURIComponent(seedId)}`);
-    return data.queue || [];
+    return data.results || data.queue || [];
   }
 
   async getHomeMixes(): Promise<Track[]> {
@@ -95,6 +101,11 @@ class ApiClient {
   async getHomeShelves(): Promise<HomeShelf[]> {
     const data = await this.request<any>(`/home/shelves`);
     return data.shelves || [];
+  }
+
+  async getExploreNewReleases(): Promise<any[]> {
+    const data = await this.request<any>(`/explore/new_releases`);
+    return data.albums || [];
   }
 
   async getAlbum(albumId: string): Promise<any> {
@@ -135,3 +146,5 @@ export const getHomeMixes = () => api.getHomeMixes();
 export const getAlbum = (id: string) => api.getAlbum(id);
 export const getPlaylist = (id: string) => api.getPlaylist(id);
 export const searchPlaylists = (q: string) => api.searchPlaylists(q);
+export const searchSongs = (q: string) => api.searchSongs(q);
+export const getExploreNewReleases = () => api.getExploreNewReleases();

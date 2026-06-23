@@ -3,16 +3,16 @@ import { SectionHeader } from "./SectionHeader";
 import { SafeImage as Image } from "@/components/SafeImage";
 import { Disc3 } from "lucide-react";
 
-export function PopularAlbumsRow({ albums, showMoreUrl }: { albums: any[], showMoreUrl?: string }) {
+export function PopularAlbumsRow({ title = "Popular Albums & EPs", icon = <Disc3 size={20} className="text-purple-500" />, albums, showMoreUrl, type = "album" }: { title?: string, icon?: React.ReactNode, albums: any[], showMoreUrl?: string, type?: "album" | "playlist" }) {
   if (!albums || albums.length === 0) return null;
   return (
     <section className="mb-10">
-      <SectionHeader title="Popular Albums & EPs" icon={<Disc3 size={20} className="text-purple-500" />} showMoreUrl={showMoreUrl} />
+      <SectionHeader title={title} icon={icon} showMoreUrl={showMoreUrl} />
       <div className="relative">
         <div className="flex gap-5 overflow-x-auto scrollbar-hide pb-2" style={{ scrollSnapType: "x mandatory", paddingLeft: "32px", paddingRight: "32px" }}>
           {albums.map((album, idx) => (
             <Link
-              href={`/dashboard/album/${album.browseId || album.id}`}
+              href={`/dashboard/${type}/${album.browseId || album.id}`}
               key={`${album.id || album.browseId || album.name}-${idx}`}
               className="group flex-shrink-0 w-40 flex flex-col items-start cursor-pointer"
               style={{ scrollSnapAlign: "start" }}

@@ -233,7 +233,7 @@ export default function HomePage() {
       ))}
       
       {renderSection('freshDrops', freshDrops, () => (
-        <ShelfRow title="New Releases For You" icon={<Flame size={20} className="text-red-500" />} tracks={freshDrops} showMoreUrl="/dashboard/feed/fresh" />
+        <PopularAlbumsRow title="New Releases For You" albums={freshDrops} />
       ))}
 
     </div>
