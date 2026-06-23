@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/Niteshagarwal01/Resonance/main/frontend/public/logofiles/main-logo.png" alt="Resonance Logo" width="400" />
-  
+  <img src="" alt="Resonance Logo" width="400" />
+
   <h1 align="center">Resonance</h1>
   <p align="center">
     <strong>An open-source, beautifully designed social music player powered by YouTube Music & Supabase.</strong>
@@ -17,8 +17,6 @@
     <a href="https://github.com/Niteshagarwal01/Resonance/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Niteshagarwal01/Resonance?style=for-the-badge&color=219EBC" alt="License" /></a>
   </p>
 </div>
-
-<br />
 
 > **Note**: Resonance utilizes the `ytmusicapi` to tap into the 100M+ song catalog of YouTube Music. No DRM. No premium subscriptions required. 100% open platform.
 
