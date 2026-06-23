@@ -82,9 +82,8 @@ export default function DiscoverPage() {
             searchAlbums(`top trending ${topGenre} hit albums`)
           ]);
           await new Promise(r => setTimeout(r, 200));
-          const currentYear = new Date().getFullYear();
           const [playlists] = await Promise.allSettled([
-            searchPlaylists(`top trending ${topGenre} hits ${currentYear}`)
+            searchPlaylists(`top trending ${topGenre} hits right now`)
           ]);
           sections = [
             { title: "Trending Songs", tracks: songs.status === 'fulfilled' ? songs.value?.songs || [] : [] },

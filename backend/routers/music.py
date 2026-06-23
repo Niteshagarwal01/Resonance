@@ -36,6 +36,9 @@ async def search_music(request: Request, q: str = Query(..., min_length=1)):
                 songs.append(entry)
                 
         elif r_type == "artist":
+            # Filter out fake fan pages and playlist channels
+            if not item.get("shuffleId") and not item.get("radioId"): continue
+            
             entry["id"] = item.get("browseId") or item.get("id")
             if not entry.get("id") and item.get("artists"):
                 entry["id"] = item["artists"][0].get("id")

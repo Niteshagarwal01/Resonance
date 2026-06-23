@@ -216,12 +216,11 @@ export function useDashboardFeeds() {
           })
           .catch(err => recordError("trendingInGenre", err));
 
-        const currentYear = new Date().getFullYear();
-        const fetchDrops = searchMusic(`latest ${topGenre} new songs ${currentYear}`)
+        const fetchDrops = searchMusic(`brand new latest ${topGenre} songs`)
           .then(async res => {
              let finalRes = res?.songs || [];
              if (finalRes.length < 25) {
-                const fb = await searchMusic(`latest new indian hit songs ${currentYear}`).catch(() => null);
+                const fb = await searchMusic(`latest new hit songs right now`).catch(() => null);
                 finalRes = [...finalRes, ...(fb?.songs || [])];
              }
              setFreshDrops(finalRes.slice(0, 60));
