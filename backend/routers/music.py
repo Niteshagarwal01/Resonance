@@ -93,6 +93,10 @@ async def search_albums(q: str = Query(..., min_length=1)):
     for item in raw_results:
         browse_id = item.get("browseId")
         if not browse_id: continue
+        title_lower = item.get("title", "").lower()
+        artist_lower = str(item.get("artist", "")).lower()
+        if any(x in title_lower for x in ["top 10", "top 20", "top 50", "best of", "jhankar", "lofi", "remix", "mashup", "jukebox", "hits"]): continue
+        if "various artists" in artist_lower: continue
         formatted.append({
             "id": browse_id,
             "title": item.get("title", ""),

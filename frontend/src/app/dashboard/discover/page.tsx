@@ -55,7 +55,7 @@ export default function DiscoverPage() {
       setLoading(true);
       try {
         const topGenre = userDna?.top_genres?.[0] || "Pop";
-        const topArtist = typeof userDna?.top_artists?.[0] === 'object' ? userDna?.top_artists?.[0].name : (userDna?.top_artists?.[0] || "Arijit Singh");
+        const topArtist = typeof userDna?.top_artists?.[0] === 'object' ? userDna?.top_artists?.[0].name : (userDna?.top_artists?.[0] || "trending top hits");
 
         let sections: any[] = [];
 
@@ -82,8 +82,9 @@ export default function DiscoverPage() {
             searchAlbums(`top trending ${topGenre} hit albums`)
           ]);
           await new Promise(r => setTimeout(r, 200));
+          const currentYear = new Date().getFullYear();
           const [playlists] = await Promise.allSettled([
-            searchPlaylists(`top trending ${topGenre} hits`)
+            searchPlaylists(`top trending ${topGenre} hits ${currentYear}`)
           ]);
           sections = [
             { title: "Trending Songs", tracks: songs.status === 'fulfilled' ? songs.value?.songs || [] : [] },

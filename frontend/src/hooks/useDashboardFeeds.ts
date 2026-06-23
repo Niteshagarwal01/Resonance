@@ -119,8 +119,8 @@ export function useDashboardFeeds() {
         const topSongObj1 = localUserDna?.top_songs?.[0];
         const topSongObj2 = localUserDna?.top_songs?.[1];
 
-        const artist1 = getArtistName(topArtistObj1) || "Arijit Singh";
-        const artist2 = getArtistName(topArtistObj2) || "Taylor Swift";
+        const artist1 = getArtistName(topArtistObj1) || localRecentlyPlayed?.[0]?.artist || "trending hit";
+        const artist2 = getArtistName(topArtistObj2) || localRecentlyPlayed?.[1]?.artist || "global viral";
 
         // --- BATCH 2: Trending & Artists ---
         const fetchArtists = searchArtists(artist1)
@@ -216,11 +216,12 @@ export function useDashboardFeeds() {
           })
           .catch(err => recordError("trendingInGenre", err));
 
-        const fetchDrops = searchMusic(`latest ${topGenre} new songs`)
+        const currentYear = new Date().getFullYear();
+        const fetchDrops = searchMusic(`latest ${topGenre} new songs ${currentYear}`)
           .then(async res => {
              let finalRes = res?.songs || [];
              if (finalRes.length < 25) {
-                const fb = await searchMusic(`latest new indian hit songs`).catch(() => null);
+                const fb = await searchMusic(`latest new indian hit songs ${currentYear}`).catch(() => null);
                 finalRes = [...finalRes, ...(fb?.songs || [])];
              }
              setFreshDrops(finalRes.slice(0, 60));
