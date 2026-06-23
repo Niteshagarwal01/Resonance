@@ -65,7 +65,7 @@ export function useDashboardFeeds() {
         let localUserDna: any = null;
         let localRecentlyPlayed: Track[] = [];
 
-        // 1. Fetch User Data
+        // --- BATCH 1: Local User Data & DNA Mix ---
         if (session) {
           const [profileRes, dnaRes, historyRes] = await Promise.allSettled([
             supabase.from("profiles").select("*").eq("id", session.user.id).single(),
@@ -95,7 +95,6 @@ export function useDashboardFeeds() {
           }
         }
 
-        // 2. Fetch DNA Vibe Mix (Taste DNA 40-Song Mix)
         setVibeLoading(true);
         const dnaLogic = computeEvolvedDNA(localUserDna, localRecentlyPlayed);
         generateLiveVibe(localUserDna, localRecentlyPlayed, dnaLogic.evolvedArtists, dnaLogic.evolvedGenres)
@@ -107,6 +106,12 @@ export function useDashboardFeeds() {
           .catch(err => recordError("curatedForYou", err))
           .finally(() => setVibeLoading(false));
 
+        // Unlock UI so Batch 1 renders instantly
+        setLoading(false);
+
+        // Wait to prevent rate limiting
+        await new Promise(r => setTimeout(r, 400));
+
         // Setup DNA defaults
         const topGenre = localUserDna?.top_genres?.[0] || "Pop";
         const topArtistObj1 = localUserDna?.top_artists?.[0];
@@ -117,8 +122,8 @@ export function useDashboardFeeds() {
         const artist1 = getArtistName(topArtistObj1) || "Arijit Singh";
         const artist2 = getArtistName(topArtistObj2) || "Taylor Swift";
 
-        // 3. Iconic Artists (Mixed & Shuffled)
-        searchArtists(artist1)
+        // --- BATCH 2: Trending & Artists ---
+        const fetchArtists = searchArtists(artist1)
           .then(async (apiArtists) => {
             const baseArtists = [...onboardingData.artists];
             for (let i = baseArtists.length - 1; i > 0; i--) {
@@ -137,8 +142,7 @@ export function useDashboardFeeds() {
           })
           .catch(err => recordError("popularArtists", err));
 
-        // 4. Editor's Picks & Trending Right Now (Global Mixed Ratio Algorithm)
-        Promise.all([
+        const fetchTrending = Promise.all([
           searchMusic("top trending global hit songs"),
           searchMusic("top trending kpop songs"),
           searchMusic("top trending bollywood hit songs"),
@@ -153,14 +157,12 @@ export function useDashboardFeeds() {
             ...(soRes?.songs?.slice(0, 10) || []),
             ...(dhRes?.songs?.slice(0, 10) || [])
           ];
-          // Shuffle Trending Mix
           for (let i = trendingMix.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [trendingMix[i], trendingMix[j]] = [trendingMix[j], trendingMix[i]];
           }
           setTrendingNow(trendingMix);
 
-          // Editor's Picks
           getCharts("IN").then(charts => {
             const topCharts = charts.slice(0, 10);
             const onboardSongs = [...onboardingData.songs];
@@ -177,8 +179,13 @@ export function useDashboardFeeds() {
           }).catch(err => recordError("editorsPicks", err));
         }).catch(err => recordError("trendingNow", err));
 
-        // 5. Popular Albums & EPs (Dynamic DNA Focused)
-        Promise.allSettled([
+        await Promise.allSettled([fetchArtists, fetchTrending]);
+
+        // Wait to prevent rate limiting
+        await new Promise(r => setTimeout(r, 400));
+
+        // --- BATCH 3: Genre, Drops, Mixes, Albums ---
+        const fetchAlbums = Promise.allSettled([
           searchAlbums(`best hit albums by ${artist1}`),
           searchAlbums(`best hit albums by ${artist2}`),
           searchAlbums(`top trending new indian bollywood albums`),
@@ -186,25 +193,19 @@ export function useDashboardFeeds() {
         ]).then(results => {
           let mixed: any[] = [];
           results.forEach(res => {
-            if (res.status === 'fulfilled' && res.value) {
+            if (res.status === "fulfilled" && res.value) {
               mixed = [...mixed, ...res.value];
             }
           });
-          
-          // Remove duplicates by ID or title
           const unique = Array.from(new Map(mixed.map(item => [item.id || item.title, item])).values());
-          
-          // Shuffle the array to ensure a good mix of the artists and trending albums
           for (let i = unique.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [unique[i], unique[j]] = [unique[j], unique[i]];
           }
-          
           setPopularAlbums(unique.slice(0, 60));
         }).catch(err => recordError("popularAlbums", err));
 
-        // 6. Trending in [Your Top Genre]
-        searchMusic(`top trending ${topGenre} songs`)
+        const fetchGenre = searchMusic(`top trending ${topGenre} songs`)
           .then(async res => {
              let finalRes = res?.songs || [];
              if (finalRes.length < 25) {
@@ -215,8 +216,7 @@ export function useDashboardFeeds() {
           })
           .catch(err => recordError("trendingInGenre", err));
 
-        // 7. Fresh Drops (DNA-Powered)
-        searchMusic(`latest ${topGenre} new songs`)
+        const fetchDrops = searchMusic(`latest ${topGenre} new songs`)
           .then(async res => {
              let finalRes = res?.songs || [];
              if (finalRes.length < 25) {
@@ -227,11 +227,10 @@ export function useDashboardFeeds() {
           })
           .catch(err => recordError("freshDrops", err));
 
-        // 8. Your Top Mixes (Based on 2nd and 3rd DNA songs)
-        const seed2 = typeof topSongObj1 === 'object' ? topSongObj1.id : null;
-        
+        const seed2 = typeof topSongObj1 === "object" ? topSongObj1.id : null;
+        let fetchMixes;
         if (seed2) {
-          getRadioQueue(seed2)
+          fetchMixes = getRadioQueue(seed2)
             .then(async queue => {
                let finalQueue = queue || [];
                if (finalQueue.length < 25) {
@@ -242,20 +241,21 @@ export function useDashboardFeeds() {
             })
             .catch(async err => {
               recordError("yourTopMixes", err);
-              // Fallback
               const m = await getHomeMixes().catch(() => []);
               setYourTopMixes(m.slice(0, 60));
             });
         } else {
-          getHomeMixes().then(m => setYourTopMixes(m.slice(0, 60))).catch(err => recordError("yourTopMixes", err));
+          fetchMixes = getHomeMixes().then(m => setYourTopMixes(m.slice(0, 60))).catch(err => recordError("yourTopMixes", err));
         }
 
-        // Only update lastFetchTime after a successful fetch of the core sections
+        await Promise.allSettled([fetchAlbums, fetchGenre, fetchDrops, fetchMixes]);
+
         lastFetchTime = Date.now();
 
       } catch (err) {
         console.error("Dashboard fetch error:", err);
       } finally {
+        // Just in case it wasn't unlocked
         setLoading(false);
       }
     }

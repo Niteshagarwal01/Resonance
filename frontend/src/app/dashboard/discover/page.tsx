@@ -60,9 +60,12 @@ export default function DiscoverPage() {
         let sections: any[] = [];
 
         if (activeTab === "for-you") {
-          const [daily, recent, gems, future] = await Promise.allSettled([
+          const [daily, recent] = await Promise.allSettled([
             searchMusic(`top hit songs`),
-            searchMusic(`more like ${topArtist}`),
+            searchMusic(`more like ${topArtist}`)
+          ]);
+          await new Promise(r => setTimeout(r, 400));
+          const [gems, future] = await Promise.allSettled([
             searchMusic(`underrated indie hit songs`),
             searchMusic(`upcoming viral hit songs`)
           ]);
@@ -74,9 +77,12 @@ export default function DiscoverPage() {
           ];
         } 
         else if (activeTab === "trending") {
-          const [songs, albums, playlists] = await Promise.allSettled([
+          const [songs, albums] = await Promise.allSettled([
             searchMusic(`top trending global hit songs`),
-            searchAlbums(`top trending hit albums`),
+            searchAlbums(`top trending hit albums`)
+          ]);
+          await new Promise(r => setTimeout(r, 400));
+          const [playlists] = await Promise.allSettled([
             searchPlaylists(`top trending hits`)
           ]);
           sections = [
@@ -96,9 +102,12 @@ export default function DiscoverPage() {
           ];
         }
         else if (activeTab === "lab") {
-          const [emerging, underground, listeners, rising] = await Promise.allSettled([
+          const [emerging, underground] = await Promise.allSettled([
             searchMusic(`emerging indie hit songs`),
-            searchMusic(`underground hip hop indie songs`),
+            searchMusic(`underground hip hop indie songs`)
+          ]);
+          await new Promise(r => setTimeout(r, 400));
+          const [listeners, rising] = await Promise.allSettled([
             searchMusic(`obscure hidden gem indie songs`),
             searchMusic(`rising viral songs this week`)
           ]);
@@ -110,11 +119,17 @@ export default function DiscoverPage() {
           ];
         }
         else if (activeTab === "mood") {
-          const [happy, focus, workout, chill, sleep, party] = await Promise.allSettled([
+          const [happy, focus] = await Promise.allSettled([
             searchMusic(`happy upbeat songs`),
-            searchMusic(`deep focus study lofi`),
+            searchMusic(`deep focus study lofi`)
+          ]);
+          await new Promise(r => setTimeout(r, 400));
+          const [workout, chill] = await Promise.allSettled([
             searchMusic(`hype high energy workout`),
-            searchMusic(`chill acoustic relaxing`),
+            searchMusic(`chill acoustic relaxing`)
+          ]);
+          await new Promise(r => setTimeout(r, 400));
+          const [sleep, party] = await Promise.allSettled([
             searchMusic(`sleep ambient relaxing`),
             searchMusic(`party dance hits`)
           ]);
@@ -128,11 +143,17 @@ export default function DiscoverPage() {
           ];
         }
         else if (activeTab === "genre") {
-           const [pop, hiphop, indie, rock, edm, regional] = await Promise.allSettled([
+           const [pop, hiphop] = await Promise.allSettled([
             searchMusic(`best pop songs`),
-            searchMusic(`best hip hop rap songs`),
+            searchMusic(`best hip hop rap songs`)
+          ]);
+          await new Promise(r => setTimeout(r, 400));
+          const [indie, rock] = await Promise.allSettled([
             searchMusic(`best indie songs`),
-            searchMusic(`best rock songs`),
+            searchMusic(`best rock songs`)
+          ]);
+          await new Promise(r => setTimeout(r, 400));
+          const [edm, regional] = await Promise.allSettled([
             searchMusic(`best edm dance songs`),
             searchMusic(`best regional folk songs`)
           ]);
@@ -146,9 +167,12 @@ export default function DiscoverPage() {
           ];
         }
         else if (activeTab === "taste") {
-           const [similarA, similarG, adjacent, outside] = await Promise.allSettled([
+           const [similarA, similarG] = await Promise.allSettled([
             searchMusic(`more like ${topArtist}`),
-            searchMusic(`more ${topGenre} hits`),
+            searchMusic(`more ${topGenre} hits`)
+          ]);
+          await new Promise(r => setTimeout(r, 400));
+          const [adjacent, outside] = await Promise.allSettled([
             searchMusic(`experimental electronic ${topGenre} fusion`),
             searchMusic(`global international world music hits`)
           ]);
