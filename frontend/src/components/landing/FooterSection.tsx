@@ -57,7 +57,7 @@ export function FooterSection() {
 
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 32, display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
           <p style={{ fontSize: 14, color: "rgba(255,255,255,0.25)", margin: 0, fontWeight: 600 }}>
-            © 2024 Resonance. Open Source. MIT License.
+            © {new Date().getFullYear()} Resonance. Open Source. MIT License.
           </p>
           <div className="flex items-center gap-6">
             {["Privacy", "Terms", "GitHub"].map(l => (

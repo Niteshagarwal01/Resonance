@@ -25,7 +25,7 @@ async def search_music(request: Request, q: str = Query(..., min_length=1)):
             "thumbnail": Formatter.get_thumbnail(item.get("thumbnails"))
         }
         
-        if r_type in ["song", "video"]:
+        if r_type == "song":
             entry["id"] = item.get("videoId")
             entry["artist"] = ", ".join(a.get("name", "") for a in item.get("artists", [])) if item.get("artists") else item.get("artist", "")
             entry["duration"] = Formatter.parse_duration(item.get("duration", item.get("length")))

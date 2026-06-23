@@ -131,7 +131,15 @@ export function useDashboardFeeds() {
               [baseArtists[i], baseArtists[j]] = [baseArtists[j], baseArtists[i]];
             }
             
-            let combined = [...(apiArtists.slice(0, 6)), ...baseArtists].slice(0, 15);
+            let combined = [...(apiArtists.slice(0, 10)), ...baseArtists];
+            const seenNames = new Set();
+            combined = combined.filter(item => {
+                const name = item.name.toLowerCase().trim();
+                if (seenNames.has(name)) return false;
+                seenNames.add(name);
+                return true;
+            });
+            combined = combined.slice(0, 15);
             combined = Array.from(new Map(combined.map(item => [item.id, item])).values());
             
             for (let i = combined.length - 1; i > 0; i--) {
@@ -216,12 +224,12 @@ export function useDashboardFeeds() {
           })
           .catch(err => recordError("trendingInGenre", err));
 
-        const fetchDrops = searchMusic(`brand new latest ${topGenre} songs`)
+        const fetchDrops = searchSongs(`new releases ${topGenre} hits`)
           .then(async res => {
-             let finalRes = res?.songs || [];
+             let finalRes = res || [];
              if (finalRes.length < 25) {
-                const fb = await searchMusic(`latest new hit songs right now`).catch(() => null);
-                finalRes = [...finalRes, ...(fb?.songs || [])];
+                const fb = await searchSongs(`latest new songs right now`).catch(() => null);
+                finalRes = [...finalRes, ...(fb || [])];
              }
              setFreshDrops(finalRes.slice(0, 60));
           })
