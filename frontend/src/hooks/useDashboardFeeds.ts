@@ -125,14 +125,22 @@ export function useDashboardFeeds() {
         // --- BATCH 2: Trending & Artists ---
         const fetchArtists = searchArtists(artist1)
           .then(async (apiArtists) => {
+            const exactMatch1 = apiArtists.find(a => a.name.toLowerCase() === artist1.toLowerCase());
+            const exactMatch2 = apiArtists.find(a => a.name.toLowerCase() === artist2.toLowerCase());
+            
             const baseArtists = [...onboardingData.artists];
             for (let i = baseArtists.length - 1; i > 0; i--) {
               const j = Math.floor(Math.random() * (i + 1));
               [baseArtists[i], baseArtists[j]] = [baseArtists[j], baseArtists[i]];
             }
             
-            let combined = [...(apiArtists.slice(0, 3)), ...baseArtists].slice(0, 15);
-            combined = Array.from(new Map(combined.map(item => [item.id, item])).values());
+            let combined = [];
+            if (exactMatch1) combined.push(exactMatch1);
+            if (exactMatch2) combined.push(exactMatch2);
+            combined = [...combined, ...baseArtists].slice(0, 15);
+            
+            // Deduplicate by name to prevent two Arijit Singhs or fake profiles
+            combined = Array.from(new Map(combined.map(item => [item.name.toLowerCase(), item])).values());
             
             for (let i = combined.length - 1; i > 0; i--) {
               const j = Math.floor(Math.random() * (i + 1));

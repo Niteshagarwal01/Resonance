@@ -12,7 +12,7 @@ export function PopularArtistsRow({ artists, showMoreUrl }: { artists: any[], sh
         <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2" style={{ scrollSnapType: "x mandatory", paddingLeft: "32px", paddingRight: "32px" }}>
           {artists.map((artist, idx) => (
             <Link
-              href={`/dashboard/search?q=${encodeURIComponent(artist.name)}`}
+              href={`/dashboard/artist/${artist.id}`}
               key={`${artist.id || artist.name}-${idx}`}
               className="group flex-shrink-0 w-36 flex flex-col items-center cursor-pointer"
               style={{ scrollSnapAlign: "start" }}
