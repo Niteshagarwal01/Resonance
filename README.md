@@ -1,9 +1,13 @@
 <div align="center">
-  <img src="frontend/public/logofiles/main-logo.png" alt="Resonance Logo" width="350" />
+  <img src="https://raw.githubusercontent.com/Niteshagarwal01/Resonance/main/frontend/public/logofiles/main-logo.png" alt="Resonance Logo" width="350" />
   
   <h1 align="center">Resonance</h1>
   <p align="center">
     <strong>An open-source, beautifully designed social music player powered by YouTube Music & Supabase.</strong>
+  </p>
+
+  <p align="center">
+    <a href="https://resonancebyechostudio.netlify.app/" target="_blank"><strong>🚀 View Live Demo</strong></a>
   </p>
 
   <p align="center">
@@ -31,7 +35,7 @@
 ## 📸 Screenshots
 *(Coming soon! Feel free to open a PR with high-quality screenshots of the app running locally!)*
 <div align="center">
-  <img src="frontend/public/logofiles/favappicon.png" alt="App Icon" width="100" />
+  <img src="https://raw.githubusercontent.com/Niteshagarwal01/Resonance/main/frontend/public/logofiles/favappicon.png" alt="App Icon" width="100" />
 </div>
 
 ---
