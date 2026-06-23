@@ -66,14 +66,14 @@ export default function DiscoverPage() {
           ]);
           await new Promise(r => setTimeout(r, 400));
           const [gems, future] = await Promise.allSettled([
-            searchMusic(`underrated indie hit songs`),
-            searchMusic(`upcoming viral hit songs`)
+            searchMusic(`underrated indie ${topGenre} hit songs`),
+            searchMusic(`more like ${userDna?.top_songs?.[0]?.title || topArtist}`)
           ]);
           sections = [
             { title: "Daily Discoveries", tracks: daily.status === 'fulfilled' ? daily.value?.songs || [] : [] },
-            { title: "Based On Recent Listening", tracks: recent.status === 'fulfilled' ? recent.value?.songs || [] : [] },
-            { title: "Hidden Gems", tracks: gems.status === 'fulfilled' ? gems.value?.songs || [] : [] },
-            { title: "Future Favorites", tracks: future.status === 'fulfilled' ? future.value?.songs || [] : [] },
+            { title: `Based On ${topArtist}`, tracks: recent.status === 'fulfilled' ? recent.value?.songs || [] : [] },
+            { title: `${topGenre} Hidden Gems`, tracks: gems.status === 'fulfilled' ? gems.value?.songs || [] : [] },
+            { title: `Similar to Your DNA`, tracks: future.status === 'fulfilled' ? future.value?.songs || [] : [] },
           ];
         } 
         else if (activeTab === "trending") {
@@ -112,10 +112,10 @@ export default function DiscoverPage() {
             searchMusic(`rising viral ${topGenre} songs this week`)
           ]);
           sections = [
-            { title: "Emerging Artists", tracks: emerging.status === 'fulfilled' ? emerging.value?.songs || [] : [] },
-            { title: "Underground Artists", tracks: underground.status === 'fulfilled' ? underground.value?.songs || [] : [] },
-            { title: "Under 10K Listeners", tracks: listeners.status === 'fulfilled' ? listeners.value?.songs || [] : [] },
-            { title: "Rising This Week", tracks: rising.status === 'fulfilled' ? rising.value?.songs || [] : [] },
+            { title: `Emerging ${topGenre} Artists`, tracks: emerging.status === 'fulfilled' ? emerging.value?.songs || [] : [] },
+            { title: `Underground ${topGenre}`, tracks: underground.status === 'fulfilled' ? underground.value?.songs || [] : [] },
+            { title: "DNA Obscure Gems", tracks: listeners.status === 'fulfilled' ? listeners.value?.songs || [] : [] },
+            { title: `Rising ${topGenre} This Week`, tracks: rising.status === 'fulfilled' ? rising.value?.songs || [] : [] },
           ];
         }
         else if (activeTab === "mood") {
@@ -202,15 +202,15 @@ export default function DiscoverPage() {
         }
         else if (activeTab === "community") {
            const [shared, saved, picks, discussions] = await Promise.allSettled([
-            searchMusic(`viral tiktok hits`),
-            searchMusic(`most popular trending hits`),
-            searchMusic(`indie viral hits`),
+            searchMusic(`viral tiktok hits ${topGenre}`),
+            searchMusic(`most popular trending hits ${topArtist}`),
+            searchMusic(`indie viral hits ${topGenre}`),
             searchMusic(`trending rap hip hop discussions`)
           ]);
           sections = [
-            { title: "Most Shared", tracks: shared.status === 'fulfilled' ? shared.value?.songs || [] : [] },
-            { title: "Most Saved", tracks: saved.status === 'fulfilled' ? saved.value?.songs || [] : [] },
-            { title: "Community Picks", tracks: picks.status === 'fulfilled' ? picks.value?.songs || [] : [] },
+            { title: `Most Shared ${topGenre}`, tracks: shared.status === 'fulfilled' ? shared.value?.songs || [] : [] },
+            { title: `Most Saved ${topArtist}`, tracks: saved.status === 'fulfilled' ? saved.value?.songs || [] : [] },
+            { title: `Community ${topGenre} Picks`, tracks: picks.status === 'fulfilled' ? picks.value?.songs || [] : [] },
             { title: "Rising Discussions", tracks: discussions.status === 'fulfilled' ? discussions.value?.songs || [] : [] }
           ];
         }
@@ -320,7 +320,7 @@ export default function DiscoverPage() {
                         <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-2" style={{ scrollSnapType: "x mandatory" }}>
                           {section.tracks.map((item: any, i: number) => {
                             const isAlbum = section.type === "albums";
-                            const linkHref = isAlbum ? `/dashboard/album/${item.browseId || item.id}` : `/dashboard/playlists/${item.browseId || item.id}`;
+                            const linkHref = isAlbum ? `/dashboard/album/${item.browseId || item.id}` : `/dashboard/playlist/${item.browseId || item.id}`;
                             const imgUrl = item.thumbnail || item.thumbnails?.[0]?.url || item.image;
                             const title = item.title || item.name;
                             const subtitle = item.artist || item.author || "Various Artists";
