@@ -100,17 +100,35 @@ class YTMusicService:
 
     @staticmethod
     async def get_radio(seed_id: str, limit: int = 50):
+        # If it's a channel/artist ID, get their top song and start a radio from it (guarantees 50 tracks)
         if seed_id.startswith("UC"):
             artist_data = await YTMusicService.run_with_cache(f"artist:{seed_id}", ytmusic.get_artist, channelId=seed_id)
-            if "songs" in artist_data and "results" in artist_data["songs"]:
-                return {"tracks": artist_data["songs"]["results"]}
+            if "songs" in artist_data and "results" in artist_data["songs"] and len(artist_data["songs"]["results"]) > 0:
+                top_song_id = artist_data["songs"]["results"][0].get("videoId")
+                if top_song_id:
+                    return await YTMusicService.run_with_cache(f"radio:{top_song_id}", ytmusic.get_watch_playlist, videoId=top_song_id, limit=limit)
             return {"tracks": []}
             
+        # If it's a playlist or radio ID
         is_playlist = seed_id.startswith("RD") or seed_id.startswith("PL") or seed_id.startswith("VL")
         if is_playlist:
             return await YTMusicService.run_with_cache(f"radio:{seed_id}", ytmusic.get_watch_playlist, playlistId=seed_id, limit=limit)
-        else:
+            
+        # If it's a video ID (11 chars)
+        if len(seed_id) == 11:
             return await YTMusicService.run_with_cache(f"radio:{seed_id}", ytmusic.get_watch_playlist, videoId=seed_id, limit=limit)
+            
+        # Fallback: It's likely a raw search term (e.g. "Aditya Rikhari"). Search for top song and start radio.
+        try:
+            search_res = await YTMusicService.run_with_cache(f"search:songs:{seed_id}", ytmusic.search, query=f"{seed_id} hit songs", filter="songs", limit=1)
+            if search_res and len(search_res) > 0:
+                top_song_id = search_res[0].get("videoId")
+                if top_song_id:
+                    return await YTMusicService.run_with_cache(f"radio:{top_song_id}", ytmusic.get_watch_playlist, videoId=top_song_id, limit=limit)
+        except Exception as e:
+            print(f"Fallback search radio failed for {seed_id}: {e}")
+            
+        return {"tracks": []}
 
     @staticmethod
     async def get_charts(country: str = "IN"):

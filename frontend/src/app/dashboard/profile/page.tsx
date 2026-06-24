@@ -7,10 +7,13 @@ import { useEffect, useState, useCallback } from "react";
 import { searchMusic, searchArtists } from "@/lib/api";
 
 const GENRES = [
-  "Pop", "Hip-Hop", "R&B", "Indie Rock", "Electronic",
-  "Classical", "Lofi Beats", "Jazz", "K-Pop", "Country",
-  "Metal", "Folk", "Reggaeton", "Ambient", "Punk",
-  "Dance", "Soul", "Gospel", "Afrobeats", "House"
+  "Bollywood Pop", "Punjabi Pop", "English Pop", "K-Pop", "Indie Pop",
+  "DHH", "Indian Rap", "Trap", "Drill", "Conscious Rap",
+  "EDM", "House", "Techno", "Future Bass", "Lo-Fi",
+  "Telugu", "Tamil", "Malayalam", "Kannada", "Marathi", "Bengali", "Bhojpuri", "Haryanvi",
+  "Rock", "Metal", "Indie Rock", "Alternative",
+  "R&B", "Sufi", "Ghazal", "Acoustic",
+  "Devotional", "Classical", "Folk"
 ];
 
 const VIBES = [
@@ -67,7 +70,12 @@ export default function ProfilePage() {
           const artists = (dnaRes.data.top_artists || []).map((a: any) => typeof a === 'string' ? { id: `legacy-${a}`, name: a, image: null } : a);
           setDnaArtists(artists);
           setDnaSongs(dnaRes.data.top_songs || []);
-          setDnaGenres(dnaRes.data.top_genres || []);
+          
+          // Filter out legacy genres that no longer exist in our new GENRES list
+          // so they don't invisibly count towards the 5-genre limit.
+          const validGenres = (dnaRes.data.top_genres || []).filter((g: string) => GENRES.includes(g));
+          setDnaGenres(validGenres);
+          
           setDnaVibes(dnaRes.data.core_vibe ? [dnaRes.data.core_vibe] : []);
         }
       }

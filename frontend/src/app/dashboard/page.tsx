@@ -10,6 +10,8 @@ import { ShelfRow } from "@/components/ShelfRow";
 import { PopularArtistsRow } from "@/components/PopularArtistsRow";
 import { PopularAlbumsRow } from "@/components/PopularAlbumsRow";
 import { SongActions } from "@/components/SongActions";
+import { RadioStationsRow } from "@/components/RadioStationsRow";
+import { useRadioStations } from "@/hooks/useRadioStations";
 
 const PX = "px-6 md:px-12 lg:px-20";
 
@@ -44,6 +46,8 @@ export default function HomePage() {
     popularArtists,
     vibeLoading
   } = useDashboardFeeds();
+
+  const { stations } = useRadioStations();
 
   const [greeting, setGreeting] = useState("Welcome");
   const [greetingEmoji, setGreetingEmoji] = useState("👋");
@@ -196,6 +200,9 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* ── Radio Stations & Mixes ── */}
+      <RadioStationsRow stations={stations} />
 
       {/* Dynamic Shelves rendering using unified configuration array */}
       {renderSection('jumpBackIn', jumpBackIn, () => (

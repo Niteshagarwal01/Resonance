@@ -7,7 +7,7 @@ from rate_limiter import limiter
 router = APIRouter()
 
 @router.get("/search")
-@limiter.limit("200/minute")
+@limiter.limit("600/minute")
 async def search_music(request: Request, q: str = Query(..., min_length=1)):
     raw_results = await YTMusicService.search(q, filter_type=None, limit=30)
     
@@ -164,7 +164,7 @@ async def get_home_shelves():
     return {"shelves": shelves}
 
 @router.get("/home")
-@limiter.limit("60/minute")
+@limiter.limit("600/minute")
 async def get_home_mixes(request: Request, user: dict = Depends(verify_token)):
     user_id = user.user.id
     
@@ -223,7 +223,7 @@ async def get_home_mixes(request: Request, user: dict = Depends(verify_token)):
     return {"tracks": final_tracks, "evolved_seeds": top_seeds}
 
 @router.get("/charts")
-@limiter.limit("60/minute")
+@limiter.limit("600/minute")
 async def get_charts(request: Request, country: str = Query(default="IN")):
     data = await YTMusicService.get_charts(country=country)
     
@@ -250,7 +250,7 @@ async def get_charts(request: Request, country: str = Query(default="IN")):
     return {"tracks": tracks}
 
 @router.get("/explore/new_releases")
-@limiter.limit("60/minute")
+@limiter.limit("600/minute")
 async def get_explore_new_releases(request: Request):
     try:
         data = await YTMusicService.get_explore()
@@ -277,8 +277,206 @@ async def get_moods():
     return categories
 
 @router.get("/radio")
-@limiter.limit("60/minute")
+@limiter.limit("600/minute")
 async def get_radio(request: Request, seed_id: str = Query(..., min_length=1)):
+    import asyncio
+    import random
+    
+    # --- Diversity Enforcer Helper ---
+    def enforce_diversity(raw_tracks, max_per_artist=3):
+        diverse_tracks = []
+        artist_counts = {}
+        for track in raw_tracks:
+            # Safely extract the primary artist name to track counts
+            primary_artist = track.get("artist", "").split(",")[0].strip().lower()
+            if not primary_artist:
+                diverse_tracks.append(track)
+                continue
+                
+            count = artist_counts.get(primary_artist, 0)
+            if count < max_per_artist:
+                diverse_tracks.append(track)
+                artist_counts[primary_artist] = count + 1
+        return diverse_tracks
+    # ---------------------------------
+
+    # Custom intercept for Hip-Hop blends (60% DHH, 25% Western, 15% K-HipHop)
+    if "Hip-Hop" in seed_id or "hip hop" in seed_id.lower():
+        try:
+            dhh_task = YTMusicService.search("top desi hip hop dhh hit songs", filter_type="songs", limit=30)
+            western_task = YTMusicService.search("top global western hip hop rap hits", filter_type="songs", limit=15)
+            khiphop_task = YTMusicService.search("top trending korean hip hop k-rap hits", filter_type="songs", limit=10)
+            
+            dhh_res, western_res, khiphop_res = await asyncio.gather(dhh_task, western_task, khiphop_task)
+            
+            tracks = []
+            seen = set()
+            
+            # Combine based on requested ratios (~50 tracks total)
+            for item in (dhh_res[:30] + western_res[:13] + khiphop_res[:7]):
+                track = Formatter.format_track(item)
+                if track and track["id"] not in seen:
+                    tracks.append(track)
+                    seen.add(track["id"])
+                    
+            random.shuffle(tracks)
+            tracks = enforce_diversity(tracks, max_per_artist=4)
+            
+            if tracks:
+                return {"queue": tracks}
+        except Exception as e:
+            print(f"Custom Hip Hop blend failed: {e}")
+            # Falls back to standard radio if it fails
+
+    # Custom intercept for Today's Mix (50% GenZ Indian, 25% YT Trending, 25% Global/Kpop)
+    if seed_id.startswith("today-mix:"):
+        parts = seed_id.split(":")
+        artist1 = parts[1] if len(parts) > 1 else "top indie pop"
+        artist2 = parts[2] if len(parts) > 2 else "trending genz"
+        
+        try:
+            trending_task = YTMusicService.get_charts(country="IN")
+            genz_task1 = YTMusicService.search(f"top indie pop bollywood hits", filter_type="songs", limit=20)
+            genz_task2 = YTMusicService.search(f"latest hits {artist1} {artist2}", filter_type="songs", limit=15)
+            global_kpop_task = YTMusicService.search("top global hit pop songs english kpop bts", filter_type="songs", limit=15)
+            
+            res = await asyncio.gather(trending_task, genz_task1, genz_task2, global_kpop_task)
+            
+            # Parse trending charts
+            chart_data = res[0]
+            daily = chart_data.get("daily", []) or chart_data.get("weekly", []) or chart_data.get("videos", [])
+            trending_raw = []
+            if daily and daily[0].get("playlistId"):
+                pl = await YTMusicService.get_playlist(daily[0]["playlistId"], limit=30)
+                trending_raw = pl.get("tracks", [])
+            else:
+                trending_raw = chart_data.get("songs", {}).get("items", [])
+                
+            genz_raw = res[1][:20] + res[2][:15]
+            global_kpop_raw = res[3] or []
+            
+            tracks = []
+            seen = set()
+            
+            for item in (trending_raw[:25] + genz_raw[:35] + global_kpop_raw[:15]):
+                track = Formatter.format_track(item)
+                if not track: continue
+                
+                title = track.get("title", "").lower()
+                # Strict filter against YouTube Bhojpuri/Regional MV spam in trending
+                if any(x in title for x in ["#video", "# video", "bhojpuri", "|", "##", "full video"]):
+                    continue
+                    
+                if track["id"] not in seen:
+                    tracks.append(track)
+                    seen.add(track["id"])
+                    
+            random.shuffle(tracks)
+            tracks = enforce_diversity(tracks, max_per_artist=3)
+            
+            if tracks:
+                return {"queue": tracks[:50]}
+        except Exception as e:
+            print(f"Custom Today's Mix blend failed: {e}")
+
+    # Custom intercept for Personalized Editor's Mix
+    if seed_id.startswith("editor-mix"):
+        try:
+            task1 = YTMusicService.search("latest top indian indie pop hits acoustic", filter_type="songs", limit=25)
+            task2 = YTMusicService.search("top trending new bollywood lofi hits", filter_type="songs", limit=25)
+            res = await asyncio.gather(task1, task2)
+            tracks = [Formatter.format_track(i) for i in (res[0] + res[1]) if Formatter.format_track(i)]
+            random.shuffle(tracks)
+            tracks = enforce_diversity(tracks, max_per_artist=3)
+            return {"queue": tracks[:50]}
+        except Exception: pass
+
+    # Custom intercept for Personalized Discovery Mix
+    if seed_id.startswith("discovery-mix"):
+        try:
+            task1 = YTMusicService.search("undiscovered underground indian indie pop", filter_type="songs", limit=30)
+            task2 = YTMusicService.search("fresh new indian pop artists", filter_type="songs", limit=20)
+            res = await asyncio.gather(task1, task2)
+            tracks = [Formatter.format_track(i) for i in (res[0] + res[1]) if Formatter.format_track(i)]
+            random.shuffle(tracks)
+            tracks = enforce_diversity(tracks, max_per_artist=2) # Max 2 per artist to ensure high discovery
+            return {"queue": tracks[:50]}
+        except Exception: pass
+
+    # Custom intercept for Mood Mix
+    if seed_id.startswith("mood-mix"):
+        parts = seed_id.split(":")
+        vibe = parts[1] if len(parts) > 1 else "chill lofi acoustic"
+        artist = parts[2] if len(parts) > 2 else "indie pop"
+        try:
+            task1 = YTMusicService.search(f"best {vibe} indian songs", filter_type="songs", limit=20)
+            task2 = YTMusicService.search(f"top trending indian {vibe} hits", filter_type="songs", limit=20)
+            task3 = YTMusicService.search(f"{vibe} songs {artist}", filter_type="songs", limit=15)
+            res = await asyncio.gather(task1, task2, task3)
+            
+            tracks = []
+            seen = set()
+            for item in (res[0][:20] + res[1][:20] + res[2][:15]):
+                track = Formatter.format_track(item)
+                if track and track["id"] not in seen:
+                    tracks.append(track)
+                    seen.add(track["id"])
+                    
+            random.shuffle(tracks)
+            tracks = enforce_diversity(tracks, max_per_artist=3)
+            return {"queue": tracks[:50]}
+        except Exception: pass
+
+    # Custom intercept for Nostalgia Mix
+    if seed_id.startswith("nostalgia-mix"):
+        parts = seed_id.split(":")
+        artist = parts[2] if len(parts) > 2 else "bollywood"
+        try:
+            task1 = YTMusicService.search("best nostalgic classic 2000s 2010s throwback indian hits", filter_type="songs", limit=30)
+            task2 = YTMusicService.search(f"classic old throwback hits {artist}", filter_type="songs", limit=20)
+            res = await asyncio.gather(task1, task2)
+            
+            tracks = []
+            seen = set()
+            for item in (res[0][:30] + res[1][:20]):
+                track = Formatter.format_track(item)
+                if track and track["id"] not in seen:
+                    tracks.append(track)
+                    seen.add(track["id"])
+                    
+            random.shuffle(tracks)
+            tracks = enforce_diversity(tracks, max_per_artist=3)
+            return {"queue": tracks[:50]}
+        except Exception: pass
+
+    # Custom intercept for Blended Artist Mixes (e.g., Artist 2 & Artist 3)
+    if seed_id.startswith("blend-artists:"):
+        parts = seed_id.split(":")
+        if len(parts) >= 3:
+            artist1 = parts[1]
+            artist2 = parts[2]
+            try:
+                task1 = YTMusicService.search(f"{artist1} top hit songs", filter_type="songs", limit=30)
+                task2 = YTMusicService.search(f"{artist2} top hit songs", filter_type="songs", limit=30)
+                res = await asyncio.gather(task1, task2)
+                
+                tracks = []
+                seen = set()
+                
+                for item in (res[0][:30] + res[1][:30]):
+                    track = Formatter.format_track(item)
+                    if track and track["id"] not in seen:
+                        tracks.append(track)
+                        seen.add(track["id"])
+                        
+                random.shuffle(tracks)
+                # Allow a bit more for dedicated artist mixes, but still cap to prevent one from completely dominating if the other fails
+                tracks = enforce_diversity(tracks, max_per_artist=15) 
+                if tracks:
+                    return {"queue": tracks[:50]}
+            except Exception as e:
+                print(f"Custom Blended Artist Mix failed: {e}")
+
     radio_queue = await YTMusicService.get_radio(seed_id, limit=100)
     tracks = []
     for item in radio_queue.get("tracks", []):

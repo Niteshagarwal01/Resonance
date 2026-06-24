@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/client";
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000/api";
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
 
 export interface Track {
   id: string;
@@ -27,7 +27,7 @@ class ApiClient {
       ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {})
     };
 
-    const timeout = 30000;
+    const timeout = 60000; // Increased to 60s since backend now does heavy parallel aggregation
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
 
@@ -43,8 +43,12 @@ class ApiClient {
         throw new Error(`API Error: ${response.status} ${response.statusText}`);
       }
       return await response.json();
-    } catch (error) {
+    } catch (error: any) {
       clearTimeout(id);
+      // Suppress AbortError from console.error to prevent Next.js Dev Overlay from popping up
+      if (error.name === 'AbortError' || error.message?.includes('aborted')) {
+        throw error;
+      }
       console.error(`Fetch error for ${endpoint}:`, error);
       throw error;
     }

@@ -12,10 +12,13 @@ export function computeEvolvedDNA(baseDna: any, historyTracks: any[]) {
     }
   });
   
+  // Filter artists: Require at least 3 plays to be considered a "recent favorite"
+  // This prevents accidental single-clicks from hijacking the user's DNA
   const recentArtists = Object.entries(artistCounts)
+    .filter(entry => entry[1] >= 3)
     .sort((a, b) => b[1] - a[1])
     .map(entry => ({ id: null, name: entry[0], image: null }))
-    .slice(0, 5);
+    .slice(0, 3); // Only allow max 3 new artists to merge at once
 
   const merged = [...recentArtists, ...base.map((b: any) => typeof b === "string" ? { id: null, name: b, image: null } : b)];
   const unique = [];
