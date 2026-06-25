@@ -227,6 +227,11 @@ export function useDashboardFeeds() {
         const fetchDrops = getExploreNewReleases()
           .then(async res => {
              let finalRes = res || [];
+             // Shuffle the releases so it feels fresh instead of identical
+             for (let i = finalRes.length - 1; i > 0; i--) {
+               const j = Math.floor(Math.random() * (i + 1));
+               [finalRes[i], finalRes[j]] = [finalRes[j], finalRes[i]];
+             }
              setFreshDrops(finalRes.slice(0, 60));
           })
           .catch(err => recordError("freshDrops", err));
@@ -253,19 +258,175 @@ export function useDashboardFeeds() {
         }
 
         await Promise.allSettled([fetchAlbums, fetchGenre, fetchDrops, fetchMixes]);
-
-        lastFetchTime = Date.now();
-
       } catch (err) {
         console.error("Dashboard fetch error:", err);
       } finally {
-        // Just in case it wasn't unlocked
         setLoading(false);
       }
     }
 
     loadData();
   }, [isCacheValid]);
+
+  // --- FAULT-TOLERANT BACKGROUND RETRY ALGORITHM ---
+  useEffect(() => {
+    if (loading) return; // Wait for initial batch to finish
+
+    let isActive = true;
+
+    const retryMissingFeeds = async () => {
+      while (isActive) {
+        const missing = [];
+        if (!feedCache?.trendingNow?.length) missing.push('trendingNow');
+        if (!feedCache?.editorsPicks?.length) missing.push('editorsPicks');
+        if (!feedCache?.popularAlbums?.length) missing.push('popularAlbums');
+        if (!feedCache?.trendingInGenre?.length) missing.push('trendingInGenre');
+        if (!feedCache?.yourTopMixes?.length) missing.push('yourTopMixes');
+        if (!feedCache?.freshDrops?.length) missing.push('freshDrops');
+        if (!feedCache?.popularArtists?.length) missing.push('popularArtists');
+
+        // ALL GREEN CHECK
+        if (missing.length === 0) {
+          lastFetchTime = Date.now(); // Lock in the 60-minute cache!
+          break;
+        }
+
+        const target = missing[0];
+        
+        // Extract required seeds for retries
+        const topGenre = feedCache?.userDna?.top_genres?.[0] || "Pop";
+        const topArtistObj1 = feedCache?.userDna?.top_artists?.[0];
+        const topArtistObj2 = feedCache?.userDna?.top_artists?.[1];
+        const artist1 = getArtistName(topArtistObj1) || feedCache?.recentlyPlayed?.[0]?.artist || "trending hit";
+        const artist2 = getArtistName(topArtistObj2) || feedCache?.recentlyPlayed?.[1]?.artist || "global viral";
+
+        try {
+          if (target === 'trendingNow') {
+            const [enRes, kpRes, boRes, soRes, dhRes] = await Promise.all([
+              searchMusic("top trending global hit songs").catch(()=>null),
+              searchMusic("top trending kpop songs").catch(()=>null),
+              searchMusic("top trending bollywood hit songs").catch(()=>null),
+              searchMusic("top trending south indian hits").catch(()=>null),
+              searchMusic("top trending desi hip hop indie hit songs").catch(()=>null)
+            ]);
+            const trendingMix = [
+              ...(enRes?.songs?.slice(0, 20) || []),
+              ...(kpRes?.songs?.slice(0, 10) || []),
+              ...(boRes?.songs?.slice(0, 25) || []),
+              ...(soRes?.songs?.slice(0, 10) || []),
+              ...(dhRes?.songs?.slice(0, 10) || [])
+            ];
+            for (let i = trendingMix.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [trendingMix[i], trendingMix[j]] = [trendingMix[j], trendingMix[i]];
+            }
+            if (trendingMix.length > 0) {
+              setTrendingNow(trendingMix);
+              setFeedErrors(prev => { const n = {...prev}; delete n.trendingNow; return n; });
+            }
+          } 
+          else if (target === 'editorsPicks') {
+            const charts = await getCharts("IN").catch(()=>[]);
+            const topCharts = charts.slice(0, 10);
+            const onboardSongs = [...onboardingData.songs];
+            for (let i = onboardSongs.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [onboardSongs[i], onboardSongs[j]] = [onboardSongs[j], onboardSongs[i]];
+            }
+            const mixedPicks = [...topCharts, ...onboardSongs.slice(0, 30)];
+            for (let i = mixedPicks.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [mixedPicks[i], mixedPicks[j]] = [mixedPicks[j], mixedPicks[i]];
+            }
+            if (mixedPicks.length > 0) {
+              setEditorsPicks(mixedPicks.slice(0, 60));
+              setFeedErrors(prev => { const n = {...prev}; delete n.editorsPicks; return n; });
+            }
+          }
+          else if (target === 'popularAlbums') {
+            const res = await Promise.allSettled([
+              searchAlbums(`best hit albums by ${artist1}`),
+              searchAlbums(`best hit albums by ${artist2}`),
+              searchAlbums(`top trending new indian bollywood albums`),
+              searchAlbums(`latest hit indian punjabi albums`)
+            ]);
+            let mixed: any[] = [];
+            res.forEach(r => { if (r.status === "fulfilled" && r.value) mixed = [...mixed, ...r.value]; });
+            if (mixed.length > 0) {
+              const unique = Array.from(new Map(mixed.map(item => [item.id || item.title, item])).values());
+              for (let i = unique.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [unique[i], unique[j]] = [unique[j], unique[i]];
+              }
+              setPopularAlbums(unique.slice(0, 60));
+              setFeedErrors(prev => { const n = {...prev}; delete n.popularAlbums; return n; });
+            }
+          }
+          else if (target === 'trendingInGenre') {
+            let res = await searchMusic(`top trending ${topGenre} songs`).catch(()=>null);
+            let finalRes = res?.songs || [];
+            if (finalRes.length < 25) {
+              const fb = await searchMusic(`top trending indian hit songs`).catch(()=>null);
+              finalRes = [...finalRes, ...(fb?.songs || [])];
+            }
+            if (finalRes.length > 0) {
+              setTrendingInGenre(finalRes.slice(0, 60));
+              setFeedErrors(prev => { const n = {...prev}; delete n.trendingInGenre; return n; });
+            }
+          }
+          else if (target === 'yourTopMixes') {
+            const m = await getHomeMixes().catch(()=>[]);
+            if (m.length > 0) {
+              setYourTopMixes(m.slice(0, 60));
+              setFeedErrors(prev => { const n = {...prev}; delete n.yourTopMixes; return n; });
+            }
+          }
+          else if (target === 'freshDrops') {
+            const res = await getExploreNewReleases().catch(()=>[]);
+            if (res && res.length > 0) {
+              let finalRes = [...res];
+              for (let i = finalRes.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [finalRes[i], finalRes[j]] = [finalRes[j], finalRes[i]];
+              }
+              setFreshDrops(finalRes.slice(0, 60));
+              setFeedErrors(prev => { const n = {...prev}; delete n.freshDrops; return n; });
+            }
+          }
+          else if (target === 'popularArtists') {
+            const apiArtists = await searchArtists(artist1).catch(()=>[]);
+            const baseArtists = [...onboardingData.artists];
+            for (let i = baseArtists.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [baseArtists[i], baseArtists[j]] = [baseArtists[j], baseArtists[i]];
+            }
+            let combined = [...(apiArtists.slice(0, 2)), ...baseArtists];
+            const seenNames = new Set();
+            combined = combined.filter(item => {
+                const name = item.name.toLowerCase().trim();
+                if (seenNames.has(name)) return false;
+                seenNames.add(name);
+                return true;
+            });
+            combined = combined.slice(0, 15);
+            if (combined.length > 0) {
+              setPopularArtists(combined);
+              setFeedErrors(prev => { const n = {...prev}; delete n.popularArtists; return n; });
+            }
+          }
+        } catch (e) {
+          console.error("Retry failed for", target, e);
+        }
+
+        // Wait 400ms before retrying the next batch
+        await new Promise(r => setTimeout(r, 400));
+      }
+    };
+
+    retryMissingFeeds();
+
+    return () => { isActive = false; };
+  }, [loading]);
 
   return {
     loading,

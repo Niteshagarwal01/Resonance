@@ -20,7 +20,7 @@ export default function SignupPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const { error } = await supabase.auth.signUp({ 
+    const { data, error } = await supabase.auth.signUp({ 
       email, 
       password,
       options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
@@ -29,11 +29,16 @@ export default function SignupPage() {
     if (error) {
       setError(error.message);
       setLoading(false);
+    } else if (data.session) {
+      // Email confirmation is disabled — user is already logged in, go to onboarding
+      window.location.href = '/onboarding';
     } else {
+      // Email confirmation required — show "check your email" state
       setSuccess(true);
       setLoading(false);
     }
   };
+
 
   const handleGoogleSignup = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
